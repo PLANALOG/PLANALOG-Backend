@@ -163,7 +163,7 @@ model Notice {
   user User @relation(fields: [userId], references: [id])
 }
 
-model Cheer {
+model Like {
   id         Int       @id @default(autoincrement())
   userId     Int
   fromUserId Int
@@ -172,8 +172,8 @@ model Cheer {
   createdAt  DateTime  @default(now())
 
   // Relationships
-  user     User @relation(name: "CheerToUser", fields: [userId], references: [id])
-  fromUser User @relation(name: "CheerFromUser", fields: [fromUserId], references: [id])
+  user     User @relation(name: "LikeToUser", fields: [userId], references: [id])
+  fromUser User @relation(name: "LikeFromUser", fields: [fromUserId], references: [id])
 }
 
 model Avatar {
