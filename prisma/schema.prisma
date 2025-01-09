@@ -1,0 +1,262 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum notice_type {
+  post
+  comment
+  friend
+}
+
+enum post_type {
+  shared_planner
+  post
+}
+
+enum share_status {
+  public
+  friend
+  draft
+}
+
+enum align_type {
+  left
+  center
+  right
+}
+
+enum content_type {
+  image
+  video
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  platform     String // Nullable
+  name         String
+  nickname     String
+  type         String
+  introduction String
+  link         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  planners          Planner[]
+  taskCategories    TaskCategory[]
+  searches          Search[]
+  friendsTo         Friend[]            @relation("UserToFriends")
+  friendsFrom       Friend[]            @relation("FriendsToUser")
+  sharedPlanners    SharedPlanner[]
+  notices           Notice[]
+  cheers            Cheer[]             @relation("CheerToUser") // All Cheers where the user is the target
+  fromCheers        Cheer[]             @relation("CheerFromUser") // All Cheers where the user is the source
+  avatars           Avatar[]
+  posts             Post[]
+  comments          Comment[]
+  SharedPlannerView SharedPlannerView[]
+}
+
+model Planner {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  plannerDate DateTime
+  isCompleted Boolean
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  user           User            @relation(fields: [userId], references: [id])
+  tasks          Task[]
+  sharedPlanners SharedPlanner[]
+}
+
+model Task {
+  id             Int      @id @default(autoincrement())
+  plannerId      Int
+  taskCategoryId Int?
+  title          String   @db.VarChar(100)
+  isCompleted    Boolean
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relationships
+  planner      Planner       @relation(fields: [plannerId], references: [id])
+  taskCategory TaskCategory? @relation(fields: [taskCategoryId], references: [id])
+}
+
+model TaskCategory {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user  User   @relation(fields: [userId], references: [id])
+  tasks Task[]
+}
+
+model Search {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Friend {
+  id         Int      @id @default(autoincrement())
+  toUserId   Int
+  fromUserId Int
+  createdAt  DateTime @default(now())
+
+  // Relationships
+  toUser   User @relation("UserToFriends", fields: [toUserId], references: [id])
+  fromUser User @relation("FriendsToUser", fields: [fromUserId], references: [id])
+}
+
+model SharedPlanner {
+  id        Int       @id @default(autoincrement())
+  plannerId Int
+  userId    Int
+  status    String // ENUM: public, friend
+  createdAt DateTime  @default(now())
+  expireAt  DateTime?
+
+  // Relationships
+  planner            Planner             @relation(fields: [plannerId], references: [id])
+  user               User                @relation(fields: [userId], references: [id])
+  sharedPlannerViews SharedPlannerView[] // Opposite relation
+}
+
+model SharedPlannerView {
+  id              Int      @id @default(autoincrement())
+  sharedPlannerId Int
+  userId          Int
+  viewedAt        DateTime
+
+  // Relationships
+  sharedPlanner SharedPlanner @relation(fields: [sharedPlannerId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
+}
+
+model Notice {
+  id         Int         @id @default(autoincrement())
+  userId     Int
+  isRead     Boolean
+  message    String
+  entityType notice_type // ENUM (post, comment, friend)
+  entityId   Int
+  createdAt  DateTime    @default(now())
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Like {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  fromUserId Int
+  entityType post_type // ENUM (shared_planner, post)
+  entityId   Int
+  createdAt  DateTime  @default(now())
+
+  // Relationships
+  user     User @relation(name: "LikeToUser", fields: [userId], references: [id])
+  fromUser User @relation(name: "LikeFromUser", fields: [fromUserId], references: [id])
+}
+
+model Avatar {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  imageUrl  String
+  createdAt DateTime @default(now())
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Post {
+  id            Int          @id @default(autoincrement())
+  userId        Int
+  postType      post_type // ENUM (moment, story)
+  title         String
+  status        share_status // ENUM (public, friend, draft)
+  textAlign     align_type // ENUM (left, center, right)
+  cheeringCount BigInt       @default(0)
+  commentCount  BigInt       @default(0)
+  publishedAt   DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Relationships
+  user     User      @relation(fields: [userId], references: [id])
+  moments  Moment[]
+  comments Comment[]
+  stories  Story[]
+}
+
+model Moment {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  content   String
+  createdAt DateTime @default(now())
+
+  // Relationships
+  post           Post            @relation(fields: [postId], references: [id])
+  momentContents MomentContent[] // Opposite relation
+}
+
+model MomentContent {
+  id        Int    @id @default(autoincrement())
+  momentId  Int
+  url       String
+  sortOrder BigInt
+
+  // Relationships
+  moment Moment @relation(fields: [momentId], references: [id])
+}
+
+model Story {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  createdAt DateTime @default(now())
+
+  // Relationships
+  post          Post           @relation(fields: [postId], references: [id])
+  storyContents StoryContent[]
+}
+
+model StoryContent {
+  id          Int    @id @default(autoincrement())
+  storyId     Int
+  contentType String
+  contentData String
+  sortOrder   BigInt
+
+  // Relationships
+  story Story @relation(fields: [storyId], references: [id])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  userId    Int
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
