@@ -1,5 +1,7 @@
 # PLANALOG : 일상 관리와 공유를 동시에 
 
+![PLANALOG](https://github.com/PLANALOG/PLANALOG-Backend/blob/develop/image.png)
+
 ## 프로젝트 소개 
 사용자가 플래너를 통해 일상을 관리하고, 이를 게시물 형식으로 공유하여 지속적인 동기부여를 받을 수 있는 일상 관리 플랫폼입니다.
 
@@ -10,11 +12,23 @@
 
 ##  기술 스택
 <img src="https://img.shields.io/badge/node.js-339933?style=for-the-badge&logo=Node.js&logoColor=white">  서버 개발을 위한 JavaScript 런타임 환경
-<img src="https://img.shields.io/badge/express-000000?style=for-the-badge&logo=express&logoColor=white"> 간단하고 유연한 Node.js 웹 프레임워크 
+
+
+<img src="https://img.shields.io/badge/express-000000?style=for-the-badge&logo=express&logoColor=white"> 간단하고 유연한 Node.js 웹 프레임워크
+
+
 <img src="https://img.shields.io/badge/prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white"> 데이터베이스와 상호작용을 쉽게 해주는 ORM 도구
+
+
 <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white"> 관계형 데이터베이스 관리 시스템
+
+
 <img src="https://img.shields.io/badge/amazonaws-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white"> 클라우드 서비스 제공 플랫폼
+
+
 <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white"> 코드 버전 관리 및 협업 플랫폼
+
+
 
 ## 브랜치 전략 
 master (배포) - develop - feature 
@@ -37,8 +51,8 @@ master (배포) - develop - feature
   
    - **제목과 본문을 빈행으로 분리**
       - 커밋 유형 이후 제목과 본문은 한글로 작성하여 내용이 잘 전달될 수 있도록 할 것
-      - 본문에는 변경한 내용과 이유 설명 (어떻게보다는 무엇 & 왜를 설명)
-    - **제목 첫 글자는 대문자로, 끝에는 . 금지**
+      - 본문에는 변경한 내용과 이유 설명 (어떻게보다는 무엇 & 왜를 설명)   
+   - **제목 첫 글자는 대문자로, 끝에는 . 금지**
   
   ### 코드 컨벤션
   
