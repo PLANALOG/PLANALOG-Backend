@@ -9,12 +9,12 @@
 - **소셜 네트워크 형성** : 사용자 간 목표와 성과를 공유하고, 피드백과 응원을 통해 지속적인 동기부여 제공
 
 ##  기술 스택
-<img src="https://img.shields.io/badge/node.js-339933?style=for-the-badge&logo=Node.js&logoColor=white">
-<img src="https://img.shields.io/badge/express-000000?style=for-the-badge&logo=express&logoColor=white">
-<img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white">
-<img src="https://img.shields.io/badge/amazonaws-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white">
-<img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
-<img src="https://img.shields.io/badge/prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white">
+<img src="https://img.shields.io/badge/node.js-339933?style=for-the-badge&logo=Node.js&logoColor=white">  서버 개발을 위한 JavaScript 런타임 환경
+<img src="https://img.shields.io/badge/express-000000?style=for-the-badge&logo=express&logoColor=white"> 간단하고 유연한 Node.js 웹 프레임워크 
+<img src="https://img.shields.io/badge/prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white"> 데이터베이스와 상호작용을 쉽게 해주는 ORM 도구
+<img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white"> 관계형 데이터베이스 관리 시스템
+<img src="https://img.shields.io/badge/amazonaws-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white"> 클라우드 서비스 제공 플랫폼
+<img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white"> 코드 버전 관리 및 협업 플랫폼
 
 ## 브랜치 전략 
 master (배포) - develop - feature 
@@ -41,10 +41,11 @@ master (배포) - develop - feature
     - **제목 첫 글자는 대문자로, 끝에는 . 금지**
   
   ### 코드 컨벤션
-    - 문자열을 처리할 때는 **쌍따옴표**를 사용하도록 합니다.
-    - 문장이 종료될 때는 **세미콜론**을 붙여줍니다.
-    - 함수명, 변수명은 **카멜케이스**로 작성합니다.
-    - 가독성을 위해 **한 줄에 하나의 문장**만 작성합니다.
-    - 주석은 설명하려는 **구문에 맞춰 들여쓰기** 합니다.
-    - **연산자 사이에는 공백**을 추가하여 가독성을 높입니다.
-    - 콤마 다음에 값이 올 경우 공백을 추가하여 가독성을 높입니다.
+  
+  - 문자열을 처리할 때는 **쌍따옴표**를 사용하도록 합니다.
+  - 문장이 종료될 때는 **세미콜론**을 붙여줍니다.
+  - 함수명, 변수명은 **카멜케이스**로 작성합니다.
+  - 가독성을 위해 **한 줄에 하나의 문장**만 작성합니다.
+  - 주석은 설명하려는 **구문에 맞춰 들여쓰기** 합니다.
+  - **연산자 사이에는 공백**을 추가하여 가독성을 높입니다.
+  - 콤마 다음에 값이 올 경우 공백을 추가하여 가독성을 높입니다.
