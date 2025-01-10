@@ -47,6 +47,7 @@ enum user_type {
   category_user
   memo_user
 }
+
 model User {
   id           BigInt      @id @default(autoincrement())
   email        String   @unique @db.VarChar(100)
@@ -56,19 +57,18 @@ model User {
   type         user_type  // ENUM: memo or category 
   introduction String   @db.VarChar(300)
   link         String   @db.VarChar(100)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   // Relationships
   planners          Planner[]
-  task_categories    Task_Category[]
+  taskCategories    TaskCategory[]
   searches         Search[]
-  friends_to         Friend[]            @relation("UserToFriends")
-  friends_from       Friend[]            @relation("FriendsToUser")
-  //shared_planners    Shared_Planner[]
+  friendsTo         Friend[]            @relation("UserToFriends")
+  friendsFrom       Friend[]            @relation("FriendsToUser")
   notices           Notice[]
   likes             Like[]             @relation("LikeToUser")
-  from_likes        Like[]             @relation("LikeFromUser")
+  fromLikes         Like[]             @relation("LikeFromUser")
   avatars           Avatar[]
   posts             Post[]
   comments          Comment[]
@@ -79,14 +79,14 @@ model User {
 
 model Planner {
   id          BigInt      @id @default(autoincrement())
-  user_id      BigInt
-  planner_date DateTime @db.Date    //날짜정보만 저장 
-  is_completed Boolean
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt   //자동시간 업데이트 
+  userId      BigInt       @map("user_id")
+  plannerDate DateTime @db.Date    @map("planner_date") //날짜정보만 저장 
+  isCompleted Boolean      @map("is_completed")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")   //자동시간 업데이트 
 
   // Relationships
-  user           User            @relation(fields: [user_id], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
   tasks          Task[]
   //shared_planners Shared_Planner[]
 
@@ -95,27 +95,27 @@ model Planner {
 
 model Task {
   id             BigInt      @id @default(autoincrement())
-  planner_id      BigInt
-  task_category_id BigInt?
+  plannerId      BigInt       @map("planner_id")
+  taskCategoryId BigInt?      @map("task_category_id")
   title          String   @db.VarChar(100)
-  is_completed    Boolean
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  isCompleted    Boolean      @map("is_completed")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
   // Relationships
-  planner      Planner       @relation(fields: [planner_id], references: [id])
-  task_category Task_Category? @relation(fields: [task_category_id], references: [id])
+  planner      Planner       @relation(fields: [plannerId], references: [id])
+  taskCategory TaskCategory? @relation(fields: [taskCategoryId], references: [id])
 
   @@map("task")
 }
 
-model Task_Category {
+model TaskCategory {
   id        BigInt      @id @default(autoincrement())
-  user_id    BigInt
+  userId    BigInt       @map("user_id")
   name      String      @db.VarChar(100)
-  created_at DateTime @default(now())
-  updated_at DateTime  @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
   // Relationships
-  user  User   @relation(fields: [user_id], references: [id])
+  user  User   @relation(fields: [userId], references: [id])
   tasks Task[]
 
   @@map("task_category")
@@ -123,25 +123,25 @@ model Task_Category {
 
 model Search {
   id        BigInt      @id @default(autoincrement())
-  user_id    BigInt
+  userId    BigInt       @map("user_id")
   content   String      @db.VarChar(100)
-  created_at DateTime @default(now())
-  updated_at DateTime  @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
   // Relationships
-  user User @relation(fields: [user_id], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@map("search")
 }
 
 model Friend {
   id         BigInt      @id @default(autoincrement())
-  to_user_id   BigInt
-  from_user_id BigInt
-  created_at  DateTime @default(now())
+  toUserId   BigInt       @map("to_user_id")
+  fromUserId BigInt       @map("from_user_id")
+  createdAt  DateTime @default(now()) @map("created_at")
 
   // Relationships
-  toUser   User @relation("UserToFriends", fields: [to_user_id], references: [id])
-  fromUser User @relation("FriendsToUser", fields: [from_user_id], references: [id])
+  toUser   User @relation("UserToFriends", fields: [toUserId], references: [id])
+  fromUser User @relation("FriendsToUser", fields: [fromUserId], references: [id])
 
   @@map("friend")
 }
@@ -176,62 +176,63 @@ model Shared_Planner_View {
   @@map("shared_planner_view")
 }
 */
+
 model Notice {
   id         BigInt         @id @default(autoincrement())
-  user_id     BigInt
-  is_read     Boolean
+  userId     BigInt          @map("user_id")
+  isRead     Boolean         @map("is_read")
   message    String         @db.VarChar(100)
-  entity_type notice_type // ENUM (post, comment, friend)
-  entity_id   Int
-  created_at  DateTime    @default(now())
+  entityType notice_type    @map("entity_type") // ENUM (post, comment, friend)
+  entityId   Int            @map("entity_id")
+  createdAt  DateTime    @default(now()) @map("created_at")
 
   // Relationships
-  user User @relation(fields: [user_id], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@map("notice")
 }
 
 model Like {
   id         BigInt       @id @default(autoincrement())
-  user_id     BigInt
-  from_user_id BigInt
-  entity_type like_post_type // ENUM (shared_planner, post)
-  entity_id   Int
-  created_at  DateTime  @default(now())
+  userId     BigInt       @map("user_id")
+  fromUserId BigInt       @map("from_user_id")
+  entityType like_post_type @map("entity_type") // ENUM (shared_planner, post)
+  entityId   Int          @map("entity_id")
+  createdAt  DateTime  @default(now()) @map("created_at")
 
   // Relationships
-  user     User @relation(name: "LikeToUser", fields: [user_id], references: [id])
-  from_user User @relation(name: "LikeFromUser", fields: [from_user_id], references: [id])
+  user     User @relation(name: "LikeToUser", fields: [userId], references: [id])
+  fromUser User @relation(name: "LikeFromUser", fields: [fromUserId], references: [id])
 
   @@map("like")
 }
 
 model Avatar {
   id        BigInt      @id @default(autoincrement())
-  user_id    BigInt
-  imageUrl  String      @db.VarChar(100)
-  created_at DateTime @default(now())
+  userId    BigInt       @map("user_id")
+  imageUrl  String      @db.VarChar(100) @map("image_url")
+  createdAt DateTime @default(now()) @map("created_at")
 
   // Relationships
-  user User @relation(fields: [user_id], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@map("avatar")
 }
 
 model Post {
   id            BigInt          @id @default(autoincrement())
-  user_id        BigInt
-  post_type     moment_story_type // ENUM (moment, story)
+  userId        BigInt          @map("user_id")
+  postType      moment_story_type @map("post_type") // ENUM (moment, story)
   title         String          @db.VarChar(100) 
-  status        share_status // ENUM (public, friend, draft)
-  text_align     align_type // ENUM (left, center, right)
-  liking_count   BigInt       @default(0)
-  comment_count  BigInt       @default(0)
-  published_at   DateTime?
-  created_at     DateTime     @default(now())
-  updated_at     DateTime      @updatedAt
+  status        share_status    @map("status") // ENUM (public, friend, draft)
+  textAlign     align_type      @map("text_align") // ENUM (left, center, right)
+  likingCount   BigInt       @default(0) @map("liking_count")
+  commentCount  BigInt       @default(0) @map("comment_count")
+  publishedAt   DateTime?       @map("published_at")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
   // Relationships
-  user     User      @relation(fields: [user_id], references: [id])
+  user     User      @relation(fields: [userId], references: [id])
   
   comments Comment[]
   moment   Moment?   @relation("post_to_moment")
@@ -241,64 +242,64 @@ model Post {
 
 model Moment {
   id        BigInt      @id @default(autoincrement())
-  post_id    BigInt     @ unique // 1대1 
+  postId    BigInt      @unique @map("post_id") // 1대1 
   content   String      @db.VarChar(500)
-  created_at DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
   // Relationships
-  post            Post  @relation("post_to_moment", fields: [post_id], references: [id])
-  moment_contents Moment_Content[]
+  post            Post  @relation("post_to_moment", fields: [postId], references: [id])
+  momentContents  MomentContent[]
 
   @@map("moment")
 }
 
-model Moment_Content {
+model MomentContent {
   id        BigInt    @id @default(autoincrement())
-  moment_id  BigInt
+  momentId  BigInt    @map("moment_id")
   url       String    @db.VarChar(100)
-  sort_order Int      //sort order 최대 5
+  sortOrder Int       @map("sort_order") //sort order 최대 5
 
   // Relationships
-  moment Moment @relation(fields: [moment_id], references: [id])
+  moment Moment @relation(fields: [momentId], references: [id])
 
   @@map("moment_content")
 }
 
 model Story {
   id        BigInt      @id @default(autoincrement())
-  post_id    BigInt     @unique    //1대1
-  created_at DateTime @default(now())
+  postId    BigInt      @unique @map("post_id")    //1대1
+  createdAt DateTime @default(now()) @map("created_at")
 
   // Relationships
-  post  Post  @relation("post_to_story", fields: [post_id], references: [id])
-  story_contents Story_Content[]
+  post  Post  @relation("post_to_story", fields: [postId], references: [id])
+  storyContents StoryContent[]
 
   @@map("story")
 }
 
-model Story_Content {
+model StoryContent {
   id          BigInt    @id @default(autoincrement())
-  story_id     BigInt
-  content_type story_content_type //ENUM: video image
-  content_data String   @db.Text  //글자수 제한 없음 
-  sort_order   Int
+  storyId     BigInt    @map("story_id")
+  contentType story_content_type @map("content_type") //ENUM: video image
+  contentData String   @db.Text  @map("content_data") //글자수 제한 없음 
+  sortOrder   Int       @map("sort_order")
 
   // Relationships
-  story Story @relation(fields: [story_id], references: [id])
+  story Story @relation(fields: [storyId], references: [id])
 
   @@map("story_content")
 }
 
 model Comment {
   id        BigInt      @id @default(autoincrement())
-  post_id    BigInt
-  user_id    BigInt
+  postId    BigInt      @map("post_id")
+  userId    BigInt      @map("user_id")
   content   String      @db.VarChar(500)
-  created_at DateTime @default(now())
-  updated_at DateTime  @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
   // Relationships
-  post Post @relation(fields: [post_id], references: [id])
-  user User @relation(fields: [user_id], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@map("comment")
 }
