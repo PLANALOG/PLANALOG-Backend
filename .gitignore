@@ -4,3 +4,6 @@ node_modules/
 # dotenv environment variable files
 .env
 .env.*
+
+# prisma migration files
+prisma/migrations
