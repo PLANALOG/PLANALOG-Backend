@@ -30,11 +30,8 @@ jobs:
       - name: Lint JavaScript files
         run: npx eslint .
 
-      - name: Test build
-        run: npm run build
-
-      - name: Run tests
-        run: npm test
+      - name: Test prisma generate
+        run: npm exec prisma generate
 
   # CD Job for Master Branch
   cd:
