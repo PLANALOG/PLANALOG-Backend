@@ -42,6 +42,9 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
+app.post("/posts/:postId/likes", handleLikePost);
+app.delete("/posts/:postId/likes", handleDeleteLikePost);
+
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의
