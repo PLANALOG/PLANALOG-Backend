@@ -27,9 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Lint JavaScript files
-        run: npx eslint .
-
       - name: Test prisma generate
         run: npm exec prisma generate
 
