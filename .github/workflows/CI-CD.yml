@@ -27,14 +27,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Test prisma generate
-        run: npm exec prisma generate
+      - name: Lint JavaScript files
+        run: npx eslint .
 
       - name: Test build
         run: npm run build
 
-      - name: Test type error
-        run: npm exec tsc --noEmit
+      - name: Run tests
+        run: npm test
 
   # CD Job for Master Branch
   cd:
