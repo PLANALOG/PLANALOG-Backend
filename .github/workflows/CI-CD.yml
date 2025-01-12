@@ -1,0 +1,111 @@
+name: CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+  pull_request:
+    branches:
+      - develop
+      - master
+
+jobs:
+  # CI Job for Develop Branch
+  ci:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Test prisma generate
+        run: npm exec prisma generate
+
+      - name: Test build
+        run: npm run build
+
+      - name: Test type error
+        run: npm exec tsc --noEmit
+
+  # CD Job for Master Branch
+  cd:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check prisma has changes
+        uses: dorny/paths-filter@v3
+        id: paths-filter
+        with:
+          filters: |
+            prisma: ["prisma/**"]
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          cat >>~/.ssh/config <<END
+          Host PLANLOG
+            HostName $EC2_HOST
+            User $EC2_USER
+            IdentityFile ~/.ssh/id_rsa
+            StrictHostKeyChecking no
+          END
+        env:
+          EC2_USER: ubuntu
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Copy Workspace
+        run: |
+          ssh PLANLOG 'sudo mkdir -p /opt/app'
+          ssh PLANLOG 'sudo chown ubuntu:ubuntu /opt/app'
+          scp -r ./[!.]* PLANLOG:/opt/app
+
+      - name: Install dependencies
+        run: |
+          ssh PLANLOG 'cd /opt/app; npm install'
+          ssh PLANLOG 'cd /opt/app; npm exec prisma generate'
+
+      - name: Apply prisma migrations
+        if: steps.paths-filter.outputs.prisma == 'true'
+        run: |
+          ssh PLANLOG 'cd /opt/app; npm exec prisma migrate deploy'
+
+      - name: Copy systemd service file
+        run: |
+          ssh PLANLOG '
+            echo "[Unit]
+            Description=UMC 7th Project
+            After=network.target
+
+            [Service]
+            User=${USER}
+            ExecStart=/usr/bin/npm run start --prefix /opt/app/
+            Restart=always
+
+            [Install]
+            WantedBy=multi-user.target" | sudo tee /etc/systemd/system/app.service
+          '
+
+      - name: Enable systemd service
+        run: |
+          ssh PLANLOG 'sudo systemctl daemon-reload'
+          ssh PLANLOG 'sudo systemctl enable app'
+
+      - name: Restart systemd service
+        run: |
+          ssh PLANLOG 'sudo systemctl restart app'
