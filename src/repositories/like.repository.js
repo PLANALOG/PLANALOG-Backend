@@ -27,8 +27,7 @@ export const addPostLike = async (userId, postId) => {
 export const removePostLike = async (userId, postId) => {
   // 좋아요가 존재하는지 확인
   const existingLike = await prisma.cheer.findFirst({
-    where: { userId, entityId: postId, entityType: "post" },
-  });
+    where: { userId, entityId: postId, entityType: "post" } });
 
   if (!existingLike) {
     throw new Error("좋아요를 누른 적이 없습니다.");

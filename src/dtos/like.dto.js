@@ -1,9 +1,11 @@
-export const responseFromLike = ({ like }) => {
+export const bodyToLike = ({ like }) => {
     return {
       id: like.id,
       userId: like.userId,
       postId: like.entityId,
-      createdAt: like.createdAt,
     };
-  };
+    };
+//export const bodyToDeleteLike = ({ like }) => {   
+
+      
   

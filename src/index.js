@@ -2,6 +2,7 @@
 import dotenv from "dotenv";
 import express from 'express';          // -> ES Module
 import cors from "cors";
+import{handleLikePost,handleDeleteLikePost} from './controllers/like.controller.js';
 
 dotenv.config();
 
