@@ -5,12 +5,13 @@ import cors from "cors";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import session from "express-session";
 import passport from "passport";
-import { googleStrategy } from "./auth.config.js";
+import { googleStrategy, kakaoStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 
 dotenv.config();
 
 passport.use(googleStrategy);
+passport.use(kakaoStrategy);
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((user, done) => done(null, user));
 
@@ -68,7 +69,7 @@ BigInt.prototype.toJSON = function () { // bigint 호환
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
-  //console.log(req.user)
+  console.log(req.user)
 })
 
 //소셜로그인 - 구글 
@@ -77,6 +78,17 @@ app.get(
   "/oauth2/callback/google",
   passport.authenticate("google", {
     failureRedirect: "/oauth2/login/google",
+    failureMessage: true,
+  }),
+  (req, res) => res.redirect("/")
+);
+
+//소셜로그인 - 카카오
+app.get("/oauth2/login/kakao", passport.authenticate("kakao"));
+app.get(
+  "/oauth2/callback/kakao",
+  passport.authenticate("kakao", {
+    failureRedirect: "/oauth2/login/kakao",
     failureMessage: true,
   }),
   (req, res) => res.redirect("/")
