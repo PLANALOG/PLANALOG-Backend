@@ -1,11 +1,17 @@
-export const bodyToLike = ({ like }) => {
+export const bodyToLike = ({ like, post }) => {
     return {
-      id: like.id,
-      userId: like.userId,
-      postId: like.entityId,
+      fromUserId: like.fromUserId, 
+      entityId: post.id, 
+      entityType: like.entityType || "post", 
     };
-    };
-//export const bodyToDeleteLike = ({ like }) => {   
+    };  
 
-      
-  
+  export const bodyToDeleteLike = ({ like,post }) => {
+    return {
+      likeId: like.likeId,
+      fromUserId: like.fromUserId,
+      entityId: post.id,
+    };
+    }; 
+ 
+    //사용자 요청 데이터 변환.반환값 추가 X
