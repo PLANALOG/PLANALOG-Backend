@@ -87,7 +87,7 @@ app.get(
     failureRedirect: "/oauth2/login/google",
     failureMessage: true,
   }),
-  (req, res) => res.redirect("/")
+  (req, res) => res.success()
 );
 
 //소셜로그인 - 카카오
@@ -98,7 +98,7 @@ app.get(
     failureRedirect: "/oauth2/login/kakao",
     failureMessage: true,
   }),
-  (req, res) => res.redirect("/")
+  (req, res) => res.success()
 );
 
 //소셜로그인 - 네이버
@@ -109,12 +109,12 @@ app.get(
     failureRedirect: "/oauth2/login/naver",
     failureMessage: true,
   }),
-  (req, res) => res.redirect("/")
+  (req, res) => res.success()
 );
 
 //로그아웃
 app.get("/logout", (req, res) => {
-  req.logout(() => res.redirect("/"));
+  req.logout(() => success());
 })
 
 
