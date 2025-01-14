@@ -3,6 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as KakaoStrategy } from "passport-kakao";
 import { Strategy as NaverStrategy } from "passport-naver";
 import { prisma } from "./db.config.js";
+import { UserWithOtherPlatformError } from "./errors.js";
 
 dotenv.config();
 
@@ -10,7 +11,11 @@ const verify = async (profile, email, platform) => {
 
     const user = await prisma.user.findFirst({ where: { email } });
     if (user !== null) {
-        return { id: user.id, email: user.email, name: user.name };
+        // 해당 이메일을 가진 유저가 있을 떄 
+        // 그 유저의 플랫폼이 파라미터의 플랫폼과 같으면 => 로그인 (return)
+        if (user.platform === platform) return { id: user.id, email: user.email, name: user.name };
+        // 그 유저의 플랫폼이 파라미터의 플랫폼과 다르면 => 에러반환 (with 플랫폼) 
+        else throw new UserWithOtherPlatformError({ name: user.name, platform: user.platform })
     }
 
     const created = await prisma.user.create({
