@@ -9,7 +9,16 @@ export const createTask= async (taskData) => {
         }
     
          // 2. Repository 계층에 저장 요청
-        const savedTask = await addTask(task);
+        try {
+          const savedTask = await addTask(task);
+          
+        }
+        catch (error) {
+          //에러 기록
+          console.error("Error adding task:", error.message);
+          //에러를 상위로 전달 
+          throw error;
+        }
     
         // 3. 저장된 결과 반환
         return savedTask;

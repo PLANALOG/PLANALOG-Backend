@@ -52,7 +52,7 @@ model User {
   id           BigInt      @id @default(autoincrement())
   email        String   @unique @db.VarChar(100)
   platform     platform_type? // ENUM: kakao google naver 
-  name         String   @db.VarChar(30)
+  name         String   @db.VarChar(20)
   nickname     String?   @db.VarChar(100)
   type         user_type  // ENUM: memo_user or category_user 
   introduction String?   @db.VarChar(300)
