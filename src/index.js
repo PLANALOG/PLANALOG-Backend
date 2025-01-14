@@ -112,6 +112,11 @@ app.get(
   (req, res) => res.redirect("/")
 );
 
+//로그아웃
+app.get("/logout", (req, res) => {
+  req.logout(() => res.redirect("/"));
+})
+
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의
