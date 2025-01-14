@@ -2,6 +2,7 @@
 import dotenv from "dotenv";
 import express from 'express';          // -> ES Module
 import cors from "cors";
+import task from "./routes/task.js";
 
 dotenv.config();
 
@@ -40,7 +41,10 @@ BigInt.prototype.toJSON = function () { // bigint 호환
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
-})
+});
+
+
+app.use("/tasks", task);
 
 
 /**
