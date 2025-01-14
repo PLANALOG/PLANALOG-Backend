@@ -18,6 +18,6 @@ export const handleCreateTask = async (req,res,next) => {
         res.success(newTask);
 
     } catch (error) {
-        
+        next(error);
     }
 }
