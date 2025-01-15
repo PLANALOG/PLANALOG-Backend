@@ -93,10 +93,28 @@ app.get("/openapi.json", async (req, res, next) => {
   const routes = ["./src/index.js"];
   const doc = {
     info: {
-      title: "UMC 7th",
-      description: "UMC 7th Node.js 테스트 프로젝트입니다.",
+      title: "PLANALOG",
+      description: "PLANALOG 테스트 문서입니다.",
     },
     host: "localhost:3000",
+    components: {
+      securitySchemes: {
+        OAuth2: {
+          type: 'oauth2',
+          flows: {
+            authorizationCode: {
+              authorizationUrl: 'http://localhost:3000/oauth2/login/google',
+              tokenUrl: 'http://localhost:3000/oauth2/callback/google',
+              scopes: {
+                read: 'Grants read access',
+                write: 'Grants write access',
+                admin: 'Grants access to admin operations'
+              }
+            }
+          }
+        }
+      }
+    }
   };
 
   const result = await swaggerAutogen(options)(outputFile, routes, doc);
