@@ -9,6 +9,8 @@ import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
+import { handleEditUser, handleCheckNickname } from "./controllers/user.controller.js";
+import { body, query } from "express-validator";
 
 dotenv.config();
 
@@ -149,6 +151,20 @@ app.get(
 app.get("/logout", (req, res) => {
   req.logout(() => success());
 });
+
+//회원정보 수정 API
+app.patch("/users/profile", [
+  body("nickname").optional().isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),
+  body("type").optional().isIn(["memo", "category"]).withMessage("type은 memo 또는 category만 가능합니다."),
+  body("introduction").optional().isString().withMessage("introduction은 문자열이어야 합니다."),
+  body("link").optional().isURL().withMessage("link는 URL 형식이어야 합니다."),
+], handleEditUser);
+
+app.get("/users/check_nickname",
+  // query("nickname").exists().withMessage("닉네임을 입력하세요.")
+  //   .isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),
+  handleCheckNickname);
+
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의

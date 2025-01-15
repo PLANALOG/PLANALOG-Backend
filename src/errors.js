@@ -10,6 +10,17 @@ export class DuplicateUserEmailError extends Error {
   } 
   */
 
+export class DuplicateUserNicknameError extends Error {
+  errorCode = "U002";
+
+  constructor(data) {
+    const reason = "이미 존재하는 닉네임입니다."
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+
 export class UserWithOtherPlatformError extends Error {
   errorCode = "U001";
 
