@@ -1,10 +1,16 @@
 import { prisma } from "../db.config.js";
 
-
 // 좋아요 추가
 export const addPostLike = async (data) => {
+  console.log("Repository Input:", data);
+
   const existingLike = await prisma.like.findFirst({
-    where: { fromUserId: data.fromUserId, entityId: data.entityId },
+    where: {
+      fromUserId: data.fromUserId,
+      userId: data.userId,
+      entityId: data.entityId,
+      entityType: data.entityType,
+    },
   });
 
   if (existingLike) {
@@ -12,9 +18,15 @@ export const addPostLike = async (data) => {
   }
 
   const newLike = await prisma.like.create({
-    data: { fromUserId: data.fromUserId, entityId: data.entityId },
+    data: {
+      entityType: data.entityType,
+      entityId: data.entityId,
+      user: { connect: { id: data.userId } },         
+      fromUser: { connect: { id: data.fromUserId } }, 
+    },
   });
-
+  
+  console.log("Created Like:", newLike);
   return newLike.id;
 };
 

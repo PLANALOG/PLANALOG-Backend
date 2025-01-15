@@ -56,8 +56,8 @@ app.get("/openapi.json", async (req, res, next) => {
   const routes = ["./src/index.js"];
   const doc = {
     info: {
-      title: "UMC 7th",
-      description: "UMC 7th Node.js 테스트 프로젝트입니다.",
+      title: "PLANALOG",
+      description: "PLANALOG 테스트 문서입니다.",
     },
     host: "localhost:3000",
   };
