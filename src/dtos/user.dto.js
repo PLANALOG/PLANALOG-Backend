@@ -1,8 +1,7 @@
 
 
-export const bodyToUpdateUser = (body, userId) => {
+export const bodyToUpdateUser = (body) => {
     return {
-        userId,
         nickname: body.nickname || undefined,
         type: body.type || undefined,
         inrtoduction: body.inrtoduction || undefined,

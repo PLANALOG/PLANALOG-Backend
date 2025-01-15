@@ -178,6 +178,7 @@ app.patch("/users/profile", [
   body("link").optional().isURL().withMessage("link는 URL 형식이어야 합니다."),
 ], handleEditUser);
 
+//닉네임 중복 조회 API
 app.get("/users/check_nickname",
   // query("nickname").exists().withMessage("닉네임을 입력하세요.")
   //   .isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),

@@ -1,10 +1,17 @@
 import { StatusCodes } from "http-status-codes";
 import { bodyToUpdateUser } from "../dtos/user.dto.js";
-import { checkNickname } from "../services/user.service.js";
+import { checkNickname, } from "../services/user.service.js";
+import { userEdit } from "../services/user.service.js";
 
 export const handleEditUser = async (req, res, next) => {
     /*
     #swagger.summary = '회원정보 수정 API'
+    #swagger.security = [{
+            "OAuth2": [
+                'read', 
+                'write'
+            ]
+    }]
     #swagger.requestBody = {
         required: true,
         content: {
@@ -15,8 +22,8 @@ export const handleEditUser = async (req, res, next) => {
                         nickname: { type: "string", example: "newNickname" },
                         type: { 
                             type: "string", 
-                            enum: ["memo", "category"], 
-                            example: "memo" 
+                            enum: ["memo_user", "category_user"], 
+                            example: "memo_user" 
                         },
                         introduction: { type: "string", example: "Hello, I am new here!" },
                         link: { type: "string", format: "uri", example: "https://myportfolio.com" }
@@ -44,8 +51,8 @@ export const handleEditUser = async (req, res, next) => {
                                 nickname: { type: "string", example: "newNickname" },
                                 type: { 
                                     type: "string", 
-                                    enum: ["memo", "category"], 
-                                    example: "memo" 
+                                    enum: ["memo_user", "category_user"], 
+                                    example: "memo_user" 
                                 },
                                 introduction: { type: "string", example: "Hello, I am new here!" },
                                 link: { type: "string", format: "uri", example: "https://myportfolio.com" },
@@ -64,9 +71,11 @@ export const handleEditUser = async (req, res, next) => {
         throw new Error("사용자 인증 정보가 누락되었습니다.");
     }
 
-    const userId = req.user.userId
+    const userId = req.user.id
 
-    const user = await userEdit(bodyToUpdateUser(req.body, userId))
+    console.log(req.user)
+
+    const user = await userEdit(bodyToUpdateUser(req.body), userId)
 
     res.status(StatusCodes.OK).success(user);
 }
@@ -106,6 +115,8 @@ export const handleCheckNickname = async (req, res, next) => {
     */
 
     console.log('닉네임 중복 조회를 요청했습니다.');
+
+    console.log(req)
 
     const nickname = req.query.nickname;
 
