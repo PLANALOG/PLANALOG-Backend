@@ -9,7 +9,7 @@ import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
-import { handleEditUser, handleCheckNickname } from "./controllers/user.controller.js";
+import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile } from "./controllers/user.controller.js";
 import { body, query } from "express-validator";
 
 dotenv.config();
@@ -186,6 +186,13 @@ app.get("/users/check_nickname",
   query("nickname").exists().withMessage("닉네임을 입력하세요.")
     .isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),
   handleCheckNickname);
+
+//자신의 회원 정보 조회
+app.get("/users", handleMyProfile)
+
+//회원 정보 조회
+app.get("/users/:userId", handleUserProfile)
+
 
 
 /**

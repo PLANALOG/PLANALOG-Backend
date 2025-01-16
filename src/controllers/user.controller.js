@@ -1,7 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { bodyToUpdateUser } from "../dtos/user.dto.js";
-import { checkNickname, } from "../services/user.service.js";
-import { userEdit } from "../services/user.service.js";
+import { userEdit, nicknameCheck, myProfile, userProfile } from "../services/user.service.js";
 
 export const handleEditUser = async (req, res, next) => {
     /*
@@ -117,8 +116,104 @@ export const handleCheckNickname = async (req, res, next) => {
 
     const nickname = req.query.nickname;
 
-    const isDuplicated = await checkNickname(nickname);
+    const isDuplicated = await nicknameCheck(nickname);
 
     res.status(StatusCodes.OK).success({ isDuplicated });
 
+}
+
+export const handleMyProfile = async (req, res, next) => {
+    /*
+        #swagger.summary = '본인 회원 정보 조회 API'
+        #swagger.responses[200] = {
+            description: "회원 정보 조회 성공 응답",
+            content: {
+                "application/json": {
+                    schema: {
+                        type: "object",
+                        properties: {
+                            resultType: { type: "string", example: "SUCCESS" },
+                            error: { type: "object", nullable: true, example: null },
+                            success: {
+                                type: "object",
+                                properties: {
+                                    userId: { type: "integer", example: 6 },
+                                    email: { type: "string", example: "dayeong0120@gmail.com" },
+                                    platform: { type: "string", example: "google" },
+                                    name: { type: "string", example: "김다영" },
+                                    nickname: { type: "string", example: "다영이이" },
+                                    type: { 
+                                        type: "string", 
+                                        example: "memo_user" 
+                                    },
+                                    introduction : { type : "string", example : "추후 수정,"}
+                                    link: { type: "string", example: "추후 수정" }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    */
+    console.log('사용자 본인의 회원 정보 조회를 요청했습니다.');
+
+    if (!req.user || !req.user.id) {
+        throw new Error("사용자 인증 정보가 누락되었습니다.");
+    }
+
+    const userId = req.user.id
+
+    const user = await myProfile(userId);
+
+    res.status(StatusCodes.OK).success(user);
+}
+
+
+export const handleUserProfile = async (req, res, next) => {
+    /*
+        #swagger.summary = '회원 정보 조회 API'
+        #swagger.parameters['userId'] = {
+            in: 'path',
+            description: '조회할 회원의 ID',
+            required: true,
+            schema: {
+                userId : 
+            }
+        }
+        #swagger.responses[200] = {
+            description: "회원 정보 조회 성공 응답",
+            content: {
+                "application/json": {
+                    schema: {
+                        type: "object",
+                        properties: {
+                            resultType: { type: "string", example: "SUCCESS" },
+                            error: { type: "object", nullable: true, example: null },
+                            success: {
+                                type: "object",
+                                properties: {
+                                    userId: { type: "integer", example: 6 },
+                                    nickname: { type: "string", example: "추후 수정" },
+                                    type: { 
+                                        type: "string", 
+                                        example: "memo_user" 
+                                    },
+                                    introduction: { type: "string", example: "추후 수정" },
+                                    link: { type: "string", example: "추후 수정" }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    */
+    console.log('회원 정보 조회를 요청했습니다.');
+
+    const userId = parseInt(req.params.userId);
+
+    const user = await userProfile(userId);
+
+    res.status(StatusCodes.OK).success(user);
 }
