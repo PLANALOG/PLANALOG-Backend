@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { createTask } from "../services/task.service.js";
 import { createTaskDto } from "../dtos/task.dto.js";
 import {updateTaskDto} from "../dtos/task.dto.js";
-import {updateTask} from "../services/task.service.js";
+import {updateTask, getTask} from "../services/task.service.js";
 
 export const handleCreateTask = async (req, res, next) => {
     try {
@@ -41,6 +41,21 @@ export const handleUpdateTask = async (req, res, next ) => {
 
         res.success(updatedTask);
 
+    }
+    catch (error) {
+        next(error);
+    }
+}
+
+export const handleGetTask = async(req, res, next) => {
+    //Task 조회. 
+    const task_id = req.params.task_id;
+
+
+    try {
+        const task = await getTask(parseInt(task_id,10));
+
+        res.success(task)
     }
     catch (error) {
         next(error);

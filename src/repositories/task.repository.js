@@ -79,3 +79,16 @@ export const addTask = async (data) => {
     
     return updatedTask;
   }
+
+  export const getTaskFromRepository = async(task_id) => {
+        const task = await prisma.task.findUnique({
+            where: {
+                id: task_id
+            }
+            }
+        )
+        if (!task) {
+            throw new Error("No such Task exists");
+        }
+        return task;
+  }

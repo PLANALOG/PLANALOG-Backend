@@ -1,4 +1,4 @@
-import { addTask, changeTask } from "../repositories/task.repository.js";
+import { addTask, changeTask, getTaskFromRepository } from "../repositories/task.repository.js";
 
 export const createTask= async (taskData) => {
         console.log("request received to Service:", taskData);
@@ -11,7 +11,8 @@ export const createTask= async (taskData) => {
          // 2. Repository 계층에 저장 요청
         try {
           const savedTask = await addTask(task);
-          
+          // 3. 저장된 결과 반환
+          return savedTask;
         }
         catch (error) {
           //에러 기록
@@ -20,27 +21,33 @@ export const createTask= async (taskData) => {
           throw error;
         }
 
-        // 3. 저장된 결과 반환
-        return savedTask;
+        
     }
 
     export const updateTask= async (taskData) => {
       // Task 수정 로직 
-      let changedTask; 
+       
       try {
-        changedTask = await changeTask(taskData) 
+        const changedTask = await changeTask(taskData)
+        // 수정된 Task 반환환
+        return changedTask;
+       
       }
       catch(error) {
         throw error;
       }
-      // 수정된 Task 반환환
-      return changedTask;
       
     }
-    const deleteTask= async (taskId) => {
+    export const deleteTask= async (taskId) => {
       // Task 삭제 로직
     }
-    const getTask = async (taskId) => {
+    export const getTask = async (taskId) => {
       // Task 조회 로직
+      try {
+        const receivedTask = await getTaskFromRepository(taskId);
+        return receivedTask;
+      }catch (error) {
+        throw error;
+      }
     }
   
