@@ -10,6 +10,10 @@ import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
 
+import { addFriend, getFriends } from './controllers/friend.controller.js';
+
+
+
 dotenv.config();
 
 passport.use(googleStrategy);
@@ -51,6 +55,22 @@ app.use(cors());                            // cors 방식 허용
 app.use(express.static('public'));          // 정적 파일 접근
 app.use(express.json());                    // request의 본문을 json으로 해석할 수 있도록 함 (JSON 형태의 요청 body를 파싱하기 위함)
 app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
+app.post('/friends', addFriend);            //팔로우
+app.get('/friends/:userId', getFriends);    //
+app.get('friends?nickname={nickname}');     //친구 목록 조회하기
+app.use((req, res, next) => {
+  console.log('req.user:', req.user);
+  console.log('req.session:', req.session);
+  next();
+});
+
+app.use((req, res, next) => {
+  console.log("Session ID:", req.sessionID); // 세션 ID 확인
+  console.log("Session Content:", req.session); // 세션 내용 확인
+  console.log("User in Request:", req.user); // 사용자 정보 확인
+  next();
+});
+
 
 app.use(
   session({
@@ -58,12 +78,15 @@ app.use(
       maxAge: 7 * 24 * 60 * 1000, //ms
     },
     resave: false, //수정되지 않은 세션일지라도 다시 저장할지(세션을 언제나 저장할지) 나타내는 부울 값.
-    saveUninitalized: false, //초기화되지 않은 세션을 저장할지(세션에 저장할 내역이 없더라도 처음부터 세션을 생성할지) 
+    saveUninitialized: false, //초기화되지 않은 세션을 저장할지(세션에 저장할 내역이 없더라도 처음부터 세션을 생성할지) 
     secret: process.env.EXPRESS_SESSION_SECRET, //세션 ID 쿠키를 서명하는 데 사용할 문자열. 보안 목적으로 필수적.
     store: new PrismaSessionStore(prisma, { // 세션 데이터의 저장 메커니즘
       checkPeriod: 2 * 60 * 1000, //ms
       dbRecordIdIsSessionId: true,
-      dbRecordIdFunction: undefined
+      dbRecordIdFunction: undefined,
+      logger: {
+        log: console.log, // 세션 저장 관련 로그 출력
+      },
     })
   })
 );
