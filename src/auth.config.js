@@ -24,7 +24,7 @@ const verify = async (profile, email, platform) => {
             platform,
             name: profile.displayName,
             nickname: "추후 수정",
-            type: null,
+            type: "null",
             introduction: "추후 수정",
             link: "추후 수정",
         },
