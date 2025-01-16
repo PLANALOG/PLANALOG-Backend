@@ -9,6 +9,7 @@ import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
+import { handleDisplayPlanner } from "./controllers/planner.controller.js";
 
 dotenv.config();
 
@@ -167,6 +168,9 @@ app.get(
 app.get("/logout", (req, res) => {
   req.logout(() => success());
 });
+
+//플래너 조회 
+app.get('/planners', handleDisplayPlanner)
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의
