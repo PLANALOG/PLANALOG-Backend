@@ -53,3 +53,29 @@ export const addTask = async (data) => {
     console.log("new task created:", newTask);
       return newTask;
   };
+
+  export const changeTask = async (data) => {
+    // task_id 로 task 조회. id는 고유하기 떄문에 findUnique 사용 
+    const existingTask = await prisma.task.findUnique({
+        where: {
+            id: data.task_id
+        }}
+    )
+    if (!existingTask) {
+        throw new Error("No such task exists");
+    }
+
+    console.log("Task 있는지 조회", existingTask);
+    
+    //task 업데이트 (Task 가 존재하는 경우)
+    const updatedTask = await prisma.task.update({
+        where: {
+            id: data.task_id
+        },
+        data: {
+            title: data.title
+        }
+    })
+    
+    return updatedTask;
+  }

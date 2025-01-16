@@ -17,3 +17,17 @@ export const createTaskDto = (body) => {
       };
 
     }
+export const updateTaskDto = (task_id, body) => {
+    // task_id 숫자인지 확인 
+    if (isNaN(task_id)) {
+        throw new Error("Task_id is not a number");
+    }
+    // 데이터 이름 확인 
+    if (!body.title) {
+        throw new Error("Task title is required");
+    }
+    return {
+        task_id: parseInt(task_id, 10),
+        title: body.title
+    }
+}

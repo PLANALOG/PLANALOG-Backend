@@ -56,10 +56,10 @@ model User {
   email        String         @unique @db.VarChar(100)
   platform     platform_type? // ENUM: kakao google naver 
   name         String         @db.VarChar(30)
-  nickname     String         @db.VarChar(100)
+  nickname     String?         @db.VarChar(100)
   type         user_type? // ENUM: memo or category 
-  introduction String         @db.VarChar(300)
-  link         String         @db.VarChar(100)
+  introduction String?         @db.VarChar(300)
+  link         String?         @db.VarChar(100)
   createdAt    DateTime       @default(now()) @map("created_at")
   updatedAt    DateTime       @updatedAt @map("updated_at")
 

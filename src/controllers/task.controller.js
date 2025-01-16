@@ -1,8 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 import { createTask } from "../services/task.service.js";
 import { createTaskDto } from "../dtos/task.dto.js";
+import {updateTaskDto} from "../dtos/task.dto.js";
+import {updateTask} from "../services/task.service.js";
 
-export const handleCreateTask = async (req,res,next) => {
+export const handleCreateTask = async (req, res, next) => {
     try {
         // console.log("request recevied to controller: ", req.body)
         // 1단계: 요청 검사
@@ -18,6 +20,29 @@ export const handleCreateTask = async (req,res,next) => {
         res.success(newTask);
 
     } catch (error) {
+        next(error);
+    }
+}
+
+export const handleUpdateTask = async (req, res, next ) => {
+    try {
+        // task_id 추출 및 검증
+        console.log("data received to controller", req.body);
+        const task_id = req.params.task_id;
+        if (!task_id) {
+            throw new Error("Task ID is required");
+        }
+
+        const validData = await updateTaskDto(task_id, req.body);
+
+        console.log("data after dto",validData);
+
+        const updatedTask = await updateTask(validData);
+
+        res.success(updatedTask);
+
+    }
+    catch (error) {
         next(error);
     }
 }
