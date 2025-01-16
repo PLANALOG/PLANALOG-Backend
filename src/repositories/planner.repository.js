@@ -30,3 +30,21 @@ export const getPlannerWithTasks = async (userId, plannerDate) => {
 
     return plannerWithTasks
 }
+
+export const getMonthPlanners = async (userId, plannerMonth, plannerNextMonth) => {
+    const monthPlannerList = await prisma.planner.findMany({
+        select: {
+            id: true,
+            plannerDate: true,
+            isCompleted: true
+        },
+        where: {
+            userId,
+            plannerDate: {
+                gte: plannerMonth,
+                lt: plannerNextMonth
+            }
+        }
+    })
+    return monthPlannerList;
+}
