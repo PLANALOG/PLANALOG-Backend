@@ -88,8 +88,7 @@ export const handleCheckNickname = async (req, res, next) => {
             description: '중복 확인할 닉네임',
             required: true,
             schema: {
-                type: 'string',
-                example: 'newNickname'
+                nickname : 
             }
         }
         #swagger.responses[200] = {
@@ -115,8 +114,6 @@ export const handleCheckNickname = async (req, res, next) => {
     */
 
     console.log('닉네임 중복 조회를 요청했습니다.');
-
-    console.log(req)
 
     const nickname = req.query.nickname;
 

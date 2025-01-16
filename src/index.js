@@ -167,7 +167,10 @@ app.get(
 
 //로그아웃
 app.get("/logout", (req, res) => {
-  req.logout(() => success());
+  req.logout(() => {
+    console.log('로그아웃 완료')
+    res.success()
+  });
 });
 
 //회원정보 수정 API
@@ -180,8 +183,8 @@ app.patch("/users/profile", [
 
 //닉네임 중복 조회 API
 app.get("/users/check_nickname",
-  // query("nickname").exists().withMessage("닉네임을 입력하세요.")
-  //   .isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),
+  query("nickname").exists().withMessage("닉네임을 입력하세요.")
+    .isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),
   handleCheckNickname);
 
 
