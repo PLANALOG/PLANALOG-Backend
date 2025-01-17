@@ -1,4 +1,4 @@
-import { addTask, changeTask, getTaskFromRepository, deleteTaskFromRepository } from "../repositories/task.repository.js";
+import { addTask, changeTask, getTaskFromRepository, deleteTaskFromRepository, taskCompletionChange } from "../repositories/task.repository.js";
 
 export const createTask= async (taskData) => {
         console.log("request received to Service:", taskData);

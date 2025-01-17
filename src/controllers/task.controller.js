@@ -1,9 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import { createTask } from "../services/task.service.js";
-import { createTaskDto, getTaskDto } from "../dtos/task.dto.js";
-import {updateTaskDto} from "../dtos/task.dto.js";
+import { createTaskDto, getTaskDto, updateTaskDto } from "../dtos/task.dto.js";
 import {updateTask, getTask, deleteTask} from "../services/task.service.js";
-
+import { toggleTaskCompletion } from "../services/task.service.js";
 export const handleCreateTask = async (req, res, next) => {
     try {
         // console.log("request recevied to controller: ", req.body)
@@ -51,7 +50,7 @@ export const handleGetTask = async(req, res, next) => {
     //Task 조회. 
     const task_id = req.params.task_id;
 
-    const validTaskId = getTaskDTO(task_id);
+    const validTaskId = getTaskDto(task_id);
     
     try {
         const task = await getTask(validTaskId);

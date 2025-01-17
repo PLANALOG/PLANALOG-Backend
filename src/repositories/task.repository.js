@@ -113,8 +113,11 @@ export const addTask = async (data) => {
   export const taskCompletionChange = async(data) => {
     try {
         // 있는지 확인 
-        const task = prisma.task.findUnique({where: {id: data.task_id}});
-
+        const task = await prisma.task.findUnique({
+            where: {
+                id: data.task_id
+            }
+        });
         if (!task) {
             throw new Error("No such Task exists");
         }

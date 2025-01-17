@@ -13,7 +13,7 @@ export const createTaskDto = (body) => {
     // 3. 데이터 반환 
     return {
         title: body.title,
-        planner_date: body.planner_date,
+        planner_date: planner_date,
       };
 
     }

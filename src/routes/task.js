@@ -13,5 +13,5 @@ router.get("/:task_id", handleGetTask);
 router.delete("/:task_id", handleDeleteTask);
 
 //할일 완료여부 수정 
-router.post("/:task_id/status", handleToggleCompletion);
+router.patch("/:task_id/status", handleToggleCompletion);
 export default router;
