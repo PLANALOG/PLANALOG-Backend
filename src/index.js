@@ -9,7 +9,7 @@ import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
-import { handleDisplayPlanner } from "./controllers/planner.controller.js";
+import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 
 dotenv.config();
 
@@ -170,7 +170,10 @@ app.get("/logout", (req, res) => {
 });
 
 //플래너 조회 
-app.get('/planners', handleDisplayPlanner)
+app.get('/planners', handleDisplayPlanner);
+
+//플래너 삭제 
+app.delete("/planners/:plannerId", handleDeletePlanner);
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의

@@ -1,4 +1,4 @@
-import { getPlannerWithTasks, getMonthPlanners } from "../repositories/planner.repository.js";
+import { getPlannerWithTasks, getMonthPlanners, deletePlanner } from "../repositories/planner.repository.js";
 import { responseFromPlannerWithTasks, responseFromPlannerCalendarView } from "../dtos/planner.dto.js";
 
 
@@ -22,4 +22,19 @@ export const plannerCalendarList = async (userId, plannerMonth) => {
     const plannerCalendarList = await getMonthPlanners(userId, plannerMonth, plannerNextMonth);
 
     return responseFromPlannerCalendarView(plannerCalendarList, plannerMonth, plannerNextMonth);
+}
+
+export const plannerDelete = async (plannerId, userId) => {
+
+    const deletedPlanner = await deletePlanner(plannerId, userId);
+
+    console.log('deletedPlanner : ', deletedPlanner);
+
+    if (deletedPlanner === null) {
+        throw new Error(`해당 id를 가진 플래너가 존재하지 않습니다. ${plannerId}`);
+    };
+
+    return deletedPlanner;
+
+
 }

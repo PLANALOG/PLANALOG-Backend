@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { plannerDisplay, plannerCalendarList } from "../services/planner.service.js";
+import { plannerDisplay, plannerCalendarList, plannerDelete } from "../services/planner.service.js";
 
 
 export const handleDisplayPlanner = async (req, res, next) => {
@@ -17,6 +17,10 @@ export const handleDisplayPlanner = async (req, res, next) => {
         userId = req.user.id;
     };
 
+
+    // date가 있다면 date로 작업
+    // month 가 있다면 month 로 작업
+    // else : 날짜정보가 누락되었습니다. date 혹은 month 정보를 입력해주세요.
     if (req.query.date) {
         console.log("플래너 조회를 요청했습니다.");
 
@@ -41,6 +45,30 @@ export const handleDisplayPlanner = async (req, res, next) => {
     };
 }
 
-// date가 있다면 date로 작업
-// month 가 있다면 month 로 작업
-// else : 날짜정보가 누락되었습니다. date 혹은 month 정보를 입력해주세요.
+export const handleDeletePlanner = async (req, res, next) => {
+    /*
+    #swagger.summary = '플래너 삭제 API'
+    #swagger.parameters['plannerId'] = {
+        in: 'path',
+        description: '삭제할 플래너의 ID',
+        required: true,
+        schema: {
+            plannerId : 
+        }
+    }
+    */
+
+    console.log("플래너 삭제를 요청했습니다.")
+
+    if (!req.user || !req.user.id) {
+        throw new Error("사용자 인증 정보가 누락되었습니다.");
+    }
+
+    const userId = parseInt(req.user.id)
+
+    const plannerId = parseInt(req.params.plannerId);
+
+    const planner = await plannerDelete(plannerId, userId);
+
+    res.status(StatusCodes.OK).success({ plannerId: planner.id });
+}
