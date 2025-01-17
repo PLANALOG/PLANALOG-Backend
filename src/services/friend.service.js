@@ -1,9 +1,9 @@
 import { prisma } from "../db.config.js";
+import { findFriends, findFriendsByNickname } from "../repositories/friend.repository.js";
+import { formatFriends } from "../dtos/friend.dto.js";
 
 
-// 친구 추가 서비스
 export const addFriendService = async (fromUserId, toUserId) => {
-  // 이미 친구인지 확인
   const existingFriend = await prisma.friend.findFirst({
     where: {
       fromUserId: fromUserId, 
@@ -15,7 +15,6 @@ export const addFriendService = async (fromUserId, toUserId) => {
     throw new Error('이미 친구 관계가 존재합니다.');
   }
 
-  // 친구 추가
   const newFriend = await prisma.friend.create({
     data: {
       fromUserId: fromUserId,
@@ -27,8 +26,14 @@ export const addFriendService = async (fromUserId, toUserId) => {
 };
 
 
-// 친구 목록 조회 서비스
-export const getFriendsService = async (fromUserId) => {
-  // 비즈니스 로직
-  console.log(`Getting friends for user: ${fromUserId}`);
+export const getFriendsService = async (fromUserId, nickname) => {
+  let friends;
+
+  if (nickname) {
+    friends = await findFriendsByNickname(fromUserId, nickname);
+  } else {
+    friends = await findFriends(fromUserId);
+  }
+
+  return formatFriends(friends); 
 };

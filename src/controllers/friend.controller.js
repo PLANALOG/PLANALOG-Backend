@@ -1,15 +1,12 @@
-import { addFriendService, getFriendsService } from '../services/friend.service.js';
 import { StatusCodes } from 'http-status-codes'; // HTTP 상태 코드를 활용하기 위해 추가
 import { prisma } from "../db.config.js";
+import { addFriendService, getFriendsService } from '../services/friend.service.js';
 
 
 
 export const addFriend = async (req, res) => {
   try {
-    console.log('req.user:', req.user);
-    console.log('req.session:', req.session);
-
-    const fromUserId = req.session.userId; // 세션에서 사용자 ID 가져오기
+    const fromUserId = req.user?.id; 
     if (!fromUserId) {
       return res.status(StatusCodes.UNAUTHORIZED).json({ message: "사용자 인증이 필요합니다." });
     }
@@ -29,82 +26,28 @@ export const addFriend = async (req, res) => {
 
 
 // 친구 목록 조회 핸들러
+// src/controllers/friend.controller.js
+
+
+
 export const getFriends = async (req, res) => {
   try {
-    console.log('친구 목록 조회 요청이 들어왔습니다!');
-    
-    // 쿼리스트링에서 `nickname` 가져오기
-    const { nickname } = req.query;
+    console.log("친구 목록 조회 요청이 들어왔습니다!");
 
-    // params에서 특정 userId 가져오기
+    const { nickname } = req.query;
     const { userId } = req.params;
 
-    let friends;
+    // 서비스 호출
+    const formattedFriends = await getFriendsService(userId, nickname);
 
-    if (nickname) {
-      // 닉네임으로 친구 검색
-      friends = await prisma.friend.findMany({
-        where: {
-          fromUserId: Number(userId), // 요청한 사용자의 친구 중에서
-          toUser: {
-            nickname: {
-              contains: nickname, // 닉네임이 포함된 경우
-            },
-          },
-        },
-        include: {
-          toUser: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              introduction: true,
-              link: true,
-              nickname: true,
-            },
-          },
-        },
-      });
-    } else {
-      // 특정 친구 정보 가져오기
-      friends = await prisma.friend.findMany({
-        where: {
-          fromUserId: Number(userId), // 요청한 사용자의 친구 목록
-        },
-        include: {
-          toUser: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              introduction: true,
-              link: true,
-              nickname: true,
-            },
-          },
-        },
-      });
-    }
-
-    // 결과 가공
-    const formattedFriends = friends.map((friend) => ({
-      id: friend.toUser.id,
-      name: friend.toUser.name,
-      email: friend.toUser.email,
-      introduction: friend.toUser.introduction,
-      link: friend.toUser.link,
-      nickname: friend.toUser.nickname,
-    }));
-
-    // 성공 응답
+    // 응답 반환
     res.status(StatusCodes.OK).json({
-      message: '친구 목록 조회 성공',
+      message: "친구 목록 조회 성공",
       data: formattedFriends,
     });
   } catch (error) {
-    console.error('친구 목록 조회 중 에러:', error.message);
+    console.error("친구 목록 조회 중 에러:", error.message);
 
-    // 실패 응답
     res.status(StatusCodes.BAD_REQUEST).json({
       message: error.message,
     });

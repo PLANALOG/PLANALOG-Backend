@@ -55,21 +55,8 @@ app.use(cors());                            // cors 방식 허용
 app.use(express.static('public'));          // 정적 파일 접근
 app.use(express.json());                    // request의 본문을 json으로 해석할 수 있도록 함 (JSON 형태의 요청 body를 파싱하기 위함)
 app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
-app.post('/friends', addFriend);            //팔로우
-app.get('/friends/:userId', getFriends);    //
-app.get('friends?nickname={nickname}');     //친구 목록 조회하기
-app.use((req, res, next) => {
-  console.log('req.user:', req.user);
-  console.log('req.session:', req.session);
-  next();
-});
 
-app.use((req, res, next) => {
-  console.log("Session ID:", req.sessionID); // 세션 ID 확인
-  console.log("Session Content:", req.session); // 세션 내용 확인
-  console.log("User in Request:", req.user); // 사용자 정보 확인
-  next();
-});
+
 
 
 app.use(
@@ -209,3 +196,12 @@ app.use((err, req, res, next) => { //
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+
+app.post('/friends', addFriend);            //팔로우
+app.get('/friends/:userId', getFriends);    //
+app.get('friends?nickname={nickname}');     //친구 목록 조회하기
+app.use((req, res, next) => {
+  console.log('req.user:', req.user);
+  console.log('req.session:', req.session);
+  next();
+});
