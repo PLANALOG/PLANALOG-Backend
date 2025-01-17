@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { createTask } from "../services/task.service.js";
 import { createTaskDto, getTaskDTO } from "../dtos/task.dto.js";
 import {updateTaskDto} from "../dtos/task.dto.js";
-import {updateTask, getTask} from "../services/task.service.js";
+import {updateTask, getTask, deleteTask} from "../services/task.service.js";
 
 export const handleCreateTask = async (req, res, next) => {
     try {
@@ -67,7 +67,7 @@ export const handleDeleteTask = async(req, res, next) => {
     
     const validTaskId = await getTaskDTO(req.params.task_id);
     try {
-        const deletedtask = await deleteTask(parseInt(task_id, 10));
+        const deletedtask = await deleteTask(validTaskId);
         
         res.success(deletedtask);
     }

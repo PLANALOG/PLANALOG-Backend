@@ -84,11 +84,29 @@ export const addTask = async (data) => {
         const task = await prisma.task.findUnique({
             where: {
                 id: data.task_id
-            }
+                }
             }
         )
         if (!task) {
             throw new Error("No such Task exists");
         }
         return task;
+  }
+  export const deleteTaskFromRepository = async(data) => {
+    try {
+        const task = await prisma.task.delete({
+            where: {
+                id: data.task_id,
+            },
+        });
+        //삭제된 task 정보 반환 
+        return task; 
+    } catch (error) {
+        
+        if (error.code === 'P2025') { 
+            throw new Error("No such Task exists");
+        }
+        // 다른 에러 발생시 추가로 던지기
+        throw error; 
+    }
   }

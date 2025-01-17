@@ -1,4 +1,4 @@
-import { addTask, changeTask, getTaskFromRepository } from "../repositories/task.repository.js";
+import { addTask, changeTask, getTaskFromRepository, deleteTaskFromRepository } from "../repositories/task.repository.js";
 
 export const createTask= async (taskData) => {
         console.log("request received to Service:", taskData);
@@ -38,8 +38,14 @@ export const createTask= async (taskData) => {
       }
       
     }
-    export const deleteTask= async (taskId) => {
+    export const deleteTask= async (taskData) => {
       // Task 삭제 로직
+      try {
+        const deletedTask = await deleteTaskFromRepository (taskData);
+        return deletedTask;
+      }catch (error) {
+        throw error; 
+      }
     }
     export const getTask = async (taskData) => {
       // Task 조회 로직
