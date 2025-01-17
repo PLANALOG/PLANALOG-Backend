@@ -4,12 +4,13 @@ export const bodyToUpdateUser = (body) => {
     return {
         nickname: body.nickname || undefined,
         type: body.type || undefined,
-        inrtoduction: body.inrtoduction || undefined,
+        introduction: body.introduction || undefined,
         link: body.link || undefined
     }
 }
 
 export const responseFromUser = (user) => {
+
     return {
         userId: user.id,
         email: user.email,
@@ -17,7 +18,7 @@ export const responseFromUser = (user) => {
         name: user.name,
         nickname: user.nickname,
         type: user.type,
-        inrtoduction: user.introduction,
+        introduction: user.introduction,
         link: user.link
     }
 }

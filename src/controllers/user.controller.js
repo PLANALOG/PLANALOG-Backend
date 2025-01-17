@@ -72,6 +72,8 @@ export const handleEditUser = async (req, res, next) => {
 
     const userId = req.user.id
 
+    console.log(req.body)
+
     console.log(req.user)
 
     const user = await userEdit(bodyToUpdateUser(req.body), userId)

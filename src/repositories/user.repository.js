@@ -8,6 +8,7 @@ export const getUserByNickname = async (nickname) => {
 }
 
 export const updateUserProfile = async (data, userId) => {
+
     const user = await prisma.user.update({
         data,
         where: { id: userId }
