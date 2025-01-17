@@ -49,6 +49,7 @@ enum story_content_type {
 enum user_type {
   category_user
   memo_user
+  null
 }
 
 model User {
