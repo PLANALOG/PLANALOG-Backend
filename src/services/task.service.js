@@ -41,10 +41,10 @@ export const createTask= async (taskData) => {
     export const deleteTask= async (taskId) => {
       // Task 삭제 로직
     }
-    export const getTask = async (taskId) => {
+    export const getTask = async (taskData) => {
       // Task 조회 로직
       try {
-        const receivedTask = await getTaskFromRepository(taskId);
+        const receivedTask = await getTaskFromRepository(taskData);
         return receivedTask;
       }catch (error) {
         throw error;

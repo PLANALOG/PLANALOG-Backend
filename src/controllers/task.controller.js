@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { createTask } from "../services/task.service.js";
-import { createTaskDto } from "../dtos/task.dto.js";
+import { createTaskDto, getTaskDTO } from "../dtos/task.dto.js";
 import {updateTaskDto} from "../dtos/task.dto.js";
 import {updateTask, getTask} from "../services/task.service.js";
 
@@ -51,11 +51,25 @@ export const handleGetTask = async(req, res, next) => {
     //Task 조회. 
     const task_id = req.params.task_id;
 
-
+    const validTaskId = getTaskDTO(task_id);
+    
     try {
-        const task = await getTask(parseInt(task_id,10));
+        const task = await getTask(validTaskId);
 
         res.success(task)
+    }
+    catch (error) {
+        next(error);
+    }
+}
+
+export const handleDeleteTask = async(req, res, next) => {
+    
+    const validTaskId = await getTaskDTO(req.params.task_id);
+    try {
+        const deletedtask = await deleteTask(parseInt(task_id, 10));
+        
+        res.success(deletedtask);
     }
     catch (error) {
         next(error);

@@ -80,10 +80,10 @@ export const addTask = async (data) => {
     return updatedTask;
   }
 
-  export const getTaskFromRepository = async(task_id) => {
+  export const getTaskFromRepository = async(data) => {
         const task = await prisma.task.findUnique({
             where: {
-                id: task_id
+                id: data.task_id
             }
             }
         )
