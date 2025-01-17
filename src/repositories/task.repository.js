@@ -110,3 +110,27 @@ export const addTask = async (data) => {
         throw error; 
     }
   }
+  export const taskCompletionChange = async(data) => {
+    try {
+        // 있는지 확인 
+        const task = prisma.task.findUnique({where: {id: data.task_id}});
+
+        if (!task) {
+            throw new Error("No such Task exists");
+        }
+
+        const changedTask = await prisma.task.update({
+            where: {
+                id: data.task_id
+            },
+            data: {
+                // 값 반대로 바꾸기
+                isCompleted: !task.isCompleted
+            }
+        })
+        
+        return changedTask;
+    } catch (error) {
+        throw error;
+    }
+}

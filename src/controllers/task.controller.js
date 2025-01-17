@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { createTask } from "../services/task.service.js";
-import { createTaskDto, getTaskDTO } from "../dtos/task.dto.js";
+import { createTaskDto, getTaskDto } from "../dtos/task.dto.js";
 import {updateTaskDto} from "../dtos/task.dto.js";
 import {updateTask, getTask, deleteTask} from "../services/task.service.js";
 
@@ -65,11 +65,24 @@ export const handleGetTask = async(req, res, next) => {
 
 export const handleDeleteTask = async(req, res, next) => {
     
-    const validTaskId = await getTaskDTO(req.params.task_id);
+    const validTaskId = await getTaskDto(req.params.task_id);
     try {
         const deletedtask = await deleteTask(validTaskId);
         
         res.success(deletedtask);
+    }
+    catch (error) {
+        next(error);
+    }
+}
+
+export const handleToggleCompletion = async(req, res, next) => {
+
+    const validTaskId = await getTaskDto(req.params.task_id);
+    
+    try {
+        const toggledTask = await toggleTaskCompletion(validTaskId);
+        res.success(toggledTask);
     }
     catch (error) {
         next(error);

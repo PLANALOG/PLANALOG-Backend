@@ -1,7 +1,7 @@
 import express from "express";
 import { handleCreateTask } from "../controllers/task.controller.js";
 import { handleUpdateTask } from "../controllers/task.controller.js";
-import { handleGetTask, handleDeleteTask } from "../controllers/task.controller.js";
+import { handleGetTask, handleDeleteTask, handleToggleCompletion } from "../controllers/task.controller.js";
 const router = express.Router();
 
 router.post("/", handleCreateTask);
@@ -12,5 +12,6 @@ router.get("/:task_id", handleGetTask);
 
 router.delete("/:task_id", handleDeleteTask);
 
-
+//할일 완료여부 수정 
+router.post("/:task_id/status", handleToggleCompletion);
 export default router;

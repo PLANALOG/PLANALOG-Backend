@@ -56,4 +56,12 @@ export const createTask= async (taskData) => {
         throw error;
       }
     }
-  
+  export const toggleTaskCompletion = async (taskData) => {
+    // Task 완료상태 수정 로직
+    try {
+      const toggledTask = await taskCompletionChange(taskData);
+      return toggledTask;
+    } catch (error) {
+      throw error;
+    }
+  }
