@@ -128,41 +128,58 @@ BigInt.prototype.toJSON = function () { // bigint 호환
 };
 
 app.get('/', (req, res) => {
+  // #swagger.ignore = true
   res.send('Hello World!')
   console.log(req.user)
 })
 
 //소셜로그인 - 구글 
-app.get("/oauth2/login/google", passport.authenticate("google"));
+app.get("/oauth2/login/google", (req, res) => {
+  passport.authenticate("google")
+});
 app.get(
   "/oauth2/callback/google",
   passport.authenticate("google", {
     failureRedirect: "/oauth2/login/google",
     failureMessage: true,
   }),
-  (req, res) => res.success()
+  (req, res) => {
+    res.success()
+  }
 );
 
 //소셜로그인 - 카카오
-app.get("/oauth2/login/kakao", passport.authenticate("kakao"));
+app.get("/oauth2/login/kakao", (req, res) => {
+  // #swagger.ignore = true
+  passport.authenticate("kakao")
+});
 app.get(
   "/oauth2/callback/kakao",
   passport.authenticate("kakao", {
     failureRedirect: "/oauth2/login/kakao",
     failureMessage: true,
   }),
-  (req, res) => res.success()
+  (req, res) => {
+    // #swagger.ignore = true
+    res.success()
+  }
 );
 
 //소셜로그인 - 네이버
-app.get("/oauth2/login/naver", passport.authenticate("naver"));
+app.get("/oauth2/login/naver", (req, res) => {
+  // #swagger.ignore = true
+  passport.authenticate("naver")
+});
 app.get(
   "/oauth2/callback/naver",
   passport.authenticate("naver", {
     failureRedirect: "/oauth2/login/naver",
     failureMessage: true,
   }),
-  (req, res) => res.success()
+  (req, res) => {
+    // #swagger.ignore = true
+    res.success()
+  }
 );
 
 //로그아웃
