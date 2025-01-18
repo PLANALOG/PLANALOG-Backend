@@ -9,7 +9,7 @@ import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
-
+import{handleAddComment} from './controllers/comment.controller.js';
 dotenv.config();
 
 passport.use(googleStrategy);
@@ -168,6 +168,11 @@ app.get("/logout", (req, res) => {
   req.logout(() => success());
 });
 
+//댓글
+app.post("/posts/:postId/comments", handleAddComment);
+//app.patch("/posts/:postId/comments/:commentId",handleEditComment) ;
+//app.delete("/comments/:commentId",handleDeleteComment);
+//app.get("/posts/:postId/comments", handleListComment);
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의
  */

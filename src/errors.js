@@ -20,3 +20,23 @@ export class UserWithOtherPlatformError extends Error {
     this.data = data;
   }
 } 
+
+export class PostIdNotFoundError extends Error{
+  errorCode = "C001";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+
+export class ContentNotFoundError extends Error{
+  errorCode = "C002";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
