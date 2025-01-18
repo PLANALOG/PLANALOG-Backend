@@ -9,7 +9,6 @@
         createdAt:comment.createdAt|| new Date(),
     };
 };
-
     export const bodyToEditComment = ({userId,commentId,comment, post }) => {
     return{
         userId,
@@ -19,3 +18,10 @@
         updatedAt:comment.updatedAt || new Date(),
     };
 };
+    export const bodyToDeleteComment =({userId, commentId,post}) => {
+        return{
+            userId,
+            commentId,
+            postId:post.id,
+        };
+    };

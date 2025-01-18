@@ -14,7 +14,7 @@ export const addComment = async (data) => { //댓글 데이터 받기
     return newComment.id;
 };
 
-export const editComment = async (data) => {
+export const editComment = async (data) => { //comment id????
     console.log("Repository Input:", data);
     const updatedComment = await prisma.comment.update({ 
         where: { id: data.commentId },
@@ -26,4 +26,13 @@ export const editComment = async (data) => {
     });
     console.log("Updated Comment:", updatedComment);
     return updatedComment;
+    };
+
+export const deleteComment = async (data) => {
+    console.log("Repository Input:", data);
+    const eraseComment = await prisma.comment.delete({ 
+        where: { id: data.commentId },
+    });
+    console.log("Delete Comment:", eraseComment);
+    return eraseComment;
     };
