@@ -40,3 +40,13 @@ export class ContentNotFoundError extends Error{
     this.data = data;
   }
 }
+
+export class CommentIdNotFoundError extends Error{
+  errorCode = "C003";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}

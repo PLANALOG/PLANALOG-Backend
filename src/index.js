@@ -9,7 +9,7 @@ import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
-import{handleAddComment} from './controllers/comment.controller.js';
+import{handleAddComment,handleEditComment} from './controllers/comment.controller.js';
 dotenv.config();
 
 passport.use(googleStrategy);
@@ -168,9 +168,10 @@ app.get("/logout", (req, res) => {
   req.logout(() => success());
 });
 
-//댓글
+//댓글 추가
 app.post("/posts/:postId/comments", handleAddComment);
-//app.patch("/posts/:postId/comments/:commentId",handleEditComment) ;
+//댓글 수정
+app.patch("/posts/:postId/comments/:commentId",handleEditComment);
 //app.delete("/comments/:commentId",handleDeleteComment);
 //app.get("/posts/:postId/comments", handleListComment);
 /**
