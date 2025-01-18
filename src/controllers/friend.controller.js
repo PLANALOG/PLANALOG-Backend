@@ -43,19 +43,23 @@ export const getFriends = async (req, res) => {
   }
 };
 
-
 import { deleteFriendService } from "../services/friend.service.js";
+import { deleteFriendDeleteDTO } from "../dtos/friend.dto.js";
+
 
 export const deleteFriend = async (req, res) => {
   try {
-    // DTO를 사용해 friend_id 검증
-    const { friend_id } = req.params;
-    const deleteDTO = new FriendDeleteDTO(friend_id);
+    const { friendId } = req.params; // URL에서 friend_id 가져오기
+    
 
-    // 서비스 호출
-    const result = await deleteFriendService(deleteDTO.friendId);
+    const deleteDTO = deleteFriendDeleteDTO(friendId); // DTO로 검증 및 객체 생성
 
-    res.status(StatusCodes.OK).json(result);
+    const result = await deleteFriendService(deleteDTO.friendId); // 서비스 호출
+
+    res.status(StatusCodes.OK).json({
+      message: "친구 삭제 성공",
+      data: result,
+    });
   } catch (error) {
     console.error("친구 삭제 중 에러:", error.message);
     res.status(StatusCodes.BAD_REQUEST).json({

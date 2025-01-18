@@ -13,8 +13,10 @@ export const createFriendDto = (body) => {
   };
 };
 
+// src/dtos/friend.dto.js
 export const formatFriends = (friends) => {
   return friends.map((friend) => ({
+    friendId: friend.id,
     id: friend.toUser.id,
     name: friend.toUser.name,
     email: friend.toUser.email,
@@ -24,12 +26,12 @@ export const formatFriends = (friends) => {
   }));
 };
 
-export class FriendDeleteDTO {
-  constructor(friendId) {
-    if (!friendId) {
-      throw new Error("Friend ID is required");
-    }
-    this.friendId = Number(friendId);
-  }
-}
 
+export const deleteFriendDeleteDTO = (friendId) => {
+  if (!friendId) {
+    throw new Error("friend_id는 필수 항목입니다.");
+  }
+  return {
+    friendId,
+  };
+};

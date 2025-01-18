@@ -38,21 +38,20 @@ export const getFriendsService = async (fromUserId, nickname) => {
   return formatFriends(friends); 
 };
 
-import { deleteFriendById } from "../repositories/friend.repository.js";
+
+
 
 export const deleteFriendService = async (friendId) => {
-  try {
-    const deletedFriend = await deleteFriendById(friendId);
+  // 친구 관계 존재 여부 확인
+  const friend = await prisma.friend.findUnique({
+    where: { id: friendId },
+  });
 
-    if (!deletedFriend) {
-      throw new Error("Friend not found");
-    }
-
-    return {
-      message: "Friend deleted successfully",
-      data: deletedFriend,
-    };
-  } catch (error) {
-    throw new Error(error.message || "Failed to delete friend");
+  if (!friend) {
+    throw new Error("친구 관계가 존재하지 않습니다.");
   }
+
+  return await prisma.friend.delete({
+    where: { id: friendId },
+  });
 };

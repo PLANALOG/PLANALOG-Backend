@@ -20,8 +20,9 @@ export const findFriends = async (fromUserId) => {
     where: {
       fromUserId: Number(fromUserId),
     },
-    include: {
-      toUser: {
+    select: {
+      id: true, 
+      toUser: { 
         select: {
           id: true,
           name: true,
@@ -34,6 +35,9 @@ export const findFriends = async (fromUserId) => {
     },
   });
 };
+
+
+
 
 export const findFriendsByNickname = async (fromUserId, nickname) => {
   return await prisma.friend.findMany({
@@ -44,8 +48,9 @@ export const findFriendsByNickname = async (fromUserId, nickname) => {
         { toUser: { name: { contains: nickname } } },
       ],
     },
-    include: {
-      toUser: {
+    select: {
+      id: true, 
+      toUser: { 
         select: {
           id: true,
           name: true,
@@ -62,11 +67,16 @@ export const findFriendsByNickname = async (fromUserId, nickname) => {
 
 
 
+
+
+
 // 친구 삭제 레파지토리 함수
-export const deleteFriendById = async (friendId) => {
-  return await prisma.friend.delete({
-    where: {
-      id: friendId,
-    },
-  });
+export const deleteFriendDeleteDTO = (friendId) => {
+  if (!friendId) {
+    throw new Error("friend_id는 필수 항목입니다.");
+  }
+
+  return {
+    friendId,
+  };
 };
