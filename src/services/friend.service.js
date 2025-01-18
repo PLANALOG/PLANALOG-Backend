@@ -37,3 +37,22 @@ export const getFriendsService = async (fromUserId, nickname) => {
 
   return formatFriends(friends); 
 };
+
+import { deleteFriendById } from "../repositories/friend.repository.js";
+
+export const deleteFriendService = async (friendId) => {
+  try {
+    const deletedFriend = await deleteFriendById(friendId);
+
+    if (!deletedFriend) {
+      throw new Error("Friend not found");
+    }
+
+    return {
+      message: "Friend deleted successfully",
+      data: deletedFriend,
+    };
+  } catch (error) {
+    throw new Error(error.message || "Failed to delete friend");
+  }
+};

@@ -13,7 +13,6 @@ export const createFriendDto = (body) => {
   };
 };
 
-// src/dtos/friend.dto.js
 export const formatFriends = (friends) => {
   return friends.map((friend) => ({
     id: friend.toUser.id,
@@ -24,3 +23,13 @@ export const formatFriends = (friends) => {
     nickname: friend.toUser.nickname,
   }));
 };
+
+export class FriendDeleteDTO {
+  constructor(friendId) {
+    if (!friendId) {
+      throw new Error("Friend ID is required");
+    }
+    this.friendId = Number(friendId);
+  }
+}
+

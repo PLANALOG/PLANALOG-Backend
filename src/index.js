@@ -10,7 +10,7 @@ import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
 
-import { addFriend, getFriends } from './controllers/friend.controller.js';
+import { addFriend, getFriends,deleteFriend } from './controllers/friend.controller.js';
 
 
 
@@ -199,9 +199,8 @@ app.listen(port, () => {
 
 app.post('/friends', addFriend);            //팔로우
 app.get('/friends/:userId', getFriends);    //
-app.get('friends?nickname={nickname}');     //친구 목록 조회하기
+app.get('/friends?nickname={nickname}');     //친구 목록 조회하기
 app.use((req, res, next) => {
-  console.log('req.user:', req.user);
-  console.log('req.session:', req.session);
   next();
 });
+app.delete('/friends/:friendId', deleteFriend);

@@ -14,12 +14,6 @@ export const createFriend = async (fromUserId, toUserId) => {
   });
 };
 
-// export const findFriendsByUserId = async (fromUserId) => {
-//   return await prisma.friend.findMany({
-//     where: { fromUserId },
-//     include: { toUser: true },
-//   });
-// };
 
 export const findFriends = async (fromUserId) => {
   return await prisma.friend.findMany({
@@ -61,6 +55,18 @@ export const findFriendsByNickname = async (fromUserId, nickname) => {
           nickname: true,
         },
       },
+    },
+  });
+};
+
+
+
+
+// 친구 삭제 레파지토리 함수
+export const deleteFriendById = async (friendId) => {
+  return await prisma.friend.delete({
+    where: {
+      id: friendId,
     },
   });
 };

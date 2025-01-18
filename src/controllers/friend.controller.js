@@ -2,8 +2,6 @@ import { StatusCodes } from 'http-status-codes'; // HTTP 상태 코드를 활용
 import { prisma } from "../db.config.js";
 import { addFriendService, getFriendsService } from '../services/friend.service.js';
 
-
-
 export const addFriend = async (req, res) => {
   try {
     const fromUserId = req.user?.id; 
@@ -23,13 +21,6 @@ export const addFriend = async (req, res) => {
   }
 };
 
-
-
-// 친구 목록 조회 핸들러
-// src/controllers/friend.controller.js
-
-
-
 export const getFriends = async (req, res) => {
   try {
     console.log("친구 목록 조회 요청이 들어왔습니다!");
@@ -37,10 +28,8 @@ export const getFriends = async (req, res) => {
     const { nickname } = req.query;
     const { userId } = req.params;
 
-    // 서비스 호출
     const formattedFriends = await getFriendsService(userId, nickname);
 
-    // 응답 반환
     res.status(StatusCodes.OK).json({
       message: "친구 목록 조회 성공",
       data: formattedFriends,
@@ -48,6 +37,27 @@ export const getFriends = async (req, res) => {
   } catch (error) {
     console.error("친구 목록 조회 중 에러:", error.message);
 
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: error.message,
+    });
+  }
+};
+
+
+import { deleteFriendService } from "../services/friend.service.js";
+
+export const deleteFriend = async (req, res) => {
+  try {
+    // DTO를 사용해 friend_id 검증
+    const { friend_id } = req.params;
+    const deleteDTO = new FriendDeleteDTO(friend_id);
+
+    // 서비스 호출
+    const result = await deleteFriendService(deleteDTO.friendId);
+
+    res.status(StatusCodes.OK).json(result);
+  } catch (error) {
+    console.error("친구 삭제 중 에러:", error.message);
     res.status(StatusCodes.BAD_REQUEST).json({
       message: error.message,
     });
