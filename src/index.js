@@ -10,7 +10,8 @@ import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
 
-import { addFriend, getFriends,deleteFriend } from './controllers/friend.controller.js';
+import { addFriend, getFriends,deleteFriend, getFriendCount  } from './controllers/friend.controller.js';
+
 
 
 
@@ -197,10 +198,16 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
-app.post('/friends', addFriend);            //팔로우
-app.get('/friends/:userId', getFriends);    //
-app.get('/friends?nickname={nickname}');     //친구 목록 조회하기
-app.use((req, res, next) => {
-  next();
-});
+
+app.post('/friends', addFriend);
+app.get('/friends/count', getFriendCount);  // count 엔드포인트를 위로 이동
+app.get('/friends/:userId', getFriends);
 app.delete('/friends/:friendId', deleteFriend);
+// app.post('/friends', addFriend);            //팔로우
+// app.get('/friends/:userId', getFriends);    //
+// app.get('/friends?nickname={nickname}');     //친구 목록 조회하기
+// app.use((req, res, next) => {
+//   next();
+// });
+// app.delete('/friends/:friendId', deleteFriend);
+// app.get('/friends/count', getFriendCount);

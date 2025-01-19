@@ -67,3 +67,32 @@ export const deleteFriend = async (req, res) => {
     });
   }
 };
+
+// src/controllers/friend.controller.js
+import { getFriendCountService } from '../services/friend.service.js';
+import { createFriendCountDTO } from '../dtos/friend.dto.js';
+
+export const getFriendCount = async (req, res) => {
+  try {
+    const fromUserId = req.user?.id;
+    if (!fromUserId) {
+      throw new Error('로그인한 사용자 정보가 필요합니다.');
+    }
+
+    // DTO 생성 및 검증
+    const dto = createFriendCountDTO(fromUserId);
+    
+    // 서비스 호출
+    const friendCount = await getFriendCountService(dto.userId);
+
+    res.status(200).json({
+      message: '친구 수 조회 성공',
+      data: { friendCount },
+    });
+  } catch (error) {
+    console.error('친구 수 조회 중 에러:', error.message);
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+};

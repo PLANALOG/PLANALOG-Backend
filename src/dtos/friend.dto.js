@@ -35,3 +35,14 @@ export const deleteFriendDeleteDTO = (friendId) => {
     friendId,
   };
 };
+
+
+export const createFriendCountDTO = (userId) => {
+  if (!userId || isNaN(Number(userId))) {
+    throw new Error('유효한 사용자 ID가 필요합니다.');
+  }
+
+  return {
+    userId: Number(userId), // Number로 변환
+  };
+};

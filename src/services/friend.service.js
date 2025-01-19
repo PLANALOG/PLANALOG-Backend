@@ -55,3 +55,19 @@ export const deleteFriendService = async (friendId) => {
     where: { id: friendId },
   });
 };
+
+
+import { findMutualFriends } from '../repositories/friend.repository.js';
+
+export const getFriendCountService = async (fromUserId) => {
+  try {
+    // 디버깅을 위한 로그
+    console.log('Service에 전달된 ID:', fromUserId, typeof fromUserId);
+    
+    const mutualFriends = await findMutualFriends(fromUserId);
+    return mutualFriends.length;
+  } catch (error) {
+    console.error('Service 에러 상세:', error);
+    throw error;
+  }
+};
