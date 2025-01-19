@@ -199,10 +199,10 @@ app.listen(port, () => {
 })
 
 
-app.post('/friends', addFriend);
+app.post('/friends', addFriend);            // 친구 추가 기능
 app.get('/friends/count', getFriendCount);  // count 엔드포인트를 위로 이동
-app.get('/friends/:userId', getFriends);
-app.delete('/friends/:friendId', deleteFriend);
+app.get('/friends/list', getFriends);       // 친구 목록 조회, 친구 검색 기능
+app.delete('/friends/:friendId', deleteFriend); //친구 삭제 기능
 // app.post('/friends', addFriend);            //팔로우
 // app.get('/friends/:userId', getFriends);    //
 // app.get('/friends?nickname={nickname}');     //친구 목록 조회하기

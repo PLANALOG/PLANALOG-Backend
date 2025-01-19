@@ -41,14 +41,19 @@ export const getFriendsService = async (fromUserId, nickname) => {
 
 
 
-export const deleteFriendService = async (friendId) => {
-  // 친구 관계 존재 여부 확인
-  const friend = await prisma.friend.findUnique({
-    where: { id: friendId },
+export const deleteFriendService = async (friendId, userId) => {
+  const friend = await prisma.friend.findFirst({
+    where: {
+      id: friendId,
+      OR: [
+        { fromUserId: userId }, 
+        { toUserId: userId },   
+      ],
+    },
   });
 
   if (!friend) {
-    throw new Error("친구 관계가 존재하지 않습니다.");
+    throw new Error("삭제할 수 있는 친구 관계가 없거나 권한이 없습니다.");
   }
 
   return await prisma.friend.delete({
@@ -57,13 +62,11 @@ export const deleteFriendService = async (friendId) => {
 };
 
 
+
 import { findMutualFriends } from '../repositories/friend.repository.js';
 
 export const getFriendCountService = async (fromUserId) => {
   try {
-    // 디버깅을 위한 로그
-    console.log('Service에 전달된 ID:', fromUserId, typeof fromUserId);
-    
     const mutualFriends = await findMutualFriends(fromUserId);
     return mutualFriends.length;
   } catch (error) {
