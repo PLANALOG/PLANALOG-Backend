@@ -169,8 +169,14 @@ app.get("/logout", (req, res) => {
   req.logout(() => success());
 });
 
+
+// Mock 인증 미들웨어
+const mockAuthMiddleware = (req, res, next) => {
+  req.user = { id: 1 }; // Mock user ID
+  next();
+};
 //task 관련 작업 
-app.use("/tasks", task);
+app.use("/tasks",mockAuthMiddleware ,task);
 
 
 /**

@@ -3,6 +3,7 @@ import { createTask } from "../services/task.service.js";
 import { createTaskDto, getTaskDto, updateTaskDto } from "../dtos/task.dto.js";
 import {updateTask, getTask, deleteTask} from "../services/task.service.js";
 import { toggleTaskCompletion } from "../services/task.service.js";
+import { findTaskWithPlanner } from "../repositories/task.repository.js";
 export const handleCreateTask = async (req, res, next) => {
     try {
         // console.log("request recevied to controller: ", req.body)
@@ -64,16 +65,62 @@ export const handleGetTask = async(req, res, next) => {
 
 export const handleDeleteTask = async(req, res, next) => {
     
-    const validTaskId = await getTaskDto(req.params.task_id);
     try {
-        const deletedtask = await deleteTask(validTaskId);
+        const taskId = req.params.task_id;
+
+        // Validate task_id
+        if (!taskId || isNaN(taskId)) {
+            return res.status(400).json({
+                resultType: "FAIL",
+                error: {
+                    errorCode: "invalid_task_id",
+                    reason: "task_id must be a valid number.",
+                },
+                success: null,
+            });
+        }
+
+        // Task 조회
+        const task = await findTaskWithPlanner({"task_id": taskId});
+
+        // Task가 존재하지 않으면 에러
+        if (!task) {
+            return res.status(404).json({
+                resultType: "FAIL",
+                error: {
+                    errorCode: "task_not_found",
+                    reason: "Task not found.",
+                },
+                success: null,
+            });
+        }
+
+        // 권한 검증
+        if (task.planner.user_id !== BigInt(req.user.id)) {
+            throw new Error("Unauthorized: You cannot delete this task.");
+        }
+
+
+        const validTaskId = getTaskDto(req.params.task_id);
+        // Task 삭제
+        const deletedTask = await deleteTask(validTaskId);
         
-        res.success(deletedtask);
-    }
-    catch (error) {
+        res.success(deletedTask);
+    } catch (error) {
         next(error);
+        }
     }
-}
+
+    // const validTaskId = await getTaskDto(req.params.task_id);
+    // try {
+    //     const deletedtask = await deleteTask(validTaskId);
+        
+    //     res.success(deletedtask);
+    // }
+    // catch (error) {
+    //     next(error);
+    // }
+
 
 export const handleToggleCompletion = async(req, res, next) => {
 

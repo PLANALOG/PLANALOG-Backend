@@ -137,3 +137,16 @@ export const addTask = async (data) => {
         throw error;
     }
 }
+export const findTaskWithPlanner = async (data) => {
+    // task_id를 bigint로 바꾸기 
+    const taskId = typeof (data.task_id) === "string" ? BigInt(data.task_id) : data.task_id;
+    return await prisma.task.findUnique({
+        where: { id: taskId },
+        include: {
+            planner: { 
+                // 연결된 Planner에서 user_id도 가져옴
+                select: { userId: true }
+            }
+        }
+    });
+};
