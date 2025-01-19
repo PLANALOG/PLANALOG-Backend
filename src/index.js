@@ -176,7 +176,7 @@ const mockAuthMiddleware = (req, res, next) => {
   next();
 };
 //task 관련 작업 
-app.use("/tasks",mockAuthMiddleware ,task);
+app.use("/tasks", mockAuthMiddleware, task);
 
 
 /**
