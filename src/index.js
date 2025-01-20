@@ -59,7 +59,7 @@ app.use(
       maxAge: 7 * 24 * 60 * 1000, //ms
     },
     resave: false, //수정되지 않은 세션일지라도 다시 저장할지(세션을 언제나 저장할지) 나타내는 부울 값.
-    saveUninitalized: false, //초기화되지 않은 세션을 저장할지(세션에 저장할 내역이 없더라도 처음부터 세션을 생성할지) 
+    saveUninitialized: false, //초기화되지 않은 세션을 저장할지(세션에 저장할 내역이 없더라도 처음부터 세션을 생성할지) 
     secret: process.env.EXPRESS_SESSION_SECRET, //세션 ID 쿠키를 서명하는 데 사용할 문자열. 보안 목적으로 필수적.
     store: new PrismaSessionStore(prisma, { // 세션 데이터의 저장 메커니즘
       checkPeriod: 2 * 60 * 1000, //ms
@@ -131,9 +131,6 @@ app.get('/', (req, res) => {
   console.log(req.user)
 })
 
-//좋아요 추가, 삭제
-app.post("/posts/:postId/likes", handleLikePost);
-app.delete("/posts/:postId/likes", handleDeleteLikePost);
 
 //소셜로그인 - 구글 
 app.get("/oauth2/login/google", passport.authenticate("google"));
@@ -172,6 +169,11 @@ app.get(
 app.get("/logout", (req, res) => {
   req.logout(() => success());
 });
+
+//좋아요 추가, 삭제
+app.post("/posts/:postId/likes", handleLikePost);
+app.delete("/posts/:postId/likes", handleDeleteLikePost);
+
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의

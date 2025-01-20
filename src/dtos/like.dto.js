@@ -6,7 +6,7 @@ export const bodyToLike = ({ like, post }) => {
     throw new Error("post.userId가 없습니다. 좋아요를 받은 사용자를 지정해야 합니다.");
   }
     return {
-      fromUserId: like.fromUserId, 
+      fromUserId: user.id, // req.user에서 가져옴
       userId: post.userId,
       entityId: post.id, 
       entityType: post.entityType || "post", 
@@ -19,5 +19,3 @@ export const bodyToLike = ({ like, post }) => {
       }
       return { likeId: like.likeId };
     };
-    
-    //사용자 요청 데이터 변환.반환값 추가 X
