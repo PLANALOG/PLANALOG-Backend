@@ -36,3 +36,22 @@ export const deleteComment = async (data) => {
     console.log("Delete Comment:", eraseComment);
     return eraseComment;
     };
+
+export const getAllPostComments =  async({ postId, cursor }) => {
+    const comments = await prisma.comment.findMany({
+        select:{
+            id: true,
+            content: true,
+            postId: true,
+            userId: true,
+            createdAt: true,
+        },
+        where: {
+            postId: postId,
+            ...(cursor && { id: { gt: cursor } }), // Cursor 조건 추가
+        },
+        orderBy:{id:"asc"},  //정렬 기준
+        take: 5, // 페이지 크기
+    });
+return comments;
+};

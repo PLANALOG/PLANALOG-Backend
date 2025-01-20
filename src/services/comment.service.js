@@ -1,6 +1,7 @@
 import {PostIdNotFoundError,ContentNotFoundError,CommentIdNotFoundError} from "../errors.js";
-import {addComment,editComment,deleteComment} from "../repositories/comment.repository.js";
+import {addComment,editComment,deleteComment,getAllPostComments} from "../repositories/comment.repository.js";
 import { prisma } from "../db.config.js";
+import { responseFromComments } from "../dtos/comment.dto.js";
 
 export const addUserComment = async (data) =>{
     const postExists = await prisma.post.findUnique({
@@ -56,3 +57,8 @@ export const deleteUserComment = async(data) =>{
     });
     return removeComment;
 }
+
+export const listComments = async (postId) => {
+    const comments = await getAllPostComments(postId);
+    return responseFromComments(comments);
+};
