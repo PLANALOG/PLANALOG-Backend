@@ -186,3 +186,15 @@ app.use((err, req, res, next) => { //
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+
+import { saveSearchRecord/*, getSearchRecords, deleteSearchRecord, deleteAllSearchRecords*/ } from "./controllers/search.controller.js";
+
+import { searchUsers } from "./controllers/search.controller.js";
+import { getSearchRecords } from "./controllers/search.controller.js";
+import { deleteSearchRecord } from "./controllers/search.controller.js";
+
+
+app.get("/searches/users", searchUsers);
+app.post("/searches", saveSearchRecord);
+app.get("/searches/records", getSearchRecords);
+app.delete("/searches/records/:recordId", deleteSearchRecord);
