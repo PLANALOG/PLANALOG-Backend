@@ -1,3 +1,4 @@
+
 import { prisma } from '../db.config.js'
 
 export const getUserByNickname = async (nickname) => {
@@ -36,6 +37,19 @@ export const getUserProfile = async (userId) => {
         },
         where: { id: userId }
     });
+
+    return user;
+}
+
+
+export const deleteUser = async (userId) => {
+    const user = await prisma.user.update({
+        data: {
+            isDeleted: true,
+            deletedAt: new Date()
+        },
+        where: { id: userId }
+    })
 
     return user;
 }

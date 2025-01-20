@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { bodyToUpdateUser } from "../dtos/user.dto.js";
-import { userEdit, nicknameCheck, myProfile, userProfile } from "../services/user.service.js";
+import { userEdit, nicknameCheck, myProfile, userProfile, userDelete } from "../services/user.service.js";
+
 
 export const handleEditUser = async (req, res, next) => {
     /*
@@ -218,4 +219,24 @@ export const handleUserProfile = async (req, res, next) => {
     const user = await userProfile(userId);
 
     res.status(StatusCodes.OK).success(user);
+}
+
+export const handleDeleteUser = async (req, res, next) => {
+    console.log("회원탈퇴를 요청했습니다.")
+
+    if (!req.user || !req.user.id) {
+        throw new Error("사용자 인증 정보가 누락되었습니다.");
+    }
+
+    const userId = parseInt(req.user.id);
+
+    const refreshToken = req.user.refreshToken;
+
+    console.log('userId', userId, 'refreshToken', refreshToken)
+
+    const user = await userDelete(userId, refreshToken);
+
+
+
+    res.status(StatusCodes.OK).success({ user });
 }

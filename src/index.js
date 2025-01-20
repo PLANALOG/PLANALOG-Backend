@@ -10,7 +10,7 @@ import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
-import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile } from "./controllers/user.controller.js";
+import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile, handleDeleteUser } from "./controllers/user.controller.js";
 import { body, query } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 
@@ -21,6 +21,8 @@ passport.use(googleStrategy);
 passport.use(kakaoStrategy);
 passport.use(naverStrategy);
 passport.serializeUser((user, done) => {
+  console.log('user', user)
+  // ｕｓｅｒ는 콜백함수 ｖｅｒｉｆｙ에서 반환된 객체임¡
   //console.log('serializeUser success')
   done(null, user)
 });
@@ -180,10 +182,12 @@ app.get(
 
 //로그아웃
 app.get("/logout", (req, res) => {
+  console.log("로그아웃 요청")
   req.logout(() => {
-    console.log('로그아웃 완료')
-    res.success()
+    req.session.destroy();
+    res.success();
   });
+
 });
 
 
@@ -222,6 +226,8 @@ app.get('/planners', handleDisplayPlanner);
 //플래너 삭제 
 app.delete("/planners/:plannerId", handleDeletePlanner);
 
+//회원 탈퇴 
+app.delete("/users", handleDeleteUser)
 
 
 /**
