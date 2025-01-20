@@ -1,17 +1,12 @@
-import { createNoticeService } from "../services/notice.service.js";
-import { validateCreateNoticeDTO } from "../dtos/notice.dto.js";
+import { createNoticeService,getNoticesService, deleteNoticeService,updateNoticeReadStatusService } from "../services/notice.service.js";
+import { validateCreateNoticeDTO,validateDeleteNoticeDTO ,validateUpdateNoticeReadDTO } from "../dtos/notice.dto.js";
 import { StatusCodes } from "http-status-codes";
-import { getNoticesService } from "../services/notice.service.js";
-import { deleteNoticeService } from "../services/notice.service.js";
-import { validateDeleteNoticeDTO } from "../dtos/notice.dto.js";
-import { updateNoticeReadStatusService } from "../services/notice.service.js";
-import { validateUpdateNoticeReadDTO } from "../dtos/notice.dto.js";
 
 
 export const createNotice = async (req, res) => {
   try {
-    const userId = req.user?.id; // 인증된 사용자 ID
-    const { message, entityType, entityId } = req.body; // 요청 데이터
+    const userId = req.user?.id; 
+    const { message, entityType, entityId } = req.body; 
 
     if (!userId) {
       return res.status(StatusCodes.BAD_REQUEST).json({
@@ -19,10 +14,8 @@ export const createNotice = async (req, res) => {
       });
     }
 
-    // DTO로 요청 데이터 검증
     const validatedNotice = validateCreateNoticeDTO({ message, entityType, entityId });
 
-    // 서비스 호출
     const notice = await createNoticeService(userId, validatedNotice);
 
     res.status(StatusCodes.CREATED).json({
