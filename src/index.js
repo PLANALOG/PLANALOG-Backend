@@ -2,6 +2,7 @@
 import dotenv from "dotenv";
 import express from 'express';          // -> ES Module
 import cors from "cors";
+import task from "./routes/task.js";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import session from "express-session";
 import passport from "passport";
@@ -192,6 +193,15 @@ app.get("/logout", (req, res) => {
   });
 });
 
+
+// Mock 인증 미들웨어
+const mockAuthMiddleware = (req, res, next) => {
+  req.user = { id: 1 }; // Mock user ID
+  next();
+};
+//task 관련 작업 
+app.use("/tasks", mockAuthMiddleware, task);
+
 //회원정보 수정 API
 app.patch("/users/profile", [
   body("nickname").optional().isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),
@@ -218,6 +228,7 @@ app.get('/planners', handleDisplayPlanner);
 
 //플래너 삭제 
 app.delete("/planners/:plannerId", handleDeletePlanner);
+
 
 
 /**
