@@ -11,6 +11,8 @@ import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
 import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile } from "./controllers/user.controller.js";
 import { body, query } from "express-validator";
+import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
+
 
 dotenv.config();
 
@@ -210,6 +212,12 @@ app.get("/users", handleMyProfile)
 //회원 정보 조회
 app.get("/users/:userId", handleUserProfile)
 
+
+//플래너 조회 
+app.get('/planners', handleDisplayPlanner);
+
+//플래너 삭제 
+app.delete("/planners/:plannerId", handleDeletePlanner);
 
 
 /**
