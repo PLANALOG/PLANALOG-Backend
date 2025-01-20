@@ -137,9 +137,7 @@ app.get('/', (req, res) => {
 })
 
 //소셜로그인 - 구글 
-app.get("/oauth2/login/google", (req, res) => {
-  passport.authenticate("google")
-});
+app.get("/oauth2/login/google", passport.authenticate("google"));
 app.get(
   "/oauth2/callback/google",
   passport.authenticate("google", {
@@ -152,10 +150,8 @@ app.get(
 );
 
 //소셜로그인 - 카카오
-app.get("/oauth2/login/kakao", (req, res) => {
-  // #swagger.ignore = true
-  passport.authenticate("kakao")
-});
+app.get("/oauth2/login/kakao", passport.authenticate("kakao"));
+
 app.get(
   "/oauth2/callback/kakao",
   passport.authenticate("kakao", {
@@ -169,10 +165,7 @@ app.get(
 );
 
 //소셜로그인 - 네이버
-app.get("/oauth2/login/naver", (req, res) => {
-  // #swagger.ignore = true
-  passport.authenticate("naver")
-});
+app.get("/oauth2/login/naver", passport.authenticate("naver"));
 app.get(
   "/oauth2/callback/naver",
   passport.authenticate("naver", {
