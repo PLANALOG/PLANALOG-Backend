@@ -186,3 +186,14 @@ app.use((err, req, res, next) => { //
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+
+import { updateNoticeReadStatus } from "./controllers/notice.controller.js";
+import { createNotice } from "./controllers/notice.controller.js";
+import { deleteNotice } from "./controllers/notice.controller.js";
+import { getNotices } from "./controllers/notice.controller.js";
+
+
+app.post("/post/notices", createNotice);
+app.patch("/notices/:noticeId/read", updateNoticeReadStatus);
+app.get("/notices", getNotices);
+app.delete("/notices/:noticeId", deleteNotice);
