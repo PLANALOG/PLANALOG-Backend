@@ -1,5 +1,6 @@
 // src/services/search.service.js
-import { saveSearchRecord, searchUsersByNicknameAndName } from "../repositories/search.repository.js";
+import { saveSearchRecord, searchUsersByNicknameAndName,deleteSearchRecord,getSearchRecords } from "../repositories/search.repository.js";
+import { formatSearchRecords } from "../dtos/search.dto.js";
 
 export const searchUsersService = async (userId, { nickname, name }) => {
   let users;
@@ -27,7 +28,6 @@ export const formatUsers = (users) => {
 };
 
 
-
 export const saveSearchRecordService = async (userId, content) => {
   if (!content) {
     throw new Error("저장할 검색 내용이 없습니다.");
@@ -36,17 +36,12 @@ export const saveSearchRecordService = async (userId, content) => {
 };
 
 
-import { getSearchRecords } from "../repositories/search.repository.js";
-import { formatSearchRecords } from "../dtos/search.dto.js";
-
 export const getSearchRecordsService = async (userId) => {
   const records = await getSearchRecords(userId);
-  return formatSearchRecords(records); // 검색 기록을 포맷팅하여 반환
+  return formatSearchRecords(records); 
 };
 
-import { deleteSearchRecord } from "../repositories/search.repository.js";
 
 export const deleteSearchRecordService = async (userId, recordId) => {
-  // 레포지토리 호출
   return await deleteSearchRecord(userId, recordId);
 };

@@ -66,7 +66,6 @@ export const deleteSearchRecord = async (userId, recordId) => {
     throw new Error("해당 검색 기록이 존재하지 않거나 권한이 없습니다.");
   }
 
-  // 검색 기록 삭제
   return await prisma.search.delete({
     where: {
       id: BigInt(recordId),

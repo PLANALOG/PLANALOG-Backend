@@ -1,9 +1,8 @@
 // src/controllers/search.controller.js
 import { searchUsersService, saveSearchRecordService } from "../services/search.service.js";
-import { createSearchUsersDTO } from "../dtos/search.dto.js";
 import { StatusCodes } from "http-status-codes";
-
-// 사용자 검색
+import { deleteSearchRecordService } from "../services/search.service.js";
+import { validateDeleteSearchRecordDTO } from "../dtos/search.dto.js";
 
 export const searchUsers = async (req, res) => {
   try {
@@ -24,10 +23,8 @@ export const searchUsers = async (req, res) => {
       });
     }
 
-    // 검색 기록 저장
     await saveSearchRecordService(userId, query);
 
-    // 검색 결과 조회
     const users = await searchUsersService(userId, { nickname: query, name: query });
 
     res.status(StatusCodes.OK).json({
@@ -43,8 +40,6 @@ export const searchUsers = async (req, res) => {
     });
   }
 };
-
-
 
 
 export const saveSearchRecord = async (req, res) => {
@@ -83,7 +78,6 @@ export const getSearchRecords = async (req, res) => {
       });
     }
 
-    // 검색 기록 조회 서비스 호출
     const records = await getSearchRecordsService(userId);
 
     res.status(StatusCodes.OK).json({
@@ -101,13 +95,12 @@ export const getSearchRecords = async (req, res) => {
 };
 
 
-import { deleteSearchRecordService } from "../services/search.service.js";
-import { validateDeleteSearchRecordDTO } from "../dtos/search.dto.js";
+
 
 export const deleteSearchRecord = async (req, res) => {
   try {
     const userId = req.user?.id;
-    const { recordId } = req.params; // 검색 기록 ID를 params에서 가져옴
+    const { recordId } = req.params; 
 
     if (!userId) {
       return res.status(StatusCodes.BAD_REQUEST).json({
@@ -115,10 +108,8 @@ export const deleteSearchRecord = async (req, res) => {
       });
     }
 
-    // DTO를 통해 삭제할 검색 기록 ID 검증
     const { recordId: validatedRecordId } = validateDeleteSearchRecordDTO(recordId);
 
-    // 서비스 호출
     await deleteSearchRecordService(userId, validatedRecordId);
 
     res.status(StatusCodes.OK).json({
