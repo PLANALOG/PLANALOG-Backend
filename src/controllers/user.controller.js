@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { bodyToUpdateUser } from "../dtos/user.dto.js";
 import { userEdit, nicknameCheck, myProfile, userProfile, userDelete } from "../services/user.service.js";
+import { prisma } from "../db.config.js"
 
 
 
@@ -239,4 +240,22 @@ export const handleDeleteUser = async (req, res, next) => {
     req.session.destroy()
 
     res.status(StatusCodes.OK).success({ deletedUser });
+}
+
+export const handleTestDeleteUser = async (req, res, next) => {
+    /* 
+    #swagger.summary = '[테스트용] 회원탈퇴복구 API'
+    #swagger.description = '탈퇴 후 14일 후 재가입 가능한 계정의 이메일과 가입 플랫폼 (google, naver, kakao)를 body에 담아 요청하면 바로 재가입할 수 있습니다.'
+    */
+    console.log("회원탈퇴복구를 요청했습니다.")
+
+    const email = req.body.email;
+    const platform = req.body.platform;
+
+    const user = await prisma.user.delete({
+        where: { email, platform }
+    })
+
+    res.status(StatusCodes.OK).success({ message: "회원탈퇴 복구가 완료되었습니다. 바로 재가입할 수 있습니다.", user });
+
 }

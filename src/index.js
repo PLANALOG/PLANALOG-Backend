@@ -10,7 +10,7 @@ import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
-import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile, handleDeleteUser } from "./controllers/user.controller.js";
+import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile, handleDeleteUser, handleTestDeleteUser } from "./controllers/user.controller.js";
 import { body, query } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 import { userDeleteScheduler } from "./scheduler.js";
@@ -228,6 +228,9 @@ app.delete("/planners/:plannerId", handleDeletePlanner);
 
 //회원 탈퇴 
 app.delete("/users", handleDeleteUser)
+
+//테스트용 : 회원탈퇴복구 (탈퇴 회원 바로 회원가입 가능)
+app.post("/users/test", handleTestDeleteUser)
 
 
 /**
