@@ -1,3 +1,5 @@
+//moment 생성 DTO
+
 export const bodyToCreateMoment = (body) => {
     // 유효성 검증
     if (!body.status) {
@@ -52,6 +54,7 @@ export const responseFromCreateMoment = (moment) => {
     };
 };
 
+//moment 수정 DTO
 export const bodyToUpdateMoment = (body) => {
     const { title, content, status, plannerId, textAlign, momentId } = body;
     //유효성 검증
@@ -99,11 +102,35 @@ export const responseFromUpdateMoment = (moment) => {
 };
 
 
-
+//moment 삭제 DTO
 export const responseFromDeleteMoment = (momentId) => {
     return {
         momentId,
     };
 };
+
+
+//사진추가 DTO
+export const responseFromAddImages = (momentId, addedImages) => {
+    return {
+        momentId,
+        addedImages: addedImages.map((image) => ({
+            id: image.id,
+            url: image.url,
+            sortOrder: image.sortOrder,
+        })),
+    };
+};
+
+//사진삭제 DTO
+export const responseFromDeleteImages = (momentId) => {
+    return {
+        momentId,
+    };
+};
+
+
+
+
 
 

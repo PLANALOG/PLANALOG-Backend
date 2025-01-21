@@ -12,7 +12,7 @@ import swaggerUiExpress from "swagger-ui-express";
 import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile } from "./controllers/user.controller.js";
 import { body, query } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
-import { handleMomentCreate, handleMomentUpdate, handleMomentDelete } from "./controllers/moment.controller.js";
+import { handleMomentCreate, handleMomentUpdate, handleMomentDelete, handleAddImagesToMoment, handleDeleteImagesFromMoment } from "./controllers/moment.controller.js";
 
 
 dotenv.config();
@@ -231,6 +231,12 @@ app.patch("/posts/moments/:momentId", handleMomentUpdate);
 
 //moment 삭제
 app.delete("/posts/moments/:momentId", handleMomentDelete);
+
+//moment 사진 추가
+app.post("/posts/moments/:momentId/images", handleAddImagesToMoment);
+
+//moment 사진 삭제
+app.delete("/posts/moments/:momentId/images/:imageId", handleDeleteImagesFromMoment);
 
 
 /**

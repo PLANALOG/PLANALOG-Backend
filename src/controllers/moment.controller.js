@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { bodyToCreateMoment, bodyToUpdateMoment } from "../dtos/moment.dto.js";
-import { momentCreate, momentUpdate, momentDelete } from "../services/moment.service.js";
+import { momentCreate, momentUpdate, momentDelete, addImagesToMoment, deleteImageFromMoment } from "../services/moment.service.js";
 
 export const handleMomentCreate = async (req, res, next) => {
     /*
@@ -129,6 +129,41 @@ export const handleMomentDelete = async (req, res, next) => {
         next(error);
     }
 };
+
+
+export const handleAddImagesToMoment = async (req, res, next) => {
+    try {
+        if (!req.user || !req.user.id) {
+            throw new Error("사용자 인증 정보가 누락되었습니다.");
+        }
+        const { momentId } = req.params;
+        const { images } = req.body;
+        const userId = req.user.id;
+
+        const addedImages = await addImagesToMoment(userId, momentId, images);
+        res.status(StatusCodes.OK).success(addedImages);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const handleDeleteImagesFromMoment = async (req, res, next) => {
+    try {
+        if (!req.user || !req.user.id) {
+            throw new Error("사용자 인증 정보가 누락되었습니다.");
+        }
+        const { momentId, imageId } = req.params;
+        const userId = req.user.id;
+
+        const deletedResponse = await deleteImageFromMoment(userId, momentId, imageId);
+        res.status(StatusCodes.OK).success(deletedResponse);
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
 
 
 

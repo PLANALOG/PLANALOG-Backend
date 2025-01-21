@@ -1,5 +1,9 @@
-import { createMoment, updateMoment, deleteMoment } from "../repositories/moment.repository.js";
-import { responseFromCreateMoment, responseFromUpdateMoment, responseFromDeleteMoment } from "../dtos/moment.dto.js";
+import { createMoment, updateMoment, deleteMoment, addImages, deleteImages } from "../repositories/moment.repository.js";
+import { responseFromCreateMoment, 
+    responseFromUpdateMoment, 
+    responseFromDeleteMoment,
+    responseFromAddImages,
+    responseFromDeleteImages } from "../dtos/moment.dto.js";
 
 
 export const momentCreate = async (data) => {
@@ -100,6 +104,61 @@ export const momentDelete = async (data) => {
     } catch (error) {
         console.error("Moment 삭제 중 오류 발생:", error.message);
         throw new Error("Moment 삭제에 실패했습니다. 다시 시도해주세요.");
+    }
+};
+
+
+export const addImagesToMoment = async (userId, momentId, images) => {
+    try {
+        // Moment 권한 검증
+        const moment = await prisma.moment.findUnique({
+            where: { id: momentId },
+            include: { post: true },
+        });
+        if (!moment) throw new Error("Moment가 존재하지 않습니다.");
+        if (moment.post.userId !== userId) throw new Error("권한이 없습니다.");
+
+        // 이미지 추가 처리
+        const addedImages = await addImages(momentId, images);
+
+        // 추가된 이미지 다시 조회
+        const updatedImages = await prisma.momentContent.findMany({
+            where: { momentId },
+            orderBy: { sortOrder: "asc" },
+        });
+
+        // 응답 데이터 생성 및 반환
+        return responseFromAddImages(momentId, updatedImages);
+    } catch (error) {
+        console.error("사진 추가 중 오류 발생:", error.message);
+        throw new Error("사진 추가에 실패했습니다. 다시 시도해주세요.");
+    }
+};
+
+export const deleteImageFromMoment = async (userId, momentId, imageId) => {
+    try {
+        // Moment 권한 검증
+        const moment = await prisma.moment.findUnique({
+            where: { id: momentId },
+            include: { post: true },
+        });
+        if (!moment) throw new Error("Moment가 존재하지 않습니다.");
+        if (moment.post.userId !== userId) throw new Error("권한이 없습니다.");
+
+        // 이미지 삭제 처리
+        const deletedMomentId = await deleteImages(imageId, momentId);
+
+        // 남아 있는 이미지 다시 조회
+        const remainingImages = await prisma.momentContent.findMany({
+            where: { momentId },
+            orderBy: { sortOrder: "asc" },
+        });
+
+        // 응답 데이터 생성 및 반환
+        return responseFromDeleteImages(momentId, remainingImages);
+    } catch (error) {
+        console.error("사진 삭제 중 오류 발생:", error.message);
+        throw new Error("사진 삭제에 실패했습니다. 다시 시도해주세요.");
     }
 };
 

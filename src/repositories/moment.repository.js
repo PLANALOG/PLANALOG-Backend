@@ -3,8 +3,8 @@ import { prisma } from "../db.config.js";
 //createMoment
 //updateMoment
 //deleteMoment
-//addImagesToMoment
-//deleteImagesFromMoment
+//addImages
+//deleteImages
 //reorderMomentImages
 
 
@@ -106,3 +106,43 @@ export const deleteMoment = async (momentId) => {
         return momentId;
     });
 };
+
+
+export const addImages = async (momentId, images) => {
+    const contents = images.map((image, index) => ({
+        momentId,
+        url: image.url,
+        sortOrder: index + 1, // 새로 추가된 이미지의 정렬
+    }));
+
+    await prisma.momentContent.createMany({ data: contents });
+
+    // 추가된 데이터 조회
+    return await prisma.momentContent.findMany({
+        where: { momentId },
+        orderBy: { sortOrder: "asc" },
+    });
+};
+
+export const deleteImages = async (imageId, momentId) => {
+    await prisma.momentContent.delete({ where: { id: imageId } });
+
+    // 남아 있는 이미지 정렬
+    const remainingImages = await prisma.momentContent.findMany({
+        where: { momentId },
+        orderBy: { sortOrder: "asc" },
+    });
+
+    // 정렬 재설정
+    await Promise.all(
+        remainingImages.map((image, index) =>
+            prisma.momentContent.update({
+                where: { id: image.id },
+                data: { sortOrder: index + 1 },
+            })
+        )
+    );
+
+    return remainingImages;
+};
+
