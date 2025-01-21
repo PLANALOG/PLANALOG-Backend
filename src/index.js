@@ -192,6 +192,7 @@ app.get("/logout", (req, res) => {
   /* 
   #swagger.tags = ['Users']
   #swagger.summary = '로그아웃 API'
+  #swagger.description = '로그아웃 요청을 합니다. 세션을 삭제하고, 로그아웃 성공 메시지를 반환합니다.'
   */
   console.log("로그아웃 요청")
   req.logout(() => {
@@ -213,7 +214,7 @@ app.use("/tasks", mockAuthMiddleware, task);
 //회원정보 수정 API
 app.patch("/users/profile", [
   body("nickname").optional().isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),
-  body("type").optional().isIn(["memo", "category"]).withMessage("type은 memo 또는 category만 가능합니다."),
+  body("type").optional().isIn(["memo_user", "category_user"]).withMessage("type은 memo 또는 category만 가능합니다."),
   body("introduction").optional().isString().withMessage("introduction은 문자열이어야 합니다."),
   body("link").optional().isURL().withMessage("link는 URL 형식이어야 합니다."),
 ], handleEditUser);

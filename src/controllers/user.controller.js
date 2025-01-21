@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { bodyToUpdateUser } from "../dtos/user.dto.js";
 import { userEdit, nicknameCheck, myProfile, userProfile, userDelete } from "../services/user.service.js";
 import { prisma } from "../db.config.js"
+import { validationResult } from "express-validator";
 
 
 
@@ -69,6 +70,12 @@ export const handleEditUser = async (req, res, next) => {
 */
 
     console.log('회원정보 수정을 요청했습니다.')
+
+    if (!validationResult(req).isEmpty()) {
+        const errorsMessages = validationResult(req).array().map((error) => error.msg);
+        //자바스크립트에서 배열을 문자열로 변환하려고 하면 암묵적으로 Array.prototype.toString 메서드가 호출
+        throw new Error(`입력정보가 유효하지않습니다. ${errorsMessages}`)
+    }
 
     if (!req.user || !req.user.id) {
         throw new Error("사용자 인증 정보가 누락되었습니다.");
