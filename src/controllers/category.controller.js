@@ -26,11 +26,20 @@ export const handleCreateCategory = async (req, res, next) => {
 };
 
 // 카테고리 수정
+// 카테고리 수정
 export const handleUpdateCategory = async (req, res, next) => {
     try {
-        const { id } = req.params; // URL에서 ID 추출
+        const { task_categories_id } = req.params; // URL에서 ID 추출
         const { name } = req.body; // 요청 본문에서 새로운 카테고리 이름 추출
-        const updatedTaskCategory = await updateCategory(id, name); // 서비스 호출
+
+        if (!name) {
+            return res.error({
+                errorCode: "INVALID_INPUT",
+                reason: "Category name is required",
+            });
+        }
+
+        const updatedTaskCategory = await updateCategory(task_categories_id, name); // 서비스 호출
         res.success(updatedTaskCategory); // 성공 응답
     } catch (error) {
         next(error); // 전역 오류 처리 미들웨어로 전달

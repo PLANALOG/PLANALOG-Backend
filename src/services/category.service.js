@@ -16,9 +16,13 @@ export const createCategory = async ({ userId, name }) => {
         throw new Error("Failed to create task category");
     }
 };
+// 카테고리 수정
 export const updateCategory = async (id, name) => {
     try {
-        const updatedCategory = await updateCategoryRepository(id, name);
+        const updatedCategory = await updateCategoryRepository(id, name); // 리포지토리 호출
+        if (!updatedCategory) {
+            throw new Error("Category not found or failed to update");
+        }
         return updatedCategory;
     } catch (error) {
         throw new Error("Failed to update task category");
