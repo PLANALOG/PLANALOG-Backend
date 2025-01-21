@@ -234,9 +234,9 @@ export const handleDeleteUser = async (req, res, next) => {
     console.log(req.user)
 
 
-    const user = await userDelete(userId, req.user);
+    const deletedUser = await userDelete(userId, req.user);
 
+    req.session.destroy()
 
-
-    res.status(StatusCodes.OK).success({ user });
+    res.status(StatusCodes.OK).success({ deletedUser });
 }

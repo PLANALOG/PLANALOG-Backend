@@ -214,6 +214,4 @@ export const naverDisconnect = async (userId, refreshToken) => {
 
     console.log('네이버 연결 끊기 성공', userIdInNaver.data.result);
 
-
-
 }

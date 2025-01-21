@@ -68,8 +68,7 @@ export const userDelete = async (userId, user) => {
         await naverDisconnect(userId, refreshToken);
     }
 
-    //카카오 연결끊기 완료
-    //구글 및 네이버 연결끊기 구현 
+
     // 세션 없애기 
     //### DB에서 30일 뒤 사용자 삭제하는 스케줄러 설정 
     // ### user정보 조회/수정하는 모든 로직에서 isDeleted 고려하도록 수정 

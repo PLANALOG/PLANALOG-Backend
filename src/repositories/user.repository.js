@@ -51,5 +51,6 @@ export const deleteUser = async (userId) => {
         where: { id: userId }
     })
 
+
     return user;
 }
