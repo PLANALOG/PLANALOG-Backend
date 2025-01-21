@@ -52,7 +52,51 @@ export const responseFromCreateMoment = (moment) => {
     };
 };
 
+export const bodyToUpdateMoment = (body) => {
+    const { title, content, status, plannerId, textAlign, momentId } = body;
+    //유효성 검증
+    if (!momentId) {
+        throw new Error("수정할 Moment ID가 필요합니다.");
+    }
 
+    // status가 public으로 변경될 경우 title과 content가 필요
+    if (status === "public" && (!title || !content)) {
+        throw new Error("공개(public) 상태로 변경하려면 제목(title)과 내용(content)이 필요합니다.");
+    }
+
+    // plannerId 검증 (숫자 또는 null 허용)
+    if (plannerId !== undefined && plannerId !== null && typeof plannerId !== "number") {
+        throw new Error("Planner ID는 숫자 또는 null이어야 합니다.");
+    }
+
+    // textAlign 검증
+    if (textAlign && !["left", "center", "right"].includes(textAlign)) {
+        throw new Error("textAlign 값은 left, center, right 중 하나여야 합니다.");
+    }
+
+    return {
+        momentId,
+        title: title !== undefined ? title : undefined,
+        content: content !== undefined ? content : undefined,
+        status: status || undefined,
+        plannerId: plannerId !== undefined ? plannerId : undefined,
+        textAlign: textAlign || undefined,
+    };
+};
+
+
+export const responseFromUpdateMoment = (moment) => {
+    return {
+        postId: moment.post.id,
+        momentId: moment.id,
+        title: moment.post.title,
+        content: moment.content,
+        status: moment.post.status,
+        textAlign: moment.post.textAlign,
+        plannerId: moment.plannerId || null,
+        updatedAt: moment.updatedAt,
+    };
+};
 
 
 

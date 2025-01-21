@@ -1,7 +1,7 @@
 import { prisma } from "../db.config.js";
 
 //createMoment
-//patchMoment
+//updateMoment
 //deleteMoment
 //addImagesToMoment
 //deleteImagesFromMoment
@@ -44,4 +44,37 @@ export const createMoment = async (data) => {
 };
 
 
+export const updateMoment = async (data) => {
+    return await prisma.$transaction(async (prisma) => {
+        const { momentId, title, content, status, plannerId, textAlign } = data;
 
+        const updatedPost = await prisma.post.update({
+            where: { id: (await prisma.moment.findUnique({ where: { id: momentId } })).postId },
+            data: {
+                ...(title !== undefined && { title }),
+                ...(status && { status }),
+                ...(textAlign && { textAlign }),
+            },
+        });
+
+        const updatedMoment = await prisma.moment.update({
+            where: { id: momentId },
+            data: {
+                ...(content !== undefined && { content }),
+                ...(plannerId === null && { plannerId: null }),
+                ...(plannerId !== undefined && plannerId !== null && { plannerId }),
+            },
+        });
+
+        return {
+            postId: updatedPost.id,
+            momentId: updatedMoment.id,
+            title: updatedPost.title,
+            content: updatedMoment.content,
+            status: updatedPost.status,
+            textAlign: updatedPost.textAlign,
+            plannerId: updatedMoment.plannerId,
+            updatedAt: updatedMoment.updatedAt,
+        };
+    });
+};
