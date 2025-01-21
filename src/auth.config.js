@@ -120,6 +120,8 @@ export const naverStrategy = new NaverStrategy(
             throw new Error(`profile.email was not found: ${profile}`);
         }
 
+        console.log('refreshToken', refreshToken);
+
         return verify(profile, email, "naver", refreshToken)
             .then((user) => cb(null, user))
             .catch((err) => cb(err));
@@ -180,5 +182,38 @@ export const googleDisconnect = async (userId, accessToken) => {
     ).catch((err) => { throw new Error(`구글 연결 끊기 실패 ${err.code}`) });
 
     console.log('구글 연결 끊기 성공', result.status);
+
+}
+
+// 네이버 연결 끊기
+export const naverDisconnect = async (userId, refreshToken) => {
+
+    // 유저의 refreshToken으로 소셜서버에 accessToken 요청 
+    const newToken = await axios.post(`https://nid.naver.com/oauth2.0/token`, null, {
+        params: {
+            grant_type: 'refresh_token',
+            client_id: process.env.PASSPORT_NAVER_CLIENT_ID,
+            client_secret: process.env.PASSPORT_NAVER_CLIENT_SECRET,
+            refresh_token: refreshToken
+        }
+    }).catch((err) => { throw new Error(`네이버 토큰 갱신 실패 ${err.code}`) });
+
+    console.log('토큰 갱신 성공', newToken.data);
+
+    const accessToken = newToken.data.access_token;
+
+    // 액세스토큰으로 연결 끊기 요청
+    const userIdInNaver = await axios.post(`https://nid.naver.com/oauth2.0/token`, null, {
+        params: {
+            grant_type: 'delete',
+            client_id: process.env.PASSPORT_NAVER_CLIENT_ID,
+            client_secret: process.env.PASSPORT_NAVER_CLIENT_SECRET,
+            access_token: accessToken
+        }
+    }).catch((err) => { throw new Error(`네이버 연결 끊기 실패 ${err.code}`) });
+
+    console.log('네이버 연결 끊기 성공', userIdInNaver.data.result);
+
+
 
 }

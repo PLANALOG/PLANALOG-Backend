@@ -1,7 +1,7 @@
 import { DuplicateUserNicknameError, NoExistsUserError } from "../errors.js";
 import { getUserByNickname, updateUserProfile, getMyProfile, getUserProfile, deleteUser } from "../repositories/user.repository.js";
 import { responseFromUser } from "../dtos/user.dto.js";
-import { kakaoDisconnect, googleDisconnect } from "../auth.config.js";
+import { kakaoDisconnect, googleDisconnect, naverDisconnect } from "../auth.config.js";
 
 
 export const userEdit = async (data, userId) => {
@@ -63,6 +63,11 @@ export const userDelete = async (userId, user) => {
         console.log('accessToken', accessToken)
         await googleDisconnect(userId, accessToken);
     }
+    else if (deletedUser.platform === "naver") {
+        const refreshToken = user.refreshToken;
+        await naverDisconnect(userId, refreshToken);
+    }
+
     //카카오 연결끊기 완료
     //구글 및 네이버 연결끊기 구현 
     // 세션 없애기 
