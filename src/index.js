@@ -2,6 +2,7 @@
 import dotenv from "dotenv";
 import express from 'express';          // -> ES Module
 import cors from "cors";
+import task from "./routes/task.js";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import session from "express-session";
 import passport from "passport";
@@ -137,9 +138,7 @@ app.get('/', (req, res) => {
 })
 
 //소셜로그인 - 구글 
-app.get("/oauth2/login/google", (req, res) => {
-  passport.authenticate("google")
-});
+app.get("/oauth2/login/google", passport.authenticate("google"));
 app.get(
   "/oauth2/callback/google",
   passport.authenticate("google", {
@@ -152,10 +151,8 @@ app.get(
 );
 
 //소셜로그인 - 카카오
-app.get("/oauth2/login/kakao", (req, res) => {
-  // #swagger.ignore = true
-  passport.authenticate("kakao")
-});
+app.get("/oauth2/login/kakao", passport.authenticate("kakao"));
+
 app.get(
   "/oauth2/callback/kakao",
   passport.authenticate("kakao", {
@@ -169,10 +166,7 @@ app.get(
 );
 
 //소셜로그인 - 네이버
-app.get("/oauth2/login/naver", (req, res) => {
-  // #swagger.ignore = true
-  passport.authenticate("naver")
-});
+app.get("/oauth2/login/naver", passport.authenticate("naver"));
 app.get(
   "/oauth2/callback/naver",
   passport.authenticate("naver", {
@@ -192,6 +186,15 @@ app.get("/logout", (req, res) => {
     res.success()
   });
 });
+
+
+// Mock 인증 미들웨어
+const mockAuthMiddleware = (req, res, next) => {
+  req.user = { id: 1 }; // Mock user ID
+  next();
+};
+//task 관련 작업 
+app.use("/tasks", mockAuthMiddleware, task);
 
 //회원정보 수정 API
 app.patch("/users/profile", [
@@ -222,6 +225,7 @@ app.delete("/planners/:plannerId", handleDeletePlanner);
 
 
 
+<<<<<<< HEAD
 
 //moment 생성
 app.post("/posts/moments", handleMomentCreate);
@@ -239,6 +243,8 @@ app.post("/posts/moments/:momentId/images", handleAddImagesToMoment);
 app.delete("/posts/moments/:momentId/images/:imageId", handleDeleteImagesFromMoment);
 
 
+=======
+>>>>>>> origin/develop
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의
  */
