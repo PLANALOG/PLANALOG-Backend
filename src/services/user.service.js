@@ -1,7 +1,7 @@
 import { DuplicateUserNicknameError, NoExistsUserError } from "../errors.js";
 import { getUserByNickname, updateUserProfile, getMyProfile, getUserProfile, deleteUser } from "../repositories/user.repository.js";
 import { responseFromUser } from "../dtos/user.dto.js";
-import { kakaoDisconnect } from "../auth.config.js";
+import { kakaoDisconnect, googleDisconnect } from "../auth.config.js";
 
 
 export const userEdit = async (data, userId) => {
@@ -46,13 +46,22 @@ export const userProfile = async (userId) => {
 }
 
 
-export const userDelete = async (userId, refreshToken) => {
-    const user = await deleteUser(userId);
+export const userDelete = async (userId, user) => {
+    const deletedUser = await deleteUser(userId);
 
-    console.log('DB에서 유저 삭제 성공', user, refreshToken);
+    console.log('DB에서 유저 삭제 성공');
 
-    if (user.platform === "kakao") {
+
+    if (deletedUser.platform === "kakao") {
+
+        const refreshToken = user.refreshToken;
         await kakaoDisconnect(userId, refreshToken);
+    }
+    else if (deletedUser.platform === "google") {
+
+        const accessToken = user.accessToken
+        console.log('accessToken', accessToken)
+        await googleDisconnect(userId, accessToken);
     }
     //카카오 연결끊기 완료
     //구글 및 네이버 연결끊기 구현 
@@ -62,6 +71,6 @@ export const userDelete = async (userId, refreshToken) => {
 
 
 
-    return user;
+    return deletedUser;
 
 }

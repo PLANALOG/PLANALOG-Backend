@@ -46,16 +46,47 @@ export const googleStrategy = new GoogleStrategy(
         state: true,
     },
     (accessToken, refreshToken, profile, cb) => {
-        const email = profile.emails?.[0]?.value;
-        if (!email) {
-            throw new Error(`profile.email was not found: ${profile}`);
-        }
+        console.log(refreshToken);
+        console.log(accessToken);
 
-        return verify(profile, email, "google", refreshToken)
+        return googleVerify(profile, accessToken)
             .then((user) => cb(null, user))
             .catch((err) => cb(err));
     }
 );
+
+
+const googleVerify = async (profile, accessToken) => {
+
+    const email = profile.emails?.[0]?.value;
+    if (!email) {
+        throw new Error(`profile.email was not found: ${profile}`);
+    }
+
+    const user = await prisma.user.findFirst({ where: { email } });
+    if (user !== null) {
+        // 해당 이메일을 가진 유저가 있을 떄 
+        // 그 유저의 플랫폼이 파라미터의 플랫폼과 같으면 => 로그인 (return)
+        if (user.platform === "google") return { id: user.id, email: user.email, name: user.name, accessToken: accessToken };
+        // 그 유저의 플랫폼이 파라미터의 플랫폼과 다르면 => 에러반환 (with 플랫폼) 
+        else throw new UserWithOtherPlatformError({ name: user.name, platform: user.platform })
+    }
+
+    const created = await prisma.user.create({
+        data: {
+            email,
+            platform: "google",
+            name: profile.displayName,
+            nickname: "추후 수정",
+            type: "null",
+            introduction: "추후 수정",
+            link: "추후 수정",
+        },
+    });
+
+    return { id: created.id, email: created.email, name: created.name, accessToken: accessToken };
+};
+
 
 // 카카오 로그인 
 export const kakaoStrategy = new KakaoStrategy(
@@ -133,4 +164,21 @@ export const kakaoDisconnect = async (userId, refreshToken) => {
     });
 
     console.log('카카오 연결 끊기 성공', userIdInKakao.data.id);
+}
+
+
+//구글 연결끊기
+export const googleDisconnect = async (userId, accessToken) => {
+
+    console.log('구글 연결 끊기를 요청했습니다.');
+
+
+    // 액세스토큰으로 연결 끊기 요청
+    const result = await axios.post(
+        `https://oauth2.googleapis.com/revoke?token=${accessToken}`
+
+    ).catch((err) => { throw new Error(`구글 연결 끊기 실패 ${err.code}`) });
+
+    console.log('구글 연결 끊기 성공', result.status);
+
 }

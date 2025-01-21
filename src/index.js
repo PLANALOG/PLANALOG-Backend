@@ -23,7 +23,7 @@ passport.use(naverStrategy);
 passport.serializeUser((user, done) => {
   console.log('user', user)
   // ｕｓｅｒ는 콜백함수 ｖｅｒｉｆｙ에서 반환된 객체임¡
-  //console.log('serializeUser success')
+  console.log('serializeUser success', user)
   done(null, user)
 });
 passport.deserializeUser((user, done) => {

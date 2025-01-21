@@ -3,6 +3,7 @@ import { bodyToUpdateUser } from "../dtos/user.dto.js";
 import { userEdit, nicknameCheck, myProfile, userProfile, userDelete } from "../services/user.service.js";
 
 
+
 export const handleEditUser = async (req, res, next) => {
     /*
     #swagger.summary = '회원정보 수정 API'
@@ -230,11 +231,10 @@ export const handleDeleteUser = async (req, res, next) => {
 
     const userId = parseInt(req.user.id);
 
-    const refreshToken = req.user.refreshToken;
+    console.log(req.user)
 
-    console.log('userId', userId, 'refreshToken', refreshToken)
 
-    const user = await userDelete(userId, refreshToken);
+    const user = await userDelete(userId, req.user);
 
 
 
