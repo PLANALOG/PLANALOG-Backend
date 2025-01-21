@@ -68,10 +68,19 @@ export const handleViewCategory = async (req, res, next) => {
 // 카테고리 삭제
 export const handleDeleteCategory = async (req, res, next) => {
     try {
-        const { id } = req.params; // URL에서 ID 추출
-        const deletedCategory = await deleteCategory(id); // 서비스 호출
-        res.success({ message: "Task category deleted successfully" }); // 성공 응답
+        const { task_categories_id } = req.params; // Extract ID from URL
+
+        if (!task_categories_id) {
+            return res.error({
+                errorCode: "INVALID_INPUT",
+                reason: "Task category ID is required",
+            });
+        }
+
+        await deleteCategory(task_categories_id); // Call service to delete category
+
+        res.success({ message: "Task category deleted successfully" }); // Respond with success
     } catch (error) {
-        next(error); // 전역 오류 처리 미들웨어로 전달
+        next(error); // Pass error to global error handler
     }
 };

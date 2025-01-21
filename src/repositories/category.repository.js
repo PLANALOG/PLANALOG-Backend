@@ -52,11 +52,17 @@ export const getAllCategoriesRepository = async (userId) => {
     }
 };
 
-export const deleteCategoryRepository = async (data) => {
-    //카테고리 삭제 
+export const deleteCategoryRepository = async (id) => {
     try {
+        const deletedCategory = await prisma.taskCategory.delete({
+            where: {
+                id: BigInt(id, 10), // Convert ID to integer
+            },
+        });
 
-    }catch (error) {
-        throw new Error();
+        return deletedCategory;
+    } catch (error) {
+        console.error("Error deleting task category:", error);
+        throw new Error("Database error: Failed to delete task category");
     }
-}
+};

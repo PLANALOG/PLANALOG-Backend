@@ -44,7 +44,11 @@ export const getCategoriesByUser = async (userId) => {
 export const deleteCategory = async (id) => {
     try {
         const deletedCategory = await deleteCategoryRepository(id);
-        
+
+        if (!deletedCategory) {
+            throw new Error("Task category not found or could not be deleted");
+        }
+
         return deletedCategory;
     } catch (error) {
         throw new Error("Failed to delete task category");
