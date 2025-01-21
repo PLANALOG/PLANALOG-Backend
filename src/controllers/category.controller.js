@@ -46,10 +46,18 @@ export const handleUpdateCategory = async (req, res, next) => {
     }
 };
 
-// 유저의 카테고리 조회
+// 유저별 카테고리 조회
 export const handleViewCategory = async (req, res, next) => {
     try {
-        const userId = req.user.id; // 인증 미들웨어에서 가져온 사용자 ID
+        const userId = req.user.id; // 인증 미들웨어에서 설정된 사용자 ID
+
+        if (!userId) {
+            return res.error({
+                errorCode: "UNAUTHORIZED",
+                reason: "User ID is missing",
+            });
+        }
+
         const taskCategories = await getCategoriesByUser(userId); // 서비스 호출
         res.success(taskCategories); // 성공 응답
     } catch (error) {

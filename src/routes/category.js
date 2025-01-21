@@ -1,5 +1,5 @@
 import express from "express";
-import {handleCreateCategory, handleUpdateCategory } from "../controllers/category.controller.js";
+import {handleCreateCategory, handleUpdateCategory, handleViewCategory } from "../controllers/category.controller.js";
 
 const router = express.Router();
 
@@ -10,5 +10,8 @@ router.post("/", handleCreateCategory);
 
 //task 카테고리 수정 
 router.patch("/:task_categories_id/", handleUpdateCategory);
+
+//task 카테고리 조회 
+router.get("/", handleViewCategory);
 
 export default router;

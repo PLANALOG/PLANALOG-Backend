@@ -7,7 +7,6 @@ import {
 
 
 export const createCategory = async ({ userId, name }) => {
-    console.log
     try {
         // 리포지토리 호출
         const createdCategory = await createCategoryRepository({ userId, name });
@@ -29,9 +28,13 @@ export const updateCategory = async (id, name) => {
     }
 };
 
+// 유저별 카테고리 조회
 export const getCategoriesByUser = async (userId) => {
     try {
-        const viewedCategories = await getAllCategoriesRepository(userId);
+        const viewedCategories = await getAllCategoriesRepository(userId); // 리포지토리 호출
+        if (!viewedCategories || viewedCategories.length === 0) {
+            throw new Error("No categories found for the user");
+        }
         return viewedCategories;
     } catch (error) {
         throw new Error("Failed to fetch task categories");

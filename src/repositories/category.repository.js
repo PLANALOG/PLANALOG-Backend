@@ -34,15 +34,23 @@ export const updateCategoryRepository = async (id, name) => {
     }
 };
 
-export const getAllCategoriesRepository = async (data) => {
-    //카테고리 조회 (userId별로로)
+// 유저별 카테고리 조회
+export const getAllCategoriesRepository = async (userId) => {
     try {
-
-    }catch (error) {
-        throw new Error();
+        const categories = await prisma.taskCategory.findMany({
+            where: {
+                userId: parseInt(userId, 10), // 사용자 ID로 필터링
+            },
+            orderBy: {
+                createdAt: "desc", // 최신 순으로 정렬
+            },
+        });
+        return categories;
+    } catch (error) {
+        console.error("Error fetching task categories:", error);
+        throw new Error("Database error: Failed to fetch task categories");
     }
-
-}
+};
 
 export const deleteCategoryRepository = async (data) => {
     //카테고리 삭제 
