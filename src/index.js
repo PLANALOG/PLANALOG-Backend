@@ -13,7 +13,7 @@ import swaggerUiExpress from "swagger-ui-express";
 import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile, handleDeleteUser } from "./controllers/user.controller.js";
 import { body, query } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
-
+import { userDeleteScheduler } from "./scheduler.js";
 
 dotenv.config();
 
@@ -245,6 +245,8 @@ app.use((err, req, res, next) => { //
   });
 });
 
+//매일 자정 탈퇴한 지 14일이 지난 유저 삭제
+app.listen(port, userDeleteScheduler);
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })

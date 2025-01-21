@@ -5,6 +5,7 @@ import { Strategy as NaverStrategy } from "passport-naver";
 import { prisma } from "./db.config.js";
 import { UserWithOtherPlatformError } from "./errors.js";
 import axios from "axios";
+import { isDeletedUser } from "./repositories/user.repository.js";
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ const verify = async (profile, email, platform, refreshToken) => {
 
     const user = await prisma.user.findFirst({ where: { email } });
     if (user !== null) {
+        await isDeletedUser(user.id);
         // 해당 이메일을 가진 유저가 있을 떄 
         // 그 유저의 플랫폼이 파라미터의 플랫폼과 같으면 => 로그인 (return)
         if (user.platform === platform) return { id: user.id, email: user.email, name: user.name, refreshToken: refreshToken };
@@ -64,7 +66,9 @@ const googleVerify = async (profile, accessToken) => {
     }
 
     const user = await prisma.user.findFirst({ where: { email } });
+
     if (user !== null) {
+        await isDeletedUser(user.id);
         // 해당 이메일을 가진 유저가 있을 떄 
         // 그 유저의 플랫폼이 파라미터의 플랫폼과 같으면 => 로그인 (return)
         if (user.platform === "google") return { id: user.id, email: user.email, name: user.name, accessToken: accessToken };

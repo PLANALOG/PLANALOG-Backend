@@ -36,7 +36,7 @@ export class NoExistsUserError extends Error {
   errorCode = "U003";
 
   constructor(data) {
-    const reason = `존재하지 않는 사용자입니다.`
+    const reason = `존재하지 않거나 탈퇴한 사용자입니다.`
     super(reason);
     this.reason = reason;
     this.data = data;

@@ -47,7 +47,11 @@ export const userProfile = async (userId) => {
 
 
 export const userDelete = async (userId, user) => {
+    const isUserExist = await getMyProfile(userId);
+    if (!isUserExist) throw new NoExistsUserError(userId);
+
     const deletedUser = await deleteUser(userId);
+
 
     console.log('DB에서 유저 삭제 성공');
 
