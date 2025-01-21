@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { bodyToCreateMoment, bodyToUpdateMoment } from "../dtos/moment.dto.js";
-import { momentCreate, momentUpdate } from "../services/moment.service.js";
+import { momentCreate, momentUpdate, momentDelete } from "../services/moment.service.js";
 
 export const handleMomentCreate = async (req, res, next) => {
     /*
@@ -99,6 +99,32 @@ export const handleMomentUpdate = async (req, res, next) => {
         const updatedMoment = await momentUpdate(momentData);
 
         res.status(StatusCodes.OK).success(updatedMoment);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const handleMomentDelete = async (req, res, next) => {
+    /*
+    #swagger.summary = 'Moment 삭제 API';
+    #swagger.parameters['momentId'] = {
+        in: 'path',
+        required: true,
+        description: '삭제할 Moment의 ID'
+    };
+    */
+
+    try {
+        if (!req.user || !req.user.id) {
+            throw new Error("사용자 인증 정보가 누락되었습니다.");
+        }
+
+        const userId = req.user.id;
+        const momentId = req.params.momentId;
+
+        const deletedMoment = await momentDelete({ userId, momentId });
+
+        res.status(StatusCodes.OK).success(deletedMoment);
     } catch (error) {
         next(error);
     }

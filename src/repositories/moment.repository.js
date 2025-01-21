@@ -78,3 +78,31 @@ export const updateMoment = async (data) => {
         };
     });
 };
+
+export const deleteMoment = async (momentId) => {
+    return await prisma.$transaction(async (prisma) => {
+        // Moment 삭제
+        const momentToDelete = await prisma.moment.findUnique({
+            where: { id: momentId },
+            include: { post: true },
+        });
+
+        if (!momentToDelete) {
+            throw new Error("삭제하려는 Moment를 찾을 수 없습니다.");
+        }
+
+        await prisma.momentContent.deleteMany({
+            where: { momentId },
+        });
+
+        await prisma.moment.delete({
+            where: { id: momentId },
+        });
+
+        await prisma.post.delete({
+            where: { id: momentToDelete.post.id },
+        });
+
+        return momentId;
+    });
+};

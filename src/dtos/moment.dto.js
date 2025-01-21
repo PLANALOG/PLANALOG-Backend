@@ -100,4 +100,10 @@ export const responseFromUpdateMoment = (moment) => {
 
 
 
+export const responseFromDeleteMoment = (momentId) => {
+    return {
+        momentId,
+    };
+};
+
 

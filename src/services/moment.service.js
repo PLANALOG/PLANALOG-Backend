@@ -1,5 +1,5 @@
-import { createMoment, updateMoment } from "../repositories/moment.repository.js";
-import { responseFromCreateMoment, responseFromUpdateMoment } from "../dtos/moment.dto.js";
+import { createMoment, updateMoment, deleteMoment } from "../repositories/moment.repository.js";
+import { responseFromCreateMoment, responseFromUpdateMoment, responseFromDeleteMoment } from "../dtos/moment.dto.js";
 
 
 export const momentCreate = async (data) => {
@@ -10,16 +10,15 @@ export const momentCreate = async (data) => {
         }
 
         // 2. Planner 연결 유효성 검증 (선택적)
-        let planner = null;
         if (data.plannerId) {
-            planner = await prisma.planner.findUnique({
-                where: { id: data.plannerId },
+        const planner = await prisma.planner.findUnique({
+            where: { id: data.plannerId },
             });
 
-            if (!planner) {
-                throw new Error("해당 Planner를 찾을 수 없습니다. 올바른 plannerId를 입력해주세요.");
-            }
+        if (!planner) {
+            throw new Error("해당 Planner를 찾을 수 없습니다. 올바른 plannerId를 입력해주세요.");
         }
+}
 
         // 3. Moment 생성 (ID 반환)
         const createdMomentId = await createMoment(data);
@@ -75,6 +74,32 @@ export const momentUpdate = async (data) => {
     } catch (error) {
         console.error("Moment 수정 중 오류 발생:", error.message);
         throw new Error("Moment 수정을 실패했습니다. 다시 시도해주세요.");
+    }
+};
+
+export const momentDelete = async (data) => {
+    try {
+        const { userId, momentId } = data;
+
+        const existingMoment = await prisma.moment.findUnique({
+            where: { id: momentId },
+            include: { post: true },
+        });
+
+        if (!existingMoment) {
+            throw new Error("삭제하려는 Moment를 찾을 수 없습니다.");
+        }
+
+        if (existingMoment.post.userId !== userId) {
+            throw new Error("사용자에게 해당 Moment를 삭제할 권한이 없습니다.");
+        }
+
+        const deletedMomentId = await deleteMoment(momentId);
+
+        return responseFromDeleteMoment(deletedMomentId);
+    } catch (error) {
+        console.error("Moment 삭제 중 오류 발생:", error.message);
+        throw new Error("Moment 삭제에 실패했습니다. 다시 시도해주세요.");
     }
 };
 
