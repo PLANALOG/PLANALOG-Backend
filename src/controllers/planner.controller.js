@@ -3,6 +3,13 @@ import { plannerDisplay, plannerCalendarList, plannerDelete } from "../services/
 
 
 export const handleDisplayPlanner = async (req, res, next) => {
+    /* 
+    #swagger.tags = ['Planners']
+    #swagger.summary = '플래너 조회 API'
+    #swagger.description = `플래너 조회 API입니다. <br>  userId가 있을 경우, 그 사용자의 플래너를 조회합니다. userId가 없을 경우, 로그인한 사용자의 플래너를 조회합니다.  <br>
+    date를 입력할 경우 (Ex. date=2025-01-01) : 해당 날짜의 플래너를 조회합니다.  <br>
+    month를 입력할 경우 (Ex.month=2025-01): 해당 월의 플래너를 조회합니다. 플래너 뷰에서 필요한 date, isCompleted 데이터만만 반환합니다.`
+    */
 
     let userId = 0;
 
@@ -47,15 +54,8 @@ export const handleDisplayPlanner = async (req, res, next) => {
 
 export const handleDeletePlanner = async (req, res, next) => {
     /*
+    #swagger.tags = ['Planners']
     #swagger.summary = '플래너 삭제 API'
-    #swagger.parameters['plannerId'] = {
-        in: 'path',
-        description: '삭제할 플래너의 ID',
-        required: true,
-        schema: {
-            plannerId : 
-        }
-    }
     */
 
     console.log("플래너 삭제를 요청했습니다.")

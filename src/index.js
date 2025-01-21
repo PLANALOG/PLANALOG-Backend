@@ -139,7 +139,9 @@ app.get('/', (req, res) => {
 })
 
 //소셜로그인 - 구글 
-app.get("/oauth2/login/google", passport.authenticate("google"));
+app.get("/oauth2/login/google", passport.authenticate("google"), (req, res) => {
+  // #swagger.ignore = true
+});
 app.get(
   "/oauth2/callback/google",
   passport.authenticate("google", {
@@ -147,12 +149,15 @@ app.get(
     failureMessage: true,
   }),
   (req, res) => {
-    res.success()
+    // #swagger.ignore = true
+    res.success({ message: "로그인 성공" })
   }
 );
 
 //소셜로그인 - 카카오
-app.get("/oauth2/login/kakao", passport.authenticate("kakao"));
+app.get("/oauth2/login/kakao", passport.authenticate("kakao"), (req, res) => {
+  // #swagger.ignore = true
+});
 
 app.get(
   "/oauth2/callback/kakao",
@@ -162,12 +167,14 @@ app.get(
   }),
   (req, res) => {
     // #swagger.ignore = true
-    res.success()
+    res.success({ message: "로그인 성공" })
   }
 );
 
 //소셜로그인 - 네이버
-app.get("/oauth2/login/naver", passport.authenticate("naver"));
+app.get("/oauth2/login/naver", passport.authenticate("naver"), (req, res) => {
+  // #swagger.ignore = true
+});
 app.get(
   "/oauth2/callback/naver",
   passport.authenticate("naver", {
@@ -176,12 +183,16 @@ app.get(
   }),
   (req, res) => {
     // #swagger.ignore = true
-    res.success()
+    res.success({ message: "로그인 성공" })
   }
 );
 
 //로그아웃
 app.get("/logout", (req, res) => {
+  /* 
+  #swagger.tags = ['Users']
+  #swagger.summary = '로그아웃 API'
+  */
   console.log("로그아웃 요청")
   req.logout(() => {
     req.session.destroy();
