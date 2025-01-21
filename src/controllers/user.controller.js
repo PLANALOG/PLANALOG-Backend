@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { bodyToUpdateUser } from "../dtos/user.dto.js";
 import { userEdit, nicknameCheck, myProfile, userProfile, userDelete } from "../services/user.service.js";
 import { prisma } from "../db.config.js"
-import { validationResult } from "express-validator";
+import { validationError } from "../validator.js";
 
 
 
@@ -71,6 +71,9 @@ export const handleEditUser = async (req, res, next) => {
 
     console.log('회원정보 수정을 요청했습니다.')
 
+    validationError(req);
+
+    //유효성 검사 에러 반환
     if (!validationResult(req).isEmpty()) {
         const errorsMessages = validationResult(req).array().map((error) => error.msg);
         //자바스크립트에서 배열을 문자열로 변환하려고 하면 암묵적으로 Array.prototype.toString 메서드가 호출
@@ -117,6 +120,9 @@ export const handleCheckNickname = async (req, res, next) => {
         }
     }
     */
+
+    //유효성 검사 에러 반환
+    validationError(req);
 
     console.log('닉네임 중복 조회를 요청했습니다.');
 
@@ -165,6 +171,9 @@ export const handleMyProfile = async (req, res, next) => {
     */
     console.log('사용자 본인의 회원 정보 조회를 요청했습니다.');
 
+    //유효성 검사 에러 반환
+    validationError(req);
+
     if (!req.user || !req.user.id) {
         throw new Error("사용자 인증 정보가 누락되었습니다.");
     }
@@ -212,6 +221,9 @@ export const handleUserProfile = async (req, res, next) => {
     */
     console.log('회원 정보 조회를 요청했습니다.');
 
+    //유효성 검사 에러 반환
+    validationError(req);
+
     const userId = parseInt(req.params.userId);
 
     const user = await userProfile(userId);
@@ -225,6 +237,7 @@ export const handleDeleteUser = async (req, res, next) => {
     #swagger.summary = '회원탈퇴 API'
     */
     console.log("회원탈퇴를 요청했습니다.")
+
 
     if (!req.user || !req.user.id) {
         throw new Error("사용자 인증 정보가 누락되었습니다.");

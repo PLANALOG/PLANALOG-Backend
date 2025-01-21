@@ -229,14 +229,21 @@ app.get("/users/check_nickname",
 app.get("/users", handleMyProfile)
 
 //회원 정보 조회
-app.get("/users/:userId", handleUserProfile)
+app.get("/users/:userId", [
+  query("userId").exists().withMessage("userId를 입력하세요.").isInt().withMessage("userId는 숫자여야 합니다."),
+], handleUserProfile)
 
 
 //플래너 조회 
-app.get('/planners', handleDisplayPlanner);
+app.get('/planners', [
+  query("userId").optional().isInt().withMessage("userId는 숫자여야 합니다."),
+  query("date").optional().isDate().withMessage("date는 날짜형식이어야 합니다.ex)2025-01-01"),
+], handleDisplayPlanner);
 
 //플래너 삭제 
-app.delete("/planners/:plannerId", handleDeletePlanner);
+app.delete("/planners/:plannerId", [
+  query("plannerId").exists().withMessage("plannerId를 입력하세요.").isInt().withMessage("plannerId는 숫자여야 합니다."),
+], handleDeletePlanner);
 
 //회원 탈퇴 
 app.delete("/users", handleDeleteUser)

@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { plannerDisplay, plannerCalendarList, plannerDelete } from "../services/planner.service.js";
+import { validationError } from "../validator.js";
 
 
 export const handleDisplayPlanner = async (req, res, next) => {
@@ -13,7 +14,8 @@ export const handleDisplayPlanner = async (req, res, next) => {
 
     let userId = 0;
 
-    console.log(req.user)
+    //유효성 검사 에러 반환
+    validationError(req);
 
     if (req.query.userId) { // query에 userId가 있을 때 : 해당 userId 사용 
         userId = parseInt(req.query.userId);
@@ -59,6 +61,9 @@ export const handleDeletePlanner = async (req, res, next) => {
     */
 
     console.log("플래너 삭제를 요청했습니다.")
+
+    //유효성 검사 에러 반환
+    validationError(req);
 
     if (!req.user || !req.user.id) {
         throw new Error("사용자 인증 정보가 누락되었습니다.");
