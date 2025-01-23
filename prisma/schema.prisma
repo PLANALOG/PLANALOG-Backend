@@ -61,8 +61,8 @@ model User {
 
   nickname     String         @db.VarChar(20)
   type         user_type // ENUM: memo or category 
-  introduction String         @db.VarChar(300)
-  link         String         @db.VarChar(100)
+  introduction String?         @db.VarChar(300)
+  link         String?         @db.VarChar(100)
   createdAt    DateTime       @default(now()) @map("created_at")
   updatedAt    DateTime       @updatedAt @map("updated_at")
 
@@ -149,6 +149,7 @@ model Friend {
   toUserId   BigInt   @map("to_user_id")
   fromUserId BigInt   @map("from_user_id")
   createdAt  DateTime @default(now()) @map("created_at")
+  isAccepted Boolean  @default(false) @map("is_accepted")
 
   // Relationships
   toUser   User @relation("UserToFriends", fields: [toUserId], references: [id])
