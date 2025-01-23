@@ -3,6 +3,7 @@ import { bodyToUpdateUser } from "../dtos/user.dto.js";
 import { userEdit, nicknameCheck, myProfile, userProfile, userDelete, profileImageEdit } from "../services/user.service.js";
 import { prisma } from "../db.config.js"
 import { validationError } from "../validator.js";
+import { validationResult } from "express-validator";
 
 
 

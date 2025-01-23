@@ -11,7 +11,7 @@ import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
 import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile, handleDeleteUser, handleTestDeleteUser, handleEditUserImage } from "./controllers/user.controller.js";
-import { body, query } from "express-validator";
+import { body, query, param } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 import { userDeleteScheduler } from "./scheduler.js";
 import { upload } from "./multer.js";
@@ -234,7 +234,7 @@ app.get("/users", handleMyProfile)
 
 //회원 정보 조회
 app.get("/users/:userId", [
-  query("userId").exists().withMessage("userId를 입력하세요.").isInt().withMessage("userId는 숫자여야 합니다."),
+  param("userId").exists().withMessage("userId를 입력하세요.").isInt().withMessage("userId는 숫자여야 합니다."),
 ], handleUserProfile)
 
 
@@ -246,7 +246,7 @@ app.get('/planners', [
 
 //플래너 삭제 
 app.delete("/planners/:plannerId", [
-  query("plannerId").exists().withMessage("plannerId를 입력하세요.").isInt().withMessage("plannerId는 숫자여야 합니다."),
+  param("plannerId").exists().withMessage("plannerId를 입력하세요.").isInt().withMessage("plannerId는 숫자여야 합니다."),
 ], handleDeletePlanner);
 
 //회원 탈퇴 
