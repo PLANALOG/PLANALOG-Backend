@@ -2,6 +2,7 @@
 import dotenv from "dotenv";
 import express from 'express';          // -> ES Module
 import cors from "cors";
+import task from "./routes/task.js";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import session from "express-session";
 import passport from "passport";
@@ -9,6 +10,10 @@ import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
+import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile } from "./controllers/user.controller.js";
+import { body, query } from "express-validator";
+import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
+
 
 import { addFriend, getFriends,deleteFriend, getFriendCount  } from './controllers/friend.controller.js';
 
@@ -137,6 +142,7 @@ BigInt.prototype.toJSON = function () { // bigint 호환
 };
 
 app.get('/', (req, res) => {
+  // #swagger.ignore = true
   res.send('Hello World!')
   console.log(req.user)
 })
@@ -149,18 +155,24 @@ app.get(
     failureRedirect: "/oauth2/login/google",
     failureMessage: true,
   }),
-  (req, res) => res.success()
+  (req, res) => {
+    res.success()
+  }
 );
 
 //소셜로그인 - 카카오
 app.get("/oauth2/login/kakao", passport.authenticate("kakao"));
+
 app.get(
   "/oauth2/callback/kakao",
   passport.authenticate("kakao", {
     failureRedirect: "/oauth2/login/kakao",
     failureMessage: true,
   }),
-  (req, res) => res.success()
+  (req, res) => {
+    // #swagger.ignore = true
+    res.success()
+  }
 );
 
 //소셜로그인 - 네이버
@@ -171,13 +183,57 @@ app.get(
     failureRedirect: "/oauth2/login/naver",
     failureMessage: true,
   }),
-  (req, res) => res.success()
+  (req, res) => {
+    // #swagger.ignore = true
+    res.success()
+  }
 );
 
 //로그아웃
 app.get("/logout", (req, res) => {
-  req.logout(() => success());
+  req.logout(() => {
+    console.log('로그아웃 완료')
+    res.success()
+  });
 });
+
+
+// Mock 인증 미들웨어
+const mockAuthMiddleware = (req, res, next) => {
+  req.user = { id: 1 }; // Mock user ID
+  next();
+};
+//task 관련 작업 
+app.use("/tasks", mockAuthMiddleware, task);
+
+//회원정보 수정 API
+app.patch("/users/profile", [
+  body("nickname").optional().isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),
+  body("type").optional().isIn(["memo", "category"]).withMessage("type은 memo 또는 category만 가능합니다."),
+  body("introduction").optional().isString().withMessage("introduction은 문자열이어야 합니다."),
+  body("link").optional().isURL().withMessage("link는 URL 형식이어야 합니다."),
+], handleEditUser);
+
+//닉네임 중복 조회 API
+app.get("/users/check_nickname",
+  query("nickname").exists().withMessage("닉네임을 입력하세요.")
+    .isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),
+  handleCheckNickname);
+
+//자신의 회원 정보 조회
+app.get("/users", handleMyProfile)
+
+//회원 정보 조회
+app.get("/users/:userId", handleUserProfile)
+
+
+//플래너 조회 
+app.get('/planners', handleDisplayPlanner);
+
+//플래너 삭제 
+app.delete("/planners/:plannerId", handleDeletePlanner);
+
+
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의

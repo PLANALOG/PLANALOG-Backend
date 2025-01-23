@@ -57,10 +57,12 @@ model User {
   email        String         @unique @db.VarChar(100)
   platform     platform_type? // ENUM: kakao google naver 
   name         String         @db.VarChar(30)
-  nickname     String         @db.VarChar(100)
-  type         user_type? // ENUM: memo or category 
-  introduction String         @db.VarChar(300)
-  link         String         @db.VarChar(100)
+
+
+  nickname     String         @db.VarChar(20)
+  type         user_type // ENUM: memo or category 
+  introduction String?         @db.VarChar(300)
+  link         String?         @db.VarChar(100)
   createdAt    DateTime       @default(now()) @map("created_at")
   updatedAt    DateTime       @updatedAt @map("updated_at")
 
@@ -94,6 +96,7 @@ model Planner {
   tasks Task[]
   //shared_planners Shared_Planner[]
 
+  @@index([userId], map: "userId")
   @@map("planner")
 }
 
@@ -106,9 +109,11 @@ model Task {
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @updatedAt @map("updated_at")
   // Relationships
-  planner        Planner       @relation(fields: [plannerId], references: [id])
+  planner        Planner       @relation(fields: [plannerId], references: [id], onDelete: Cascade)
   taskCategory   TaskCategory? @relation(fields: [taskCategoryId], references: [id])
 
+  @@index([plannerId], map: "plannerId")
+  @@index([taskCategoryId], map: "taskCategoryId")
   @@map("task")
 }
 
@@ -122,6 +127,7 @@ model TaskCategory {
   user      User     @relation(fields: [userId], references: [id])
   tasks     Task[]
 
+  @@index([userId], map: "userId")
   @@map("task_category")
 }
 
@@ -134,6 +140,7 @@ model Search {
   // Relationships
   user      User     @relation(fields: [userId], references: [id])
 
+  @@index([userId], map: "userId")
   @@map("search")
 }
 
@@ -142,11 +149,14 @@ model Friend {
   toUserId   BigInt   @map("to_user_id")
   fromUserId BigInt   @map("from_user_id")
   createdAt  DateTime @default(now()) @map("created_at")
+  isAccepted Boolean  @default(false) @map("is_accepted")
 
   // Relationships
   toUser   User @relation("UserToFriends", fields: [toUserId], references: [id])
   fromUser User @relation("FriendsToUser", fields: [fromUserId], references: [id])
 
+  @@index([toUserId], map: "toUserId")
+  @@index([fromUserId], map: "fromUserId")
   @@map("friend")
 }
 
@@ -188,6 +198,7 @@ model Notice {
   // Relationships
   user User @relation(fields: [userId], references: [id])
 
+  @@index([userId], map: "userId")
   @@map("notice")
 }
 
@@ -203,6 +214,8 @@ model Like {
   user     User @relation(name: "LikeToUser", fields: [userId], references: [id])
   fromUser User @relation(name: "LikeFromUser", fields: [fromUserId], references: [id])
 
+  @@index([userId], map: "userId")
+  @@index([fromUserId], map: "fromUserId")
   @@map("like")
 }
 
@@ -215,6 +228,7 @@ model Avatar {
   // Relationships
   user User @relation(fields: [userId], references: [id])
 
+  @@index([userId], map: "userId")
   @@map("avatar")
 }
 
@@ -237,6 +251,7 @@ model Post {
   moment   Moment?   @relation("post_to_moment")
   story    Story?    @relation("post_to_story")
 
+  @@index([userId], map: "userId")
   @@map("post")
 }
 
@@ -250,6 +265,7 @@ model Moment {
   post           Post            @relation("post_to_moment", fields: [postId], references: [id])
   momentContents MomentContent[]
 
+  @@index([postId], map: "postId")
   @@map("moment")
 }
 
@@ -262,6 +278,7 @@ model MomentContent {
   // Relationships
   moment Moment @relation(fields: [momentId], references: [id])
 
+  @@index([momentId], map: "momentId")
   @@map("moment_content")
 }
 
@@ -274,6 +291,7 @@ model Story {
   post          Post           @relation("post_to_story", fields: [postId], references: [id])
   storyContents StoryContent[]
 
+  @@index([postId], map: "postId")
   @@map("story")
 }
 
@@ -287,6 +305,7 @@ model StoryContent {
   // Relationships
   story Story @relation(fields: [storyId], references: [id])
 
+  @@index([storyId], map: "storyId")
   @@map("story_content")
 }
 
@@ -301,6 +320,8 @@ model Comment {
   post      Post     @relation(fields: [postId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
 
+  @@index([postId], map: "postId")
+  @@index([userId], map: "userId")
   @@map("comment")
 }
 
