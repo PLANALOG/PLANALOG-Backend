@@ -2,6 +2,7 @@ import { DuplicateUserNicknameError, NoExistsUserError } from "../errors.js";
 import { getUserByNickname, updateUserProfile, getMyProfile, getUserProfile, deleteUser } from "../repositories/user.repository.js";
 import { responseFromUser } from "../dtos/user.dto.js";
 import { kakaoDisconnect, googleDisconnect, naverDisconnect } from "../auth.config.js";
+import { deleteFile } from "../multer.js";
 
 
 export const userEdit = async (data, userId) => {
@@ -81,4 +82,22 @@ export const userDelete = async (userId, user) => {
 
     return deletedUser;
 
+}
+
+
+export const profileImageEdit = async (imagePaths, userId) => {
+
+    //기존 프로필 이미지 url 가져오기
+    const user = await getMyProfile(userId);
+    const deleteImageUrl = user.profileImage;
+    console.log('deleteImageUrl', deleteImageUrl);
+
+    //기존 프로필 이미지 삭제하기 
+    await deleteFile(deleteImageUrl);
+
+    //프로필 이미지 경로 업데이트 
+    const updatedUser = await updateUserProfile({ profileImage: imagePaths }, userId);
+
+    //업데이트된 프로필 이미지 url 반환
+    return responseFromUser({ profileImage: updatedUser.profileImage });
 }

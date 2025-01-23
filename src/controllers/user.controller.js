@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { bodyToUpdateUser } from "../dtos/user.dto.js";
-import { userEdit, nicknameCheck, myProfile, userProfile, userDelete } from "../services/user.service.js";
+import { userEdit, nicknameCheck, myProfile, userProfile, userDelete, profileImageEdit } from "../services/user.service.js";
 import { prisma } from "../db.config.js"
 import { validationError } from "../validator.js";
 
@@ -272,4 +272,47 @@ export const handleTestDeleteUser = async (req, res, next) => {
 
     res.status(StatusCodes.OK).success({ message: "회원탈퇴 복구가 완료되었습니다. 바로 재가입할 수 있습니다.", user });
 
+}
+
+export const handleEditUserImage = async (req, res, next) => {
+    /*
+    #swagger.summary = '파일 업로드'
+    #swagger.description = '서버에 파일'
+    #swagger.requestBody = {
+        required: true,
+        content: {
+        "multipart/form-data": {
+            schema: {
+            type: 'object',
+            properties: {
+                image: {
+                type: 'string',
+                format: 'binary',
+                description: '업로드할 이미지 파일'
+                }
+            },
+            required: ['image']
+            }
+        }
+        }
+    }
+    */
+    console.log("회원 프로필사진 변경을 요청했습니다.");
+    console.log(req.file);
+
+    const imagePaths = req.file.location;
+
+    if (!req.user || !req.user.id) {
+        throw new Error("사용자 인증 정보가 누락되었습니다.");
+    }
+
+    const userId = parseInt(req.user.id);
+
+    console.log(req.file);
+
+
+    const savedUrl = await profileImageEdit(imagePaths, userId);
+
+
+    res.status(StatusCodes.OK).success({ message: "프로필 사진 변경 성공", savedUrl: savedUrl.profileImage });
 }

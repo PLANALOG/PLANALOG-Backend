@@ -10,10 +10,11 @@ import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
-import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile, handleDeleteUser, handleTestDeleteUser } from "./controllers/user.controller.js";
+import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile, handleDeleteUser, handleTestDeleteUser, handleEditUserImage } from "./controllers/user.controller.js";
 import { body, query } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 import { userDeleteScheduler } from "./scheduler.js";
+import { upload } from "./multer.js";
 
 dotenv.config();
 
@@ -218,6 +219,9 @@ app.patch("/users/profile", [
   body("introduction").optional().isString().withMessage("introduction은 문자열이어야 합니다."),
   body("link").optional().isURL().withMessage("link는 URL 형식이어야 합니다."),
 ], handleEditUser);
+
+// 프로필 사진 변경 
+app.post("/users/profile/image", upload.single("image"), handleEditUserImage);
 
 //닉네임 중복 조회 API
 app.get("/users/check_nickname",

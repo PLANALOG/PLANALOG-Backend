@@ -41,4 +41,6 @@ export class NoExistsUserError extends Error {
     this.reason = reason;
     this.data = data;
   }
-} 
+}
+
+

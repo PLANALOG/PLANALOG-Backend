@@ -16,7 +16,7 @@ export const updateUserProfile = async (data, userId) => {
         where: { id: userId }
     })
 
-    return user
+    return user;
 }
 
 export const getMyProfile = async (userId) => {
