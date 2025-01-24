@@ -39,8 +39,6 @@ export const getFriendsService = async (fromUserId, nickname) => {
 };
 
 
-
-
 export const deleteFriendService = async (friendId, userId) => {
   const friend = await prisma.friend.findFirst({
     where: {
@@ -63,14 +61,47 @@ export const deleteFriendService = async (friendId, userId) => {
 
 
 
-import { findMutualFriends } from '../repositories/friend.repository.js';
+import { countFollowers } from '../repositories/friend.repository.js';
 
-export const getFriendCountService = async (fromUserId) => {
+export const getFriendCountService = async (userId) => {
   try {
-    const mutualFriends = await findMutualFriends(fromUserId);
-    return mutualFriends.length;
+    const followerCount = await countFollowers(userId); // 팔로워 수 조회
+    return followerCount;
   } catch (error) {
     console.error('Service 에러 상세:', error);
     throw error;
   }
 };
+
+import { findFollowers, findFollowings } from "../repositories/friend.repository.js";
+
+export const getFollowersService = async (userId, search) => {
+  try {
+    const followers = await findFollowers(userId, search);
+    return formatFriends(followers);
+  } catch (error) {
+    console.error("Service 에러 (팔로워 조회):", error.message);
+    throw error;
+  }
+};
+
+export const getFollowingService = async (userId, search) => {
+  try {
+    const following = await findFollowings(userId, search);
+    return formatFriends(following);
+  } catch (error) {
+    console.error("Service 에러 (팔로우 조회):", error.message);
+    throw error;
+  }
+};
+
+
+export const acceptFriendService = async (friendId, userId) => {
+  const updatedFriend = await acceptFriendRequest(friendId, userId);
+  if (!updatedFriend) {
+    throw new Error("친구 요청을 처리할 수 없습니다.");
+  }
+
+  return updatedFriend;
+};
+

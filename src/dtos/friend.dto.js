@@ -13,16 +13,18 @@ export const createFriendDto = (body) => {
   };
 };
 
-// src/dtos/friend.dto.js
+
+
 export const formatFriends = (friends) => {
   return friends.map((friend) => ({
     friendId: friend.id,
-    id: friend.toUser.id,
-    name: friend.toUser.name,
-    email: friend.toUser.email,
-    introduction: friend.toUser.introduction,
-    link: friend.toUser.link,
-    nickname: friend.toUser.nickname,
+    id: friend.toUser ? friend.toUser.id : friend.fromUser.id,
+    name: friend.toUser ? friend.toUser.name : friend.fromUser.name,
+    email: friend.toUser ? friend.toUser.email : friend.fromUser.email,
+    nickname: friend.toUser ? friend.toUser.nickname : friend.fromUser.nickname,
+    introduction: friend.toUser ? friend.toUser.introduction : friend.fromUser.introduction,
+    link: friend.toUser ? friend.toUser.link : friend.fromUser.link,
+    isAccepted: friend.isAccepted, 
   }));
 };
 
@@ -33,7 +35,7 @@ export const deleteFriendDeleteDTO = (friendId) => {
   }
 
   return {
-    friendId: Number(friendId), // Number로 변환
+    friendId: Number(friendId), 
   };
 };
 
@@ -45,6 +47,7 @@ export const createFriendCountDTO = (userId) => {
   }
 
   return {
-    userId: Number(userId), 
+    userId: Number(userId),
   };
 };
+
