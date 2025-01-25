@@ -6,7 +6,10 @@ import {createCategory,
 
 // 카테고리 생성
 export const handleCreateCategory = async (req, res, next) => {
-
+    /*
+    #swagger.tags = ['Categories']
+    #swagger.summary = '카테고리 생성 API'
+    */
     try {
         //세션에서 userId 가져오기 
         const userId = req.user.id;
@@ -25,9 +28,14 @@ export const handleCreateCategory = async (req, res, next) => {
     }
 };
 
-// 카테고리 수정
+
 // 카테고리 수정
 export const handleUpdateCategory = async (req, res, next) => {
+    /*
+    #swagger.tags = ['Categories']
+    #swagger.summary = '카테고리 생성 API'
+
+    */
     try {
         const { task_categories_id } = req.params; // URL에서 ID 추출
         const { name } = req.body; // 요청 본문에서 새로운 카테고리 이름 추출
@@ -48,6 +56,11 @@ export const handleUpdateCategory = async (req, res, next) => {
 
 // 유저별 카테고리 조회
 export const handleViewCategory = async (req, res, next) => {
+    /*
+    #swagger.tags = ['Categories']
+    #swagger.summary = '카테고리 생성 API'
+
+    */
     try {
         const userId = req.user.id; // 인증 미들웨어에서 설정된 사용자 ID
 
@@ -67,6 +80,11 @@ export const handleViewCategory = async (req, res, next) => {
 
 // 카테고리 삭제
 export const handleDeleteCategory = async (req, res, next) => {
+    /*
+    #swagger.tags = ['Categories']
+    #swagger.summary = '카테고리 생성 API'
+
+    */
     try {
         const { task_categories_id } = req.params; // Extract ID from URL
 
