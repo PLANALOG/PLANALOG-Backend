@@ -39,6 +39,7 @@ export const getUserProfile = async (userId) => {
             type: true,
             introduction: true,
             link: true,
+            profileImage: true
         },
         where: { id: userId }
     });

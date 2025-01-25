@@ -277,42 +277,62 @@ export const handleTestDeleteUser = async (req, res, next) => {
 
 export const handleEditUserImage = async (req, res, next) => {
     /*
-    #swagger.summary = '파일 업로드'
-    #swagger.description = '서버에 파일'
-    #swagger.requestBody = {
-        required: true,
-        content: {
-        "multipart/form-data": {
-            schema: {
-            type: 'object',
-            properties: {
-                image: {
-                type: 'string',
-                format: 'binary',
-                description: '업로드할 이미지 파일'
+        #swagger.tags = ['Users']
+        #swagger.summary = '프로필 사진 변경 API'
+        #swagger.description = `
+            파일 업로드 시 이미지 파일을 받아 프로필 사진을 변경합니다. 
+            기본 이미지를 사용할 경우, 'basicImage' 필드에 1~8 사이의 숫자를 입력합니다.`
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "multipart/form-data": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            image: {
+                                type: 'string',
+                                format: 'binary',
+                                description: '업로드할 이미지 파일'
+                            },
+                            basicImage: {
+                                type: 'integer',
+                                description: '기본 이미지 번호 (1~8)',
+                                minimum: 1,
+                                maximum: 8
+                            }
+                        },
+                        oneOf: [
+                            { required: ['image'] },
+                            { required: ['basicImage'] }
+                        ]
+                    }
                 }
-            },
-            required: ['image']
             }
         }
-        }
-    }
     */
     console.log("회원 프로필사진 변경을 요청했습니다.");
     console.log(req.file);
 
-    const imagePaths = req.file.location;
+    let imagePaths;
+    let isBasicImage = false;
+
+    if (req.file) {
+        //저장된 이미지 url을 받아옴
+        imagePaths = req.file.location;
+    } else {
+        const BasicImageNum = req.body.basicImage;
+        imagePaths = `https://planalog-s3.s3.ap-northeast-2.amazonaws.com/basic_images/${BasicImageNum}.png`;
+        isBasicImage = true;
+    }
+
 
     if (!req.user || !req.user.id) {
         throw new Error("사용자 인증 정보가 누락되었습니다.");
     }
-
     const userId = parseInt(req.user.id);
 
-    console.log(req.file);
 
-
-    const savedUrl = await profileImageEdit(imagePaths, userId);
+    const savedUrl = await profileImageEdit(imagePaths, userId, isBasicImage);
 
 
     res.status(StatusCodes.OK).success({ message: "프로필 사진 변경 성공", savedUrl: savedUrl.profileImage });

@@ -85,7 +85,7 @@ export const userDelete = async (userId, user) => {
 }
 
 
-export const profileImageEdit = async (imagePaths, userId) => {
+export const profileImageEdit = async (imagePaths, userId, isBasicImage) => {
 
     //기존 프로필 이미지 url 가져오기
     const user = await getMyProfile(userId);
@@ -93,7 +93,8 @@ export const profileImageEdit = async (imagePaths, userId) => {
     console.log('deleteImageUrl', deleteImageUrl);
 
     //기존 프로필 이미지 삭제하기 
-    await deleteFile(deleteImageUrl);
+    if (!isBasicImage)
+        await deleteFile(deleteImageUrl);
 
     //프로필 이미지 경로 업데이트 
     const updatedUser = await updateUserProfile({ profileImage: imagePaths }, userId);
