@@ -19,6 +19,7 @@ export const responseFromUser = (user) => {
         nickname: user.nickname,
         type: user.type,
         introduction: user.introduction,
-        link: user.link
+        link: user.link,
+        profileImage: user.profileImage
     }
 }

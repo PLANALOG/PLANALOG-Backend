@@ -1,6 +1,9 @@
 import { prisma } from '../db.config.js';
+import { isDeletedUser } from './user.repository.js';
 
 export const getPlannerWithTasks = async (userId, plannerDate) => {
+
+    await isDeletedUser(userId);
 
     const plannerWithTasks = await prisma.planner.findFirst({
         select: {
@@ -32,6 +35,8 @@ export const getPlannerWithTasks = async (userId, plannerDate) => {
 }
 
 export const getMonthPlanners = async (userId, plannerMonth, plannerNextMonth) => {
+    await isDeletedUser(userId);
+
     const monthPlannerList = await prisma.planner.findMany({
         select: {
             id: true,
@@ -50,6 +55,8 @@ export const getMonthPlanners = async (userId, plannerMonth, plannerNextMonth) =
 }
 
 export const deletePlanner = async (plannerId, userId) => {
+    await isDeletedUser(userId);
+
     //해당 플래너 존재하는 지 & 유저의 플래너가 맞는 지 확인 
     const planner = await prisma.planner.findFirst({ where: { id: plannerId } });
 
