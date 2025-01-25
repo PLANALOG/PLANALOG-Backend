@@ -4,6 +4,7 @@ import { userEdit, nicknameCheck, myProfile, userProfile, userDelete, profileIma
 import { prisma } from "../db.config.js"
 import { validationError } from "../validator.js";
 import { validationResult } from "express-validator";
+import { authError } from "../errors.js";
 
 
 
@@ -82,7 +83,7 @@ export const handleEditUser = async (req, res, next) => {
     }
 
     if (!req.user || !req.user.id) {
-        throw new Error("사용자 인증 정보가 누락되었습니다.");
+        throw new authError();
     }
 
     const userId = req.user.id
@@ -176,7 +177,7 @@ export const handleMyProfile = async (req, res, next) => {
     validationError(req);
 
     if (!req.user || !req.user.id) {
-        throw new Error("사용자 인증 정보가 누락되었습니다.");
+        throw new authError();
     }
 
     const userId = req.user.id
@@ -241,7 +242,7 @@ export const handleDeleteUser = async (req, res, next) => {
 
 
     if (!req.user || !req.user.id) {
-        throw new Error("사용자 인증 정보가 누락되었습니다.");
+        throw new authError();
     }
 
     const userId = parseInt(req.user.id);
@@ -327,7 +328,7 @@ export const handleEditUserImage = async (req, res, next) => {
 
 
     if (!req.user || !req.user.id) {
-        throw new Error("사용자 인증 정보가 누락되었습니다.");
+        throw new authError();
     }
     const userId = parseInt(req.user.id);
 
