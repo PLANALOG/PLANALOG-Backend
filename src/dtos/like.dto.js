@@ -1,4 +1,4 @@
-export const bodyToLike = ({ like, post }) => {
+export const bodyToLike = ({ like, post }, user) => {
   if (!post || typeof post.id === "undefined") {
     throw new Error("post 객체 또는 post.id가 없습니다.");
   }

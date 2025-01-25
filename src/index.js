@@ -10,6 +10,7 @@ import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
 import{handleLikePost,handleDeleteLikePost} from './controllers/like.controller.js';
+import { userDeleteScheduler } from "./scheduler.js";
 
 dotenv.config();
 
@@ -17,7 +18,9 @@ passport.use(googleStrategy);
 passport.use(kakaoStrategy);
 passport.use(naverStrategy);
 passport.serializeUser((user, done) => {
-  //console.log('serializeUser success')
+  console.log('user', user)
+  // ｕｓｅｒ는 콜백함수 ｖｅｒｉｆｙ에서 반환된 객체임¡
+  console.log('serializeUser success', user)
   done(null, user)
 });
 passport.deserializeUser((user, done) => {
@@ -53,13 +56,51 @@ app.use(express.static('public'));          // 정적 파일 접근
 app.use(express.json());                    // request의 본문을 json으로 해석할 수 있도록 함 (JSON 형태의 요청 body를 파싱하기 위함)
 app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
 
+// 개발 환경에서 인증 우회 미들웨어
+if (process.env.NODE_ENV === "development") {
+  app.use(async (req, res, next) => {
+    // 인증 우회
+    req.user = { id: BigInt(1), email: "test@example.com" };
+
+    // 요청 처리 전에 기본 데이터 생성
+    if (req.method === "POST" || req.method === "PUT") {
+      const existingPost = await prisma.post.findUnique({
+        where: { id: "1" },
+      });
+
+      if (!existingPost) {
+        await prisma.user.upsert({
+          where: { id: "1" },
+          update: {},
+          create: {
+            id: "1",
+            email: "test@example.com",
+            name: "Test User",
+          },
+        });
+
+        await prisma.post.create({
+          data: {
+            id: "1",
+            title: "테스트 게시글",
+            content: "이것은 테스트 데이터입니다.",
+            userId: "1",
+          },
+        });
+      }
+    }
+
+    next();
+  });
+}
+
 app.use(
   session({
     cookie: { //세션 ID 쿠키의 옵션을 지정하는 객체
       maxAge: 7 * 24 * 60 * 1000, //ms
     },
     resave: false, //수정되지 않은 세션일지라도 다시 저장할지(세션을 언제나 저장할지) 나타내는 부울 값.
-    saveUninitialized: false, //초기화되지 않은 세션을 저장할지(세션에 저장할 내역이 없더라도 처음부터 세션을 생성할지) 
+    saveUninitalized: false, //초기화되지 않은 세션을 저장할지(세션에 저장할 내역이 없더라도 처음부터 세션을 생성할지) 
     secret: process.env.EXPRESS_SESSION_SECRET, //세션 ID 쿠키를 서명하는 데 사용할 문자열. 보안 목적으로 필수적.
     store: new PrismaSessionStore(prisma, { // 세션 데이터의 저장 메커니즘
       checkPeriod: 2 * 60 * 1000, //ms
@@ -96,15 +137,15 @@ app.get("/openapi.json", async (req, res, next) => {
       title: "PLANALOG",
       description: "PLANALOG 테스트 문서입니다.",
     },
-    host: "localhost:3000",
+    host: "15.164.83.14:3000",
     components: {
       securitySchemes: {
         OAuth2: {
           type: 'oauth2',
           flows: {
             authorizationCode: {
-              authorizationUrl: 'http://localhost:3000/oauth2/login/google',
-              tokenUrl: 'http://localhost:3000/oauth2/callback/google',
+              authorizationUrl: 'http://15.164.83.14:3000/oauth2/login/google',
+              tokenUrl: 'http://15.164.83.14:3000/oauth2/callback/google',
               scopes: {
                 read: 'Grants read access',
                 write: 'Grants write access',
@@ -127,48 +168,75 @@ BigInt.prototype.toJSON = function () { // bigint 호환
 };
 
 app.get('/', (req, res) => {
+  // #swagger.ignore = true
   res.send('Hello World!')
   console.log(req.user)
 })
 
-
 //소셜로그인 - 구글 
-app.get("/oauth2/login/google", passport.authenticate("google"));
+app.get("/oauth2/login/google", passport.authenticate("google"), (req, res) => {
+  // #swagger.ignore = true
+});
 app.get(
   "/oauth2/callback/google",
   passport.authenticate("google", {
     failureRedirect: "/oauth2/login/google",
     failureMessage: true,
   }),
-  (req, res) => res.success()
+  (req, res) => {
+    // #swagger.ignore = true
+    res.success({ message: "로그인 성공" })
+  }
 );
 
 //소셜로그인 - 카카오
-app.get("/oauth2/login/kakao", passport.authenticate("kakao"));
+app.get("/oauth2/login/kakao", passport.authenticate("kakao"), (req, res) => {
+  // #swagger.ignore = true
+});
+
 app.get(
   "/oauth2/callback/kakao",
   passport.authenticate("kakao", {
     failureRedirect: "/oauth2/login/kakao",
     failureMessage: true,
   }),
-  (req, res) => res.success()
+  (req, res) => {
+    // #swagger.ignore = true
+    res.success({ message: "로그인 성공" })
+  }
 );
 
 //소셜로그인 - 네이버
-app.get("/oauth2/login/naver", passport.authenticate("naver"));
+app.get("/oauth2/login/naver", passport.authenticate("naver"), (req, res) => {
+  // #swagger.ignore = true
+});
 app.get(
   "/oauth2/callback/naver",
   passport.authenticate("naver", {
     failureRedirect: "/oauth2/login/naver",
     failureMessage: true,
   }),
-  (req, res) => res.success()
+  (req, res) => {
+    // #swagger.ignore = true
+    res.success({ message: "로그인 성공" })
+  }
 );
 
 //로그아웃
 app.get("/logout", (req, res) => {
-  req.logout(() => success());
+  /* 
+  #swagger.tags = ['Users']
+  #swagger.summary = '로그아웃 API'
+  #swagger.description = '로그아웃 요청을 합니다. 세션을 삭제하고, 로그아웃 성공 메시지를 반환합니다.'
+  */
+  console.log("로그아웃 요청")
+  req.logout(() => {
+    req.session.destroy();
+    res.success();
+  });
+
 });
+
 
 //좋아요 추가, 삭제
 app.post("/posts/:postId/likes", handleLikePost);
@@ -190,6 +258,8 @@ app.use((err, req, res, next) => { //
   });
 });
 
+//매일 자정 탈퇴한 지 14일이 지난 유저 삭제
+app.listen(port, userDeleteScheduler);
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
