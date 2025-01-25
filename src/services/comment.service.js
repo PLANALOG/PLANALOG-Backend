@@ -50,6 +50,10 @@ export const deleteUserComment = async(data) =>{
     if (!commentExists) {
         throw new CommentIdNotFoundError("존재하지 않는 댓글입니다.",data);
     }
+        // 댓글 작성자이거나 게시물 작성자인 경우만 삭제 허용
+    if (data.userId !== comment.userId && data.userId !== post.userId) {
+        throw new Error("삭제 권한이 없습니다.");
+    }
     const removeComment = await deleteComment({
         userId: data.userId,
         postId: data.postId,

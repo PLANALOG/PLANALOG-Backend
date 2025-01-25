@@ -58,7 +58,7 @@ app.use(
       maxAge: 7 * 24 * 60 * 1000, //ms
     },
     resave: false, //수정되지 않은 세션일지라도 다시 저장할지(세션을 언제나 저장할지) 나타내는 부울 값.
-    saveUninitalized: false, //초기화되지 않은 세션을 저장할지(세션에 저장할 내역이 없더라도 처음부터 세션을 생성할지) 
+    saveUninitialized: false, //초기화되지 않은 세션을 저장할지(세션에 저장할 내역이 없더라도 처음부터 세션을 생성할지) 
     secret: process.env.EXPRESS_SESSION_SECRET, //세션 ID 쿠키를 서명하는 데 사용할 문자열. 보안 목적으로 필수적.
     store: new PrismaSessionStore(prisma, { // 세션 데이터의 저장 메커니즘
       checkPeriod: 2 * 60 * 1000, //ms
@@ -70,6 +70,12 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session()); //사용자의 모든 요청에 HTTP Cookie 중 sid 값이 있다면, 이를 MySQL DB에서 찾아, 일치하는 Session이 있다면 사용자 데이터를 가져와 req.user
+
+////로그인 상태 확인-> merge 전 삭제
+app.get("/", (req, res) => {
+  // #swagger.ignore = true
+  res.send("Hello World!");
+});
 
 app.use(
   "/docs",
@@ -162,6 +168,8 @@ app.get(
   }),
   (req, res) => res.success()
 );
+
+
 
 //로그아웃
 app.get("/logout", (req, res) => {
