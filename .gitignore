@@ -7,3 +7,4 @@ node_modules/
 
 # prisma migration files
 prisma/migrations
+src/uploads
