@@ -24,7 +24,6 @@ import {addPostLike, removePostLike} from "../repositories/like.repository.js";
         throw new DuplicateLikePostError("이미 존재하는 좋아요입니다.", data);
     }
 
-
     return {
         likeId: likePostId,
         message: "좋아요가 성공적으로 추가되었습니다.",

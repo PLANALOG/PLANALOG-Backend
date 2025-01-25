@@ -56,43 +56,6 @@ app.use(express.static('public'));          // 정적 파일 접근
 app.use(express.json());                    // request의 본문을 json으로 해석할 수 있도록 함 (JSON 형태의 요청 body를 파싱하기 위함)
 app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
 
-// 개발 환경에서 인증 우회 미들웨어
-if (process.env.NODE_ENV === "development") {
-  app.use(async (req, res, next) => {
-    // 인증 우회
-    req.user = { id: BigInt(1), email: "test@example.com" };
-
-    // 요청 처리 전에 기본 데이터 생성
-    if (req.method === "POST" || req.method === "PUT") {
-      const existingPost = await prisma.post.findUnique({
-        where: { id: "1" },
-      });
-
-      if (!existingPost) {
-        await prisma.user.upsert({
-          where: { id: "1" },
-          update: {},
-          create: {
-            id: "1",
-            email: "test@example.com",
-            name: "Test User",
-          },
-        });
-
-        await prisma.post.create({
-          data: {
-            id: "1",
-            title: "테스트 게시글",
-            content: "이것은 테스트 데이터입니다.",
-            userId: "1",
-          },
-        });
-      }
-    }
-
-    next();
-  });
-}
 
 app.use(
   session({

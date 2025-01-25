@@ -128,8 +128,6 @@ export const handleLikePost = async (req, res, next) => {
 
    try{ 
     console.log("Like를 요청했습니다!");
-    console.log("body:", req.body); //값이 잘 들어오나 확인하기 위한 테스트용
-    console.log("user:", req.user);
     const like = await likePost(bodyToLike(req.body,req.user)); 
     res.status(StatusCodes.OK).success(like); 
   } catch (error) {
@@ -245,7 +243,6 @@ export const handleDeleteLikePost =  async (req, res, next) =>{
 
   try{ 
   console.log("Like 삭제를 요청했습니다!");
-  console.log("body:", req.body);
   const like = await deletePostLike(bodyToDeleteLike(req.body), req.user);
   res.status(StatusCodes.OK).success(like);
   } catch (error) {
