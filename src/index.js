@@ -225,7 +225,7 @@ app.delete("/planners/:plannerId", handleDeletePlanner);
 
 
 
-<<<<<<< HEAD
+
 
 //moment 생성
 app.post("/posts/moments", handleMomentCreate);
@@ -243,8 +243,6 @@ app.post("/posts/moments/:momentId/images", handleAddImagesToMoment);
 app.delete("/posts/moments/:momentId/images/:imageId", handleDeleteImagesFromMoment);
 
 
-=======
->>>>>>> origin/develop
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의
  */
