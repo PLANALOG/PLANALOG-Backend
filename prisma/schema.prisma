@@ -151,7 +151,6 @@ model Friend {
   toUserId   BigInt   @map("to_user_id")
   fromUserId BigInt   @map("from_user_id")
   createdAt  DateTime @default(now()) @map("created_at")
-  isAccepted Boolean  @default(false) @map("is_accepted")
 
   // Relationships
   toUser   User @relation("UserToFriends", fields: [toUserId], references: [id])
