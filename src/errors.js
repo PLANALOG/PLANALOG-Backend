@@ -43,4 +43,13 @@ export class NoExistsUserError extends Error {
   }
 }
 
+export class authError extends Error {
+  errorCode = "A001";
+
+  constructor() {
+    const reason = `사용자 인증 정보가 누락되었습니다. 로그인 후 이용해주세요.`
+    super(reason);
+    this.reason = reason;
+  }
+}
 
