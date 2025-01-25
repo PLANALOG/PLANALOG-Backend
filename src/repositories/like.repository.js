@@ -10,6 +10,7 @@ export const addPostLike = async (data) => {
       userId: data.userId,
       entityId: data.entityId,
       entityType: data.entityType,
+      user: { isDeleted: false },  //탈퇴 회원 배제제
     },
   });
 
@@ -33,7 +34,9 @@ export const addPostLike = async (data) => {
 // 좋아요 삭제
 export const removePostLike = async (data) => {
   const existingLike = await prisma.like.findUnique({
-    where: { id: data.likeId },
+    where: { id: data.likeId ,
+    user: { isDeleted: false },
+    },
   });
 
   if (!existingLike) {
