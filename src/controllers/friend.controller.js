@@ -10,20 +10,34 @@ export const addFriend = async (req, res) => {
   try {
     const fromUserId = req.user?.id; // 로그인한 유저의 ID
     if (!fromUserId) {
-      return res.status(StatusCodes.UNAUTHORIZED).json({ message: "사용자 인증이 필요합니다." });
+      return res.status(StatusCodes.UNAUTHORIZED).error({
+        errorCode: "A001",
+        reason: "사용자 인증이 필요합니다.",
+      });
     }
 
     const { toUserId } = req.body;
     if (!toUserId) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "toUserId는 필수 값입니다." });
+      return res.status(StatusCodes.BAD_REQUEST).error({
+        errorCode: "A002",
+        reason: "toUserId는 필수 값입니다.",
+      });
     }
 
     const result = await addFriendService(fromUserId, toUserId);
-    res.status(StatusCodes.CREATED).json({ message: "친구 요청이 성공적으로 생성되었습니다.", result });
+    res.status(StatusCodes.CREATED).success({
+      message: "친구 요청이 성공적으로 생성되었습니다.",
+      result,
+    });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+    res.status(error.statusCode || StatusCodes.BAD_REQUEST).error({
+      errorCode: error.errorCode || "unknown",
+      reason: error.message || "알 수 없는 에러가 발생했습니다.",
+      data: error.data || null,
+    });
   }
 };
+
 
 
 // 내가 팔로우하는 사람 목록 조회
@@ -109,11 +123,12 @@ export const getFollowing = async (req, res) => {
 export const deleteFriend = async (req, res) => {
   try {
     const { friendId } = req.params; // URL에서 friendId 가져오기
-    const userId = req.user.id;     // userId
+    const userId = req.user?.id;     // userId
 
     if (!friendId || !userId) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "friendId와 userId가 필요합니다.",
+      return res.status(StatusCodes.BAD_REQUEST).error({
+        errorCode: "D001",
+        reason: "friendId와 userId가 필요합니다.",
       });
     }
 
@@ -123,17 +138,20 @@ export const deleteFriend = async (req, res) => {
     // Service 호출
     const result = await deleteFriendService(deleteDTO.friendId, userId);
 
-    res.status(StatusCodes.OK).json({
+    res.status(StatusCodes.OK).success({
       message: "친구 삭제 성공",
       data: result,
     });
   } catch (error) {
     console.error("친구 삭제 중 에러:", error.message);
-    res.status(StatusCodes.BAD_REQUEST).json({
-      message: error.message,
+    res.status(error.statusCode || StatusCodes.BAD_REQUEST).error({
+      errorCode: error.errorCode || "D002",
+      reason: error.message || "친구 삭제 중 오류가 발생했습니다.",
+      data: error.data || null,
     });
   }
 };
+
 
 
 // src/controllers/friend.controller.js

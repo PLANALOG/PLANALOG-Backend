@@ -145,14 +145,15 @@ export const findFollowers = async (userId, search) => {
     where: {
       toUserId: BigInt(userId),
       isAccepted: true,
-      ...(search && {
-        fromUser: {
+      fromUser: {
+        is_deleted: false, // 탈퇴하지 않은 유저만 포함
+        ...(search && {
           OR: [
             { name: { contains: search } },
             { nickname: { contains: search } },
           ],
-        },
-      }),
+        }),
+      },
     },
     select: {
       id: true,
@@ -171,19 +172,21 @@ export const findFollowers = async (userId, search) => {
 };
 
 
+
 export const findFollowings = async (userId, search) => {
   return await prisma.friend.findMany({
     where: {
       fromUserId: BigInt(userId),
       isAccepted: true,
-      ...(search && {
-        toUser: {
+      toUser: {
+        is_deleted: false, // 탈퇴하지 않은 유저만 포함
+        ...(search && {
           OR: [
             { name: { contains: search } },
             { nickname: { contains: search } },
           ],
-        },
-      }),
+        }),
+      },
     },
     select: {
       id: true,
@@ -200,3 +203,4 @@ export const findFollowings = async (userId, search) => {
     },
   });
 };
+
