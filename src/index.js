@@ -2,7 +2,6 @@
 import dotenv from "dotenv";
 import express from 'express';          // -> ES Module
 import cors from "cors";
-<<<<<<< HEAD
 import task from "./routes/task.js";
 import taskCategory from "./routes/category.js"; //라우터 객체 가져오기 
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
@@ -17,10 +16,7 @@ import { body, query, param } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 import { userDeleteScheduler } from "./scheduler.js";
 import { upload } from "./multer.js";
-=======
-import { addFriend, getFriends } from './controllers/friend.controller.js';
 
->>>>>>> 2bf7847 (임시 변경 사항 저장)
 
 dotenv.config();
 
@@ -40,6 +36,17 @@ passport.deserializeUser((user, done) => {
 
 const app = express()
 const port = process.env.PORT;
+
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your-secret", // 반드시 비밀 키 설정
+    resave: false, // 세션 변경이 없을 때 저장 방지
+    saveUninitialized: false, // 초기화되지 않은 세션을 저장하지 않음
+    cookie: { secure: false }, // HTTPS 사용 시 secure: true로 설정
+  })
+);
+
 
 
 /**
@@ -65,9 +72,6 @@ app.use(cors());                            // cors 방식 허용
 app.use(express.static('public'));          // 정적 파일 접근
 app.use(express.json());                    // request의 본문을 json으로 해석할 수 있도록 함 (JSON 형태의 요청 body를 파싱하기 위함)
 app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
-app.post('/friends', addFriend);            //팔로우
-app.get('/friends/:userId', getFriends);    //
-app.get('friends?nickname={nickname}');     //친구 목록 조회하기
 
 
 app.use(

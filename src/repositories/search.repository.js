@@ -1,4 +1,3 @@
-// src/repositories/user.repository.js
 import { prisma } from "../db.config.js";
 
 export const searchUsersByNicknameAndName = async (nickname, name) => {
@@ -48,12 +47,11 @@ export const getSearchRecords = async (userId) => {
       userId: BigInt(userId),
     },
     orderBy: {
-      createdAt: "desc", // 최신 순으로 정렬
+      createdAt: "desc", 
     },
   });
 };
 
-// 검색 기록 삭제
 export const deleteSearchRecord = async (userId, recordId) => {
   // 삭제 전, 해당 검색 기록이 현재 사용자 소유인지 확인
   const record = await prisma.search.findUnique({

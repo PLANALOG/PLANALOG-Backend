@@ -1,4 +1,3 @@
-// src/services/search.service.js
 import { saveSearchRecord, searchUsersByNicknameAndName,deleteSearchRecord,getSearchRecords } from "../repositories/search.repository.js";
 import { formatSearchRecords } from "../dtos/search.dto.js";
 
@@ -6,16 +5,14 @@ export const searchUsersService = async (userId, { nickname, name }) => {
   let users;
 
   if (nickname || name) {
-    // 닉네임 또는 이름으로 검색
     users = await searchUsersByNicknameAndName(nickname, name);
   } else {
     throw new Error("검색 조건이 없습니다.");
   }
 
-  return formatUsers(users); // 데이터 포맷팅
+  return formatUsers(users); 
 };
 
-// 데이터 포맷팅 함수
 export const formatUsers = (users) => {
   return users.map(user => ({
     id: user.id,
