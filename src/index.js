@@ -16,6 +16,7 @@ import { body, query, param } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 import { userDeleteScheduler } from "./scheduler.js";
 import { upload } from "./multer.js";
+import{handleLikePost,handleDeleteLikePost} from './controllers/like.controller.js';
 
 dotenv.config();
 
@@ -257,6 +258,11 @@ app.delete("/users", handleDeleteUser)
 
 //테스트용 : 회원탈퇴복구 (탈퇴 회원 바로 회원가입 가능)
 app.post("/users/test", handleTestDeleteUser)
+
+//좋아요 추가, 삭제
+app.post("/posts/:postId/likes", handleLikePost);
+app.delete("/posts/:postId/likes", handleDeleteLikePost);
+
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의

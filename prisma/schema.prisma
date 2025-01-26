@@ -24,11 +24,6 @@ enum like_post_type {
   post
 }
 
-enum moment_story_type {
-  moment
-  story
-}
-
 enum share_status {
   public
   friend
@@ -41,7 +36,8 @@ enum align_type {
   right
 }
 
-enum story_content_type {
+enum content_type {
+  text
   image
   video
 }
@@ -94,9 +90,10 @@ model Planner {
   updatedAt   DateTime @updatedAt @map("updated_at") //자동시간 업데이트 
 
   // Relationships
-  user  User   @relation(fields: [userId], references: [id])
-  tasks Task[]
+  user   User     @relation(fields: [userId], references: [id])
+  tasks  Task[]
   //shared_planners Shared_Planner[]
+  Moment Moment[]
 
   @@index([userId], map: "userId")
   @@map("planner")
@@ -151,7 +148,6 @@ model Friend {
   toUserId   BigInt   @map("to_user_id")
   fromUserId BigInt   @map("from_user_id")
   createdAt  DateTime @default(now()) @map("created_at")
-  isAccepted Boolean  @default(false) @map("is_accepted")
 
   // Relationships
   toUser   User @relation("UserToFriends", fields: [toUserId], references: [id])
@@ -235,23 +231,21 @@ model Avatar {
 }
 
 model Post {
-  id           BigInt            @id @default(autoincrement())
-  userId       BigInt            @map("user_id")
-  postType     moment_story_type @map("post_type") // ENUM (moment, story)
-  title        String            @db.VarChar(100)
-  status       share_status      @map("status") // ENUM (public, friend, draft)
-  textAlign    align_type        @map("text_align") // ENUM (left, center, right)
-  likingCount  BigInt            @default(0) @map("liking_count")
-  commentCount BigInt            @default(0) @map("comment_count")
-  publishedAt  DateTime?         @map("published_at")
-  createdAt    DateTime          @default(now()) @map("created_at")
-  updatedAt    DateTime          @updatedAt @map("updated_at")
+  id           BigInt       @id @default(autoincrement())
+  userId       BigInt       @map("user_id")
+  title        String       @db.VarChar(100)
+  status       share_status @map("status") // ENUM (public, friend, draft)
+  textAlign    align_type   @map("text_align") // ENUM (left, center, right)
+  likingCount  BigInt       @default(0) @map("liking_count")
+  commentCount BigInt       @default(0) @map("comment_count")
+  publishedAt  DateTime?    @map("published_at")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
   // Relationships
-  user         User              @relation(fields: [userId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
 
   comments Comment[]
   moment   Moment?   @relation("post_to_moment")
-  story    Story?    @relation("post_to_story")
 
   @@index([userId], map: "userId")
   @@map("post")
@@ -260,11 +254,12 @@ model Post {
 model Moment {
   id        BigInt   @id @default(autoincrement())
   postId    BigInt   @unique @map("post_id") // 1대1 
-  content   String   @db.VarChar(500)
+  plannerId BigInt?  @map("planner_id")
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relationships
   post           Post            @relation("post_to_moment", fields: [postId], references: [id])
+  Planner        Planner?        @relation(fields: [plannerId], references: [id])
   momentContents MomentContent[]
 
   @@index([postId], map: "postId")
@@ -272,43 +267,18 @@ model Moment {
 }
 
 model MomentContent {
-  id        BigInt @id @default(autoincrement())
-  momentId  BigInt @map("moment_id")
-  url       String @db.VarChar(100)
-  sortOrder Int    @map("sort_order") //sort order 최대 5
+  id        BigInt       @id @default(autoincrement())
+  momentId  BigInt       @map("moment_id")
+  content   String?      @db.Text // 글 단락
+  url       String       @db.VarChar(300)
+  sortOrder Int          @map("sort_order") // 콘텐츠 순서
+  type      content_type @map("type") // 콘텐츠 유형 (text, image, video)
 
   // Relationships
   moment Moment @relation(fields: [momentId], references: [id])
 
   @@index([momentId], map: "momentId")
   @@map("moment_content")
-}
-
-model Story {
-  id        BigInt   @id @default(autoincrement())
-  postId    BigInt   @unique @map("post_id") //1대1
-  createdAt DateTime @default(now()) @map("created_at")
-
-  // Relationships
-  post          Post           @relation("post_to_story", fields: [postId], references: [id])
-  storyContents StoryContent[]
-
-  @@index([postId], map: "postId")
-  @@map("story")
-}
-
-model StoryContent {
-  id          BigInt             @id @default(autoincrement())
-  storyId     BigInt             @map("story_id")
-  contentType story_content_type @map("content_type") //ENUM: video image
-  contentData String             @map("content_data") @db.Text //글자수 제한 없음 
-  sortOrder   Int                @map("sort_order")
-
-  // Relationships
-  story Story @relation(fields: [storyId], references: [id])
-
-  @@index([storyId], map: "storyId")
-  @@map("story_content")
 }
 
 model Comment {
