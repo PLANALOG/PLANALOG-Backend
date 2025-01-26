@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express from 'express';          // -> ES Module
 import cors from "cors";
 import task from "./routes/task.js";
+import taskCategory from "./routes/category.js"; //라우터 객체 가져오기 
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import session from "express-session";
 import passport from "passport";
@@ -212,6 +213,8 @@ const mockAuthMiddleware = (req, res, next) => {
 };
 //task 관련 작업 
 app.use("/tasks", mockAuthMiddleware, task);
+//task_category 관련작업
+app.use("/task_category", mockAuthMiddleware, taskCategory )
 
 //회원정보 수정 API
 app.patch("/users/profile", [
