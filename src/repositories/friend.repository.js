@@ -146,7 +146,7 @@ export const findFollowers = async (userId, search) => {
       toUserId: BigInt(userId),
       isAccepted: true,
       fromUser: {
-        isDeleted: false, // 탈퇴하지 않은 유저만 포함
+        isDeleted: false, 
         ...(search && {
           OR: [
             { name: { contains: search } },
@@ -179,7 +179,7 @@ export const findFollowings = async (userId, search) => {
       fromUserId: BigInt(userId),
       isAccepted: true,
       toUser: {
-        isDeleted: false, // 탈퇴하지 않은 유저만 포함
+        isDeleted: false, 
         ...(search && {
           OR: [
             { name: { contains: search } },

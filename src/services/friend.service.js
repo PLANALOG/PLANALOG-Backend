@@ -65,7 +65,7 @@ import { countFollowers } from '../repositories/friend.repository.js';
 
 export const getFriendCountService = async (userId) => {
   try {
-    const followerCount = await countFollowers(userId); // 팔로워 수 조회
+    const followerCount = await countFollowers(userId); 
     return followerCount;
   } catch (error) {
     console.error('Service 에러 상세:', error);
@@ -95,7 +95,6 @@ export const getFollowingService = async (userId, search) => {
   }
 };
 
-// src/services/friend.service.js
 import { acceptFriendRequest } from "../repositories/friend.repository.js";
 
 

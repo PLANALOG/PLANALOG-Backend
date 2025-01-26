@@ -8,7 +8,7 @@ import { deleteFriendDeleteDTO } from "../dtos/friend.dto.js";
 
 export const addFriend = async (req, res) => {
   try {
-    const fromUserId = req.user?.id; // 로그인한 유저의 ID
+    const fromUserId = req.user?.id; 
     if (!fromUserId) {
       return res.status(StatusCodes.UNAUTHORIZED).error({
         errorCode: "A001",
@@ -50,7 +50,7 @@ export const getFollowers = async (req, res) => {
       return res.success(null, "사용자 인증 정보가 필요합니다.");
     }
 
-    const { search } = req.query; // 검색어
+    const { search } = req.query; 
     const followers = await getFollowersService(userId, search);
 
     res.success(followers, "팔로워 목록 조회 성공");
@@ -72,7 +72,7 @@ export const getFollowing = async (req, res) => {
       return res.success(null, "사용자 인증 정보가 필요합니다.");
     }
 
-    const { search } = req.query; // 검색어
+    const { search } = req.query; 
     const following = await getFollowingService(userId, search);
 
     res.success(following, "팔로우하는 사람 목록 조회 성공");
@@ -113,8 +113,8 @@ export const getFollowing = async (req, res) => {
 
 export const deleteFriend = async (req, res) => {
   try {
-    const { friendId } = req.params; // URL에서 friendId 가져오기
-    const userId = req.user?.id;     // userId
+    const { friendId } = req.params; 
+    const userId = req.user?.id;     
 
     if (!friendId || !userId) {
       return res.status(StatusCodes.BAD_REQUEST).error({
@@ -123,10 +123,8 @@ export const deleteFriend = async (req, res) => {
       });
     }
 
-    // DTO를 통해 데이터 검증
     const deleteDTO = deleteFriendDeleteDTO(friendId);
 
-    // Service 호출
     const result = await deleteFriendService(deleteDTO.friendId, userId);
 
     res.status(StatusCodes.OK).success({
@@ -145,11 +143,10 @@ export const deleteFriend = async (req, res) => {
 
 
 
-// src/controllers/friend.controller.js
 
 export const getFriendCount = async (req, res) => {
   try {
-    const userId = req.user?.id; // 로그인한 사용자 ID
+    const userId = req.user?.id; 
     if (!userId) {
       return res.error({
         errorCode: 'USER001',
@@ -183,8 +180,8 @@ import { acceptFriendService } from "../services/friend.service.js";
 
 export const acceptFriend = async (req, res) => {
   try {
-    const { friendId } = req.params; // URL에서 friendId 추출
-    const userId = req.user?.id; // 로그인한 사용자 ID
+    const { friendId } = req.params; 
+    const userId = req.user?.id; 
 
     if (!userId) {
       return res.error({
