@@ -1,7 +1,8 @@
 import {createCategory,
         updateCategory,
         getCategoriesByUser,
-        deleteCategory
+        deleteCategory,
+        createTaskCategory
 } from '../services/category.service.js'
 
 // 카테고리 생성
@@ -14,15 +15,20 @@ export const handleCreateCategory = async (req, res, next) => {
     content: {
         "application/json": {
             schema: {
-                type: "object",
-                properties: {
-                    name: { 
-                        type: "string", 
-                        example: "Work", 
-                        description: "카테고리 이름" 
-                    }
-                },
-                required: ["name"]
+                    type: "object",
+                    properties: {
+                        name: { 
+                            type: "string", 
+                            example: "Work", 
+                            description: "카테고리 이름" 
+                        },
+                        planner_date: {
+                            type: "string",
+                            example: "2022-12-25",
+                            description: "플래너 날짜"
+                        }
+                    },
+                    required: ["name", "planner_date"]
             }
         }
     }
@@ -109,6 +115,7 @@ export const handleCreateCategory = async (req, res, next) => {
             }
         }
     }
+}
     */
     try {
         //세션에서 userId 가져오기 
@@ -423,3 +430,105 @@ export const handleDeleteCategory = async (req, res, next) => {
         next(error); // Pass error to global error handler
     }
 };
+
+export const handleCreateTaskCategory = async (req, res, next) => { 
+    /*
+    #swagger.tags = ['Categories']
+    #swagger.summary = '할일 카테고리 생성 API'
+    #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        title: { 
+                            type: "string", 
+                            example: "해야할일 123", 
+                            description: "할일 제목" 
+                        },
+                        planner_date: { 
+                            type: "string", 
+                            example: "2022-12-25", 
+                            description: "할일 계획 날짜" 
+                        }
+                    },
+                    required: ["title", "planner_date"]
+                }
+            }
+        }
+    }
+    #swagger.responses[200] = {
+        description: "할일 카테고리 생성 성공",
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        resultType: { 
+                            type: "string", 
+                            example: "SUCCESS", 
+                            description: "결과 상태 (SUCCESS: 성공)"
+                        },
+                        error: { 
+                            type: "object", 
+                            nullable: true, 
+                            example: null, 
+                            description: "에러 정보 (없을 경우 null)"
+                        },
+                        success: { 
+                            type: "object", 
+                            properties: {
+                                id: { 
+                                    type: "integer", 
+                                    description: "할일 ID", 
+                                    example: 1 
+                                },
+                                title: { 
+                                    type: "string", 
+                                    description: "할일 제목", 
+                                    example: "Work" 
+                                },
+                                planner_date: { 
+                                    type: "string", 
+                                    description: "할일 계획 날짜", 
+                                    example: "2022-12-25" 
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+    */
+    try {
+        const { task_category_id } = req.params; // URL에서 ID 추출
+        const { title, planner_date } = req.body; // 요청 본문에서 할일 제목과 계획 날짜 추출
+
+        if (!title || !planner_date) {
+            return res.status(400).json({
+                resultType: "FAIL",
+                error: {
+                    errorCode: "INVALID_INPUT",
+                    reason: "Title and planner_date are required.",
+                },
+                success: null,
+            });
+            }
+            const createdTaskCategory = await createTaskCategory({
+                task_category_id,
+                title,
+                planner_date,
+            });
+            return res.status(200).json({
+                resultType: "SUCCESS",
+                error: null,
+                success: createdTaskCategory,
+            });
+        }
+        catch (error) {
+            next(error); // 전역 오류 처리 미들웨어로 전달
+        }
+    } 

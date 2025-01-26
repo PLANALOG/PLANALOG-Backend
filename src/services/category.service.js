@@ -2,11 +2,14 @@ import {
     createCategoryRepository,
     updateCategoryRepository,
     getAllCategoriesRepository,
-    deleteCategoryRepository
+    deleteCategoryRepository,
+    createTaskCategoryRepository
 } from "../repositories/category.repository.js";
 
 
 export const createCategory = async ({ userId, name }) => {
+    //카테고리 생성성
+    console.log("category data in service", userId, name);
     try {
         // 리포지토리 호출
         const createdCategory = await createCategoryRepository({ userId, name });
@@ -53,4 +56,26 @@ export const deleteCategory = async (id) => {
     } catch (error) {
         throw new Error("Failed to delete task category");
     }
+};
+export const createTaskCategory = async ({ task_category_id, title, planner_date }) => {
+    // 서비스 로직: 예외 처리, 비즈니스 로직 추가
+    if (!task_category_id || isNaN(task_category_id)) {
+        throw new Error("Invalid task_category_id");
+    }
+
+    const newTaskCategory = await createTaskCategoryRepository({
+        task_category_id,
+        title,
+        planner_date,
+    });
+
+    if (!newTaskCategory) {
+        throw new Error("Failed to create task category.");
+    }
+
+    return {
+        id: newTaskCategory.id,
+        title: newTaskCategory.title,
+        planner_date: newTaskCategory.planner_date,
+    };
 };
