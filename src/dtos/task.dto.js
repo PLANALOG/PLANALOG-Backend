@@ -17,7 +17,7 @@ export const createTaskDto = (body) => {
       };
 
     }
-export const updateTaskDto = ({task_id, body}) => {
+export const updateTaskDto = (task_id, body) => {
     // task_id 숫자인지 확인 
     if (isNaN(task_id)) {
         throw new Error("Task_id is not a number");

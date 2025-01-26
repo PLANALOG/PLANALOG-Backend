@@ -4,6 +4,8 @@ import { createTaskDto, getTaskDto, updateTaskDto } from "../dtos/task.dto.js";
 import {updateTask, getTask, deleteTask} from "../services/task.service.js";
 import { toggleTaskCompletion } from "../services/task.service.js";
 import { findTaskWithPlanner } from "../repositories/task.repository.js";
+import { Prisma } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 export const handleCreateTask = async (req, res, next) => {
     /*
     #swagger.tags = ['Tasks']
@@ -60,7 +62,7 @@ export const handleCreateTask = async (req, res, next) => {
                                     example: "생성완료", 
                                     description: "성공 메시지"
                                 },
-                                title: { 
+                                title: { npm r
                                     type: "string", 
                                     example: "오늘 할일 1", 
                                     description: "생성된 할일 제목"
@@ -306,7 +308,7 @@ try {
     if (!task_id) {
         throw new Error("Task ID is required");
     }
-
+    const prisma = new PrismaClient();
     // Task가 사용자의 Task인지 검증
     const task = await prisma.task.findFirst({
         where: {
@@ -323,8 +325,8 @@ try {
 
     // 유효한 데이터 검증 (DTO 활용)
     const validData = await updateTaskDto(task_id, req.body);
-
-    console.log("data after dto", validData);
+    
+    console.log("data after dto", validData.task_id, validData.title);
 
     // Task 업데이트
     const updatedTask = await prisma.task.update({
@@ -666,7 +668,7 @@ export const handleDeleteTask = async(req, res, next) => {
         }
 
         // 권한 검증
-        if (task.planner.user_id !== BigInt(req.user.id)) {
+        if (task.planner.userId !== BigInt(req.user.id)) {
             throw new Error("Unauthorized: You cannot delete this task.");
         }
 
