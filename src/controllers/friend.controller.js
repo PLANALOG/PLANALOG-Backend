@@ -47,49 +47,40 @@ export const getFollowers = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(StatusCodes.OK).json({
-        message: "사용자 인증 정보가 필요합니다.",
-        data: null,
-      });
+      return res.success(null, "사용자 인증 정보가 필요합니다.");
     }
 
     const { search } = req.query; // 검색어
     const followers = await getFollowersService(userId, search);
 
-    res.status(StatusCodes.OK).json({
-      message: "팔로워 목록 조회 성공",
-      data: followers,
-    });
+    res.success(followers, "팔로워 목록 조회 성공");
   } catch (error) {
     console.error("팔로워 조회 중 에러:", error.message);
-    res.status(StatusCodes.OK).json({
-      message: "팔로워 목록 조회 중 에러가 발생했습니다.",
+    res.error({
+      errorCode: "F001",
+      reason: "팔로워 목록 조회 중 에러가 발생했습니다.",
       data: null,
     });
   }
 };
 
+
 export const getFollowing = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(StatusCodes.OK).json({
-        message: "사용자 인증 정보가 필요합니다.",
-        data: null,
-      });
+      return res.success(null, "사용자 인증 정보가 필요합니다.");
     }
 
     const { search } = req.query; // 검색어
     const following = await getFollowingService(userId, search);
 
-    res.status(StatusCodes.OK).json({
-      message: "팔로우하는 사람 목록 조회 성공",
-      data: following,
-    });
+    res.success(following, "팔로우하는 사람 목록 조회 성공");
   } catch (error) {
     console.error("팔로우 조회 중 에러:", error.message);
-    res.status(StatusCodes.OK).json({
-      message: "팔로우 목록 조회 중 에러가 발생했습니다.",
+    res.error({
+      errorCode: "F002",
+      reason: "팔로우 목록 조회 중 에러가 발생했습니다.",
       data: null,
     });
   }
@@ -160,27 +151,35 @@ export const getFriendCount = async (req, res) => {
   try {
     const userId = req.user?.id; // 로그인한 사용자 ID
     if (!userId) {
-      throw new Error('로그인한 사용자 정보가 필요합니다.');
+      return res.error({
+        errorCode: 'USER001',
+        reason: '로그인한 사용자 정보가 필요합니다.',
+        data: null,
+      });
     }
 
     const dto = createFriendCountDTO(userId);
 
     const friendCount = await getFriendCountService(dto.userId);
 
-    res.status(StatusCodes.OK).json({
+    return res.success({
       message: '팔로워 수 조회 성공',
       data: { friendCount },
     });
   } catch (error) {
     console.error('팔로워 수 조회 중 에러:', error.message);
-    res.status(StatusCodes.BAD_REQUEST).json({
-      message: error.message,
+    return res.error({
+      errorCode: 'FRIEND001',
+      reason: error.message,
+      data: null,
     });
   }
 };
 
 
+
 import { acceptFriendService } from "../services/friend.service.js";
+
 
 export const acceptFriend = async (req, res) => {
   try {
@@ -188,17 +187,30 @@ export const acceptFriend = async (req, res) => {
     const userId = req.user?.id; // 로그인한 사용자 ID
 
     if (!userId) {
-      return res.status(StatusCodes.UNAUTHORIZED).json({ message: "사용자 인증이 필요합니다." });
+      return res.error({
+        errorCode: "AUTH001",
+        reason: "사용자 인증이 필요합니다.",
+      });
     }
 
     const result = await acceptFriendService(friendId, userId);
 
     if (!result) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "권한이 없거나 유효하지 않은 요청입니다." });
+      return res.error({
+        errorCode: "FRIEND001",
+        reason: "권한이 없거나 유효하지 않은 요청입니다.",
+      });
     }
 
-    res.status(StatusCodes.OK).json({ message: "친구 요청이 수락되었습니다.", result });
+    res.success({
+      message: "친구 요청이 수락되었습니다.",
+      data: result,
+    });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+    console.error("친구 요청 수락 중 에러:", error.message);
+    res.error({
+      errorCode: "FRIEND002",
+      reason: error.message,
+    });
   }
 };

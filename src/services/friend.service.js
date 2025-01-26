@@ -96,6 +96,8 @@ export const getFollowingService = async (userId, search) => {
 };
 
 // src/services/friend.service.js
+import { acceptFriendRequest } from "../repositories/friend.repository.js";
+
 
 export const acceptFriendService = async (friendId, userId) => {
   const updatedFriend = await acceptFriendRequest(friendId, userId);
