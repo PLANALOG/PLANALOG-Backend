@@ -71,6 +71,21 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session()); //사용자의 모든 요청에 HTTP Cookie 중 sid 값이 있다면, 이를 MySQL DB에서 찾아, 일치하는 Session이 있다면 사용자 데이터를 가져와 req.user
 
+
+app.use((req, res, next) => {
+  // req.user Mocking
+  if (!req.user) {
+    req.user = {
+      id: 1, // 테스트 사용자 ID
+      email: "test@example.com",
+      name: "테스트 유저",
+    };
+  }
+  next(); // 다음 미들웨어로 진행
+});
+
+
+
 ////로그인 상태 확인-> merge 전 삭제
 app.get("/", (req, res) => {
   // #swagger.ignore = true

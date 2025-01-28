@@ -63,6 +63,21 @@ export const deleteUserComment = async(data) =>{
 }
 
 export const listComments = async (postId) => {
-    const comments = await getAllPostComments(postId);
-    return responseFromComments(comments);
+  // 게시글 존재 여부 확인
+  const postExists = await prisma.post.findUnique({
+    where: { id: postId },
+});
+if (!postExists) {
+    throw new PostIdNotFoundError("존재하지 않는 게시글입니다.", { postId });
+}
+
+// 댓글 목록 조회
+const comments = await getAllPostComments({ postId, cursor });
+
+// 댓글이 없는 경우 처리
+if (!comments || comments.length === 0) {
+    throw new CommentIdNotFoundError("댓글이 존재하지 않습니다.", { postId });
+}
+
+return responseFromComments(comments);
 };
