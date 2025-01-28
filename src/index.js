@@ -2,6 +2,8 @@
 import dotenv from "dotenv";
 import express from 'express';          // -> ES Module
 import cors from "cors";
+import task from "./routes/task.js";
+import taskCategory from "./routes/category.js"; //라우터 객체 가져오기 
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import session from "express-session";
 import passport from "passport";
@@ -9,14 +11,22 @@ import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
+import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile, handleDeleteUser, handleTestDeleteUser, handleEditUserImage } from "./controllers/user.controller.js";
+import { body, query, param } from "express-validator";
+import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
+import { userDeleteScheduler } from "./scheduler.js";
+import { upload } from "./multer.js";
 import{handleAddComment,handleEditComment,handleDeleteComment,handleListComment} from './controllers/comment.controller.js';
+
 dotenv.config();
 
 passport.use(googleStrategy);
 passport.use(kakaoStrategy);
 passport.use(naverStrategy);
 passport.serializeUser((user, done) => {
-  //console.log('serializeUser success')
+  console.log('user', user)
+  // ｕｓｅｒ는 콜백함수 ｖｅｒｉｆｙ에서 반환된 객체임¡
+  console.log('serializeUser success', user)
   done(null, user)
 });
 passport.deserializeUser((user, done) => {
@@ -70,27 +80,6 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session()); //사용자의 모든 요청에 HTTP Cookie 중 sid 값이 있다면, 이를 MySQL DB에서 찾아, 일치하는 Session이 있다면 사용자 데이터를 가져와 req.user
-
-
-app.use((req, res, next) => {
-  // req.user Mocking
-  if (!req.user) {
-    req.user = {
-      id: 1, // 테스트 사용자 ID
-      email: "test@example.com",
-      name: "테스트 유저",
-    };
-  }
-  next(); // 다음 미들웨어로 진행
-});
-
-
-
-////로그인 상태 확인-> merge 전 삭제
-app.get("/", (req, res) => {
-  // #swagger.ignore = true
-  res.send("Hello World!");
-});
 
 app.use(
   "/docs",
@@ -147,49 +136,130 @@ BigInt.prototype.toJSON = function () { // bigint 호환
 };
 
 app.get('/', (req, res) => {
+  // #swagger.ignore = true
   res.send('Hello World!')
   console.log(req.user)
 })
 
 //소셜로그인 - 구글 
-app.get("/oauth2/login/google", passport.authenticate("google"));
+app.get("/oauth2/login/google", passport.authenticate("google"), (req, res) => {
+  // #swagger.ignore = true
+});
 app.get(
   "/oauth2/callback/google",
   passport.authenticate("google", {
     failureRedirect: "/oauth2/login/google",
     failureMessage: true,
   }),
-  (req, res) => res.success()
+  (req, res) => {
+    // #swagger.ignore = true
+    res.success({ message: "로그인 성공" })
+  }
 );
 
 //소셜로그인 - 카카오
-app.get("/oauth2/login/kakao", passport.authenticate("kakao"));
+app.get("/oauth2/login/kakao", passport.authenticate("kakao"), (req, res) => {
+  // #swagger.ignore = true
+});
+
 app.get(
   "/oauth2/callback/kakao",
   passport.authenticate("kakao", {
     failureRedirect: "/oauth2/login/kakao",
     failureMessage: true,
   }),
-  (req, res) => res.success()
+  (req, res) => {
+    // #swagger.ignore = true
+    res.success({ message: "로그인 성공" })
+  }
 );
 
 //소셜로그인 - 네이버
-app.get("/oauth2/login/naver", passport.authenticate("naver"));
+app.get("/oauth2/login/naver", passport.authenticate("naver"), (req, res) => {
+  // #swagger.ignore = true
+});
 app.get(
   "/oauth2/callback/naver",
   passport.authenticate("naver", {
     failureRedirect: "/oauth2/login/naver",
     failureMessage: true,
   }),
-  (req, res) => res.success()
+  (req, res) => {
+    // #swagger.ignore = true
+    res.success({ message: "로그인 성공" })
+  }
 );
 
 
 
 //로그아웃
 app.get("/logout", (req, res) => {
-  req.logout(() => success());
+  /* 
+  #swagger.tags = ['Users']
+  #swagger.summary = '로그아웃 API'
+  #swagger.description = '로그아웃 요청을 합니다. 세션을 삭제하고, 로그아웃 성공 메시지를 반환합니다.'
+  */
+  console.log("로그아웃 요청")
+  req.logout(() => {
+    req.session.destroy();
+    res.success();
+  });
+
 });
+
+
+// Mock 인증 미들웨어
+const mockAuthMiddleware = (req, res, next) => {
+  req.user = { id: 1 }; // Mock user ID
+  next();
+};
+//task 관련 작업 
+app.use("/tasks", mockAuthMiddleware, task);
+//task_category 관련작업
+app.use("/task_category", mockAuthMiddleware, taskCategory )
+
+//회원정보 수정 API
+app.patch("/users/profile", [
+  body("nickname").optional().isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),
+  body("type").optional().isIn(["memo_user", "category_user"]).withMessage("type은 memo 또는 category만 가능합니다."),
+  body("introduction").optional().isString().withMessage("introduction은 문자열이어야 합니다."),
+  body("link").optional().isURL().withMessage("link는 URL 형식이어야 합니다."),
+], handleEditUser);
+
+// 프로필 사진 변경 
+app.post("/users/profile/image", upload.single("image"), handleEditUserImage);
+
+//닉네임 중복 조회 API
+app.get("/users/check_nickname",
+  query("nickname").exists().withMessage("닉네임을 입력하세요.")
+    .isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),
+  handleCheckNickname);
+
+//자신의 회원 정보 조회
+app.get("/users", handleMyProfile)
+
+//회원 정보 조회
+app.get("/users/:userId", [
+  param("userId").exists().withMessage("userId를 입력하세요.").isInt().withMessage("userId는 숫자여야 합니다."),
+], handleUserProfile)
+
+
+//플래너 조회 
+app.get('/planners', [
+  query("userId").optional().isInt().withMessage("userId는 숫자여야 합니다."),
+  query("date").optional().isDate().withMessage("date는 날짜형식이어야 합니다.ex)2025-01-01"),
+], handleDisplayPlanner);
+
+//플래너 삭제 
+app.delete("/planners/:plannerId", [
+  param("plannerId").exists().withMessage("plannerId를 입력하세요.").isInt().withMessage("plannerId는 숫자여야 합니다."),
+], handleDeletePlanner);
+
+//회원 탈퇴 
+app.delete("/users", handleDeleteUser)
+
+//테스트용 : 회원탈퇴복구 (탈퇴 회원 바로 회원가입 가능)
+app.post("/users/test", handleTestDeleteUser)
 
 //댓글 추가
 app.post("/posts/:postId/comments", handleAddComment);
@@ -197,8 +267,9 @@ app.post("/posts/:postId/comments", handleAddComment);
 app.patch("/posts/:postId/comments/:commentId",handleEditComment);
 //댓글 삭제
 app.delete("/comments/:commentId",handleDeleteComment);
-//댓글 목록록
+//댓글 목록
 app.get("/posts/:postId/comments", handleListComment);
+
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의
  */
@@ -214,6 +285,8 @@ app.use((err, req, res, next) => { //
   });
 });
 
+//매일 자정 탈퇴한 지 14일이 지난 유저 삭제
+app.listen(port, userDeleteScheduler);
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
