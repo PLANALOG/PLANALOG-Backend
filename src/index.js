@@ -262,13 +262,13 @@ app.delete("/users", handleDeleteUser)
 app.post("/users/test", handleTestDeleteUser)
 
 //댓글 추가
-app.post("/posts/:postId/comments", handleAddComment);
+app.post("/moments/:momentId/comments", handleAddComment);
 //댓글 수정
-app.patch("/posts/:postId/comments/:commentId",handleEditComment);
+app.patch("/moments/:momentId/comments/:commentId",handleEditComment);
 //댓글 삭제
 app.delete("/comments/:commentId",handleDeleteComment);
 //댓글 목록
-app.get("/posts/:postId/comments", handleListComment);
+app.get("/moments/:momentId/comments", handleListComment);
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의

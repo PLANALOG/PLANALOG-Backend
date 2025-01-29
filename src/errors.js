@@ -53,7 +53,7 @@ export class authError extends Error {
   }
 }
 
-export class PostIdNotFoundError extends Error{
+export class momentIdNotFoundError extends Error{
   errorCode = "C001";
 
   constructor(reason, data) {

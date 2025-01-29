@@ -107,8 +107,8 @@ export const handleAddComment = async (req, res, next) => {
     try{ 
       console.log("댓글 추가를 요청했습니다!");  
       console.log("body:", req.body);
-      const postId = parseInt(req.params.postId);
-      const commentData = bodyToComment(req.body, req.query.userId,postId);         
+      const momentId = parseInt(req.params.momentId);
+      const commentData = bodyToComment(req.body, req.query.userId,momentId);         
 
       const newComment = await addUserComment(commentData);
       res.status(StatusCodes.OK).success(newComment); 
@@ -267,9 +267,9 @@ export const handleAddComment = async (req, res, next) => {
     try{
       console.log("댓글 수정 기능 요청했습니다!");
       console.log("body:", req.body);
-      const postId = parseInt(req.params.postId);
+      const momentId = parseInt(req.params.momentId);
       const commentId = parseInt(req.params.commentId);
-      const editData = bodyToEditComment(req.body, req.query.userId, postId, commentId); 
+      const editData = bodyToEditComment(req.body, req.query.userId, momentId, commentId); 
       const updatedComment = await editUserComment(editData);
       res.status(StatusCodes.OK).success(updatedComment); 
     } catch (error) {
@@ -463,9 +463,9 @@ swagger.responses[404] = {
   }
   */
         try {
-            const postId = parseInt(req.params.postId);
+            const momentId = parseInt(req.params.momentId);
             const cursor = req.query.cursor ? parseInt(req.query.cursor) : null;
-            const comments = await listComments(postId, cursor);
+            const comments = await listComments(momentId, cursor);
             res.status(StatusCodes.OK).success(comments);
         } catch (error) {
             next(error);

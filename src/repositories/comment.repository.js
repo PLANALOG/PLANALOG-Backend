@@ -5,7 +5,7 @@ export const addComment = async (data) => { //댓글 데이터 받기
     const newComment = await prisma.comment.create({
         data:{
             userId: data.userId,
-            postId: data.postId,
+            momentId: data.momentId,
             content: data.content,
             createdAt: data.createdAt || new Date(),
         },
@@ -14,12 +14,12 @@ export const addComment = async (data) => { //댓글 데이터 받기
     return newComment.id;
 };
 
-export const editComment = async (data) => { //comment id????
+export const editComment = async (data) => { 
     console.log("Repository Input:", data);
     const updatedComment = await prisma.comment.update({ 
         where: { id: data.commentId },
         data:{userId: data.userId,
-            postId: data.postId,
+            momentId: data.momentId,
             content: data.content,
             updatedAt: data.updatedAt || new Date(),
     },
@@ -37,17 +37,17 @@ export const deleteComment = async (data) => {
     return eraseComment;
     };
 
-export const getAllPostComments =  async({ postId, cursor }) => {
+export const getAllmomentComments =  async({ momentId, cursor }) => {
     const comments = await prisma.comment.findMany({
         select:{
             id: true,
             content: true,
-            postId: true,
+            momentId: true,
             userId: true,
             createdAt: true,
         },
         where: {
-            postId: postId,
+            momentId: momentId,
             ...(cursor && { id: { gt: cursor } }), // Cursor 조건 추가
         },
         orderBy:{id:"asc"},  //정렬 기준

@@ -1,15 +1,15 @@
-    export const bodyToComment = ({comment},userId,postId) => {
+    export const bodyToComment = ({comment},userId,momentId) => {
     return {
-        userId: userId,  
-        postId:postId,
+        userId:userId,  
+        momentId:momentId,
         content:comment.content,
         createdAt:comment.createdAt|| new Date(),
     };
 };
-    export const bodyToEditComment =  ({ comment }, userId, postId, commentId)  => {
+    export const bodyToEditComment =  ({ comment }, userId, momentId, commentId)  => {
         return {
             userId,
-            postId,
+            momentId,
             commentId,
             content: comment.content,
             updatedAt: comment.updatedAt || new Date(),
