@@ -106,10 +106,7 @@ export const handleAddComment = async (req, res, next) => {
 
     try{ 
       console.log("댓글 추가를 요청했습니다!");  
-      console.log("body:", req.body);
-      const momentId = parseInt(req.params.momentId);
-      const commentData = bodyToComment(req.body, req.query.userId,req.params.momentId);         
-
+      const commentData = bodyToComment(req.body, req.query.userId,parseInt(req.params.momentId));         
       const newComment = await addUserComment(commentData);
       res.status(StatusCodes.OK).success(newComment); 
     } catch (error) {
@@ -266,7 +263,6 @@ export const handleAddComment = async (req, res, next) => {
   */ 
     try{
       console.log("댓글 수정 기능 요청했습니다!");
-      console.log("body:", req.body);
       const momentId = parseInt(req.params.momentId);
       const commentId = parseInt(req.params.commentId);
       const editData = bodyToEditComment(req.body, req.query.userId, momentId, commentId); 
@@ -375,7 +371,6 @@ swagger.responses[404] = {
 
       try{
         console.log("댓글 삭제 기능 요청");   
-        console.log("params:", req.params);
         const deleteData = bodyToDeleteComment(req.query.userId, req.params.commentId);
         const deleteComment = await deleteUserComment(deleteData);
         res.status(StatusCodes.OK).success(deleteComment); 
