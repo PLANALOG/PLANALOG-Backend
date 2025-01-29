@@ -1,23 +1,24 @@
-    export const bodyToComment = ({comment, post }) => {
+    export const bodyToComment = ({comment},userId,postId) => {
     return {
-
-        postId:post.id,
+        userId: userId,  
+        postId:postId,
         content:comment.content,
         createdAt:comment.createdAt|| new Date(),
     };
 };
-    export const bodyToEditComment = ({commentId,comment, post }) => {
-    return{
-        commentId,
-        postId:post.id,
-        content:comment.content,
-        updatedAt:comment.updatedAt || new Date(),
-    };
-};
-    export const bodyToDeleteComment =({ commentId,post}) => {
-        return{
+    export const bodyToEditComment =  ({ comment }, userId, postId, commentId)  => {
+        return {
+            userId,
+            postId,
             commentId,
-            postId:post.id,
+            content: comment.content,
+            updatedAt: comment.updatedAt || new Date(),
+        };
+    };
+    export const bodyToDeleteComment = (userId, commentId) => {
+        return{
+            userId: parseInt(userId), // 문자열로 전달될 수 있으므로 정수로 변환
+            commentId: parseInt(commentId),
         };
     };
 

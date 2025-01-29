@@ -7,6 +7,9 @@ export const addUserComment = async (data) =>{
     const postExists = await prisma.post.findUnique({
         where: { id: data.postId },
     });
+    if (!data.userId) {
+        throw new Error("userId가 요청되지 않았습니다.");
+    }
     if (!postExists) {
         throw new PostIdNotFoundError("존재하지 않는 게시글입니다.", data);
     }
@@ -24,14 +27,26 @@ export const addUserComment = async (data) =>{
 };
 
 export const editUserComment = async(data) =>{
+    const postExists = await prisma.post.findUnique({
+        where: { id: data.postId },
+    });
+
+    if (!postExists) {
+        throw new PostIdNotFoundError("존재하지 않는 게시글입니다.", { postId: data.postId });
+    }
+
     const commentExists = await prisma.comment.findUnique({
         where: { id: data.commentId },
     });
+
     if (!commentExists) {
         throw new CommentIdNotFoundError("존재하지 않는 댓글입니다.",data);
     }
     if (!data.content || data.content.trim() === "") {
         throw new ContentNotFoundError("댓글 내용이 비어 있습니다.", data);
+    }
+    if (data.userId !== commentExists.userId) {
+        throw new PermissionDeniedError("수정 권한이 없습니다.", data);
     }
     const updatedComment = await editComment({
         userId: data.userId,
@@ -46,14 +61,15 @@ export const editUserComment = async(data) =>{
 export const deleteUserComment = async(data) =>{
     const commentExists = await prisma.comment.findUnique({
         where: { id: data.commentId },
+        include: { post: true }
     });
     if (!commentExists) {
         throw new CommentIdNotFoundError("존재하지 않는 댓글입니다.",data);
     }
         // 댓글 작성자이거나 게시물 작성자인 경우만 삭제 허용
-    if (data.userId !== comment.userId && data.userId !== post.userId) {
-        throw new Error("삭제 권한이 없습니다.");
-    }
+        if (data.userId !== commentExists.userId && data.userId !== commentExists.post.userId) {
+            throw new PermissionDeniedError("삭제 권한이 없습니다.",data);
+        }
     const removeComment = await deleteComment({
         userId: data.userId,
         postId: data.postId,
@@ -70,14 +86,8 @@ export const listComments = async (postId) => {
 if (!postExists) {
     throw new PostIdNotFoundError("존재하지 않는 게시글입니다.", { postId });
 }
-
 // 댓글 목록 조회
 const comments = await getAllPostComments({ postId, cursor });
-
-// 댓글이 없는 경우 처리
-if (!comments || comments.length === 0) {
-    throw new CommentIdNotFoundError("댓글이 존재하지 않습니다.", { postId });
-}
-
-return responseFromComments(comments);
+//댓글이 없는 경우 빈 배열 반환
+return responseFromComments(comments || []);
 };

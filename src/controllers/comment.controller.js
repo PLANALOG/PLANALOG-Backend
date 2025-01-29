@@ -3,20 +3,6 @@ import { bodyToComment, bodyToEditComment, bodyToDeleteComment } from "../dtos/c
 import { addUserComment, editUserComment, deleteUserComment,listComments } from "../services/comment.service.js";
 
 export const handleAddComment = async (req, res, next) => {
-    try{ 
-      console.log("댓글 추가를 요청했습니다!");  
-      console.log("body:", req.body); // 값이 잘 들어오나 확인하기 위한 테스트용 
-      console.log(req.user);
-      const commentData = bodyToComment(req.body); // 반환 객체 저장
-      commentData.userId = req.user.id;           // 새 속성 추가
-
-      const newComment = await addUserComment(commentData);
-      res.status(StatusCodes.OK).success(newComment); 
-    } catch (error) {
-        next(error);
-    }
-      };
-
   /*
   #swagger.summary = '댓글 추가 API'
   #swagger.description = '지정된 게시글에 댓글을 추가합니다.'
@@ -118,21 +104,23 @@ export const handleAddComment = async (req, res, next) => {
   }
   */
 
+    try{ 
+      console.log("댓글 추가를 요청했습니다!");  
+      console.log("body:", req.body);
+      const postId = parseInt(req.params.postId);
+      const commentData = bodyToComment(req.body, req.query.userId,postId);         
+
+      const newComment = await addUserComment(commentData);
+      res.status(StatusCodes.OK).success(newComment); 
+    } catch (error) {
+        next(error);
+    }
+      };
+
+  
 
    export const handleEditComment = async (req, res, next) => {
-    try{
-      console.log("댓글 수정 기능 요청했습니다!");
-      console.log(req.user);
-      console.log("body:", req.body);
-      const editData = bodyToEditComment(req.body);
-      editData.userId = req.user.id; 
-      const updatedComment = await editUserComment(editData);
-      res.status(StatusCodes.OK).success(updatedComment); 
-    } catch (error) {
-      next(error);
-  }
-    };
-     /*
+      /*
   #swagger.summary = '댓글 수정 API'
   #swagger.description = '지정된 게시글의 특정 댓글 내용을 수정합니다.'
   #swagger.parameters['postId'] = {
@@ -232,31 +220,94 @@ export const handleAddComment = async (req, res, next) => {
         }
       }
     }
+  } 
+        #swagger.responses[404] = {
+  description: "존재하지 않는 게시글",
+  content: {
+    "application/json": {
+      schema: {
+        type: "object",
+        properties: {
+          resultType: { type: "string", example: "FAIL" },
+          error: {
+            type: "object",
+            properties: {
+              errorCode: { type: "string", example: "C001" },
+              reason: { type: "string", example: "존재하지 않는 게시글입니다." }
+            }
+          },
+          success: { type: "object", nullable: true, example: null }
+        }
+      }
+    }
   }
-*/
+}
+ #swagger.responses[403] = {
+    description: "권한 없음",
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          properties: {
+            resultType: { type: "string", example: "FAIL" },
+            error: {
+              type: "object",
+              properties: {
+                errorCode: { type: "string", example: "C004" },
+                reason: { type: "string", example: "댓글 수정 권한이 없습니다." }
+              }
+            },
+            success: { type: "object", nullable: true, example: null }
+          }
+        }
+      }
+    }
+  }
+  */ 
+    try{
+      console.log("댓글 수정 기능 요청했습니다!");
+      console.log("body:", req.body);
+      const postId = parseInt(req.params.postId);
+      const commentId = parseInt(req.params.commentId);
+      const editData = bodyToEditComment(req.body, req.query.userId, postId, commentId); 
+      const updatedComment = await editUserComment(editData);
+      res.status(StatusCodes.OK).success(updatedComment); 
+    } catch (error) {
+      next(error);
+  }
+    };
+   
+
     //댓글 삭제
     export const handleDeleteComment = async (req,res,next) => {
-      try{
-        console.log("댓글 삭제 기능 요청");   
-        console.log("body:", req.body);
-        console.log(req.user);
-        const deleteData = bodyToDeleteComment(req.body);
-        deleteData.userId =  req.user.id;
-        const deleteComment = await deleteUserComment(deleteData);
-        res.status(StatusCodes.OK).success(deleteComment); 
-      } catch (error) {
-        next(error);
-    }
-      };
-       /*
+        /*
   #swagger.summary = '댓글 삭제 API'
   #swagger.description = '지정된 댓글을 삭제합니다.'
+  
   #swagger.parameters['commentId'] = {
     in: 'path',
     required: true,
     description: '삭제할 댓글의 ID',
     schema: { type: 'integer' }
   }
+
+  #swagger.requestBody = {
+    required: true,
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          properties: {
+            commentId: { type: "integer", description: "삭제할 댓글의 ID" }
+          }
+        },
+        example: {
+          commentId: 123
+        }
+      }
+    }
+  }
+
   #swagger.responses[200] = {
     description: "댓글 삭제 성공",
     content: {
@@ -277,28 +328,7 @@ export const handleAddComment = async (req, res, next) => {
       }
     }
   }
-  #swagger.responses[400] = {
-    description: "잘못된 요청 (필수 데이터 누락)",
-    content: {
-      "application/json": {
-        schema: {
-          type: "object",
-          properties: {
-            resultType: { type: "string", example: "FAIL" },
-            error: {
-              type: "object",
-              properties: {
-                errorCode: { type: "string", example: "C002" },
-                reason: { type: "string", example: "댓글 ID가 요청에 포함되지 않았습니다." }
-              }
-            },
-            success: { type: "object", nullable: true, example: null }
-          }
-        }
-      }
-    }
-  }
-  #swagger.responses[404] = {
+swagger.responses[404] = {
     description: "존재하지 않는 댓글",
     content: {
       "application/json": {
@@ -340,21 +370,24 @@ export const handleAddComment = async (req, res, next) => {
       }
     }
   }
+
   */
 
+      try{
+        console.log("댓글 삭제 기능 요청");   
+        console.log("params:", req.params);
+        const deleteData = bodyToDeleteComment(req.query.userId, req.params.commentId);
+        const deleteComment = await deleteUserComment(deleteData);
+        res.status(StatusCodes.OK).success(deleteComment); 
+      } catch (error) {
+        next(error);
+    }
+      };
+     
 
       //댓글 목록 조회
       export const handleListComment = async (req, res, next) => {
-        try {
-            const postId = parseInt(req.params.postId);
-            const cursor = req.query.cursor ? parseInt(req.query.cursor) : null;
-            const comments = await listComments(postId, cursor);
-            res.status(StatusCodes.OK).success(comments);
-        } catch (error) {
-            next(error);
-        }
-    };
- /*
+        /*
   #swagger.summary = '댓글 목록 조회 API'
   #swagger.description = '지정된 게시글의 댓글 목록을 조회합니다.'
   #swagger.parameters['postId'] = {
@@ -429,3 +462,13 @@ export const handleAddComment = async (req, res, next) => {
     }
   }
   */
+        try {
+            const postId = parseInt(req.params.postId);
+            const cursor = req.query.cursor ? parseInt(req.query.cursor) : null;
+            const comments = await listComments(postId, cursor);
+            res.status(StatusCodes.OK).success(comments);
+        } catch (error) {
+            next(error);
+        }
+    };
+ 

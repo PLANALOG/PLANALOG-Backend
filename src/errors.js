@@ -82,3 +82,14 @@ export class CommentIdNotFoundError extends Error{
     this.data = data;
   }
 }
+
+
+export class PermissionDeniedError extends Error{
+  errorCode = "C004";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
