@@ -5,7 +5,7 @@ import { responseFromComments } from "../dtos/comment.dto.js";
 
 export const addUserComment = async (data) =>{
     const momentExists = await prisma.moment.findUnique({
-        where: { id: data.postId },
+        where: { id: data.momentId },
     });
     if (!data.userId) {
         throw new Error("userId가 요청되지 않았습니다.");
@@ -31,7 +31,7 @@ export const editUserComment = async(data) =>{
         where: { id: data.momentId },
     });
 
-    if (!postExists) {
+    if (!momentExists) {
         throw new momentIdNotFoundError("존재하지 않는 게시글입니다.", { momentId: data.momentId });
     }
 

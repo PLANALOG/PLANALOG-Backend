@@ -6,7 +6,7 @@ export const handleAddComment = async (req, res, next) => {
   /*
   #swagger.summary = '댓글 추가 API'
   #swagger.description = '지정된 게시글에 댓글을 추가합니다.'
-  #swagger.parameters['postId'] = {
+  #swagger.parameters['momentId'] = {
     in: 'path',
     required: true,
     description: '댓글을 추가할 게시글의 ID',
@@ -33,7 +33,7 @@ export const handleAddComment = async (req, res, next) => {
         }
       }
     }
-  }
+  }                              
 }
 
   #swagger.responses[200] = {
@@ -52,7 +52,7 @@ export const handleAddComment = async (req, res, next) => {
                 content: { type: "string", description: "댓글 내용", example: "이것은 테스트 댓글입니다." },
                 createdAt: { type: "string", format: "date-time", description: "생성 시간", example: "2025-01-28T12:34:56Z" },
                 userId: { type: "integer", description: "댓글 작성자 ID", example: 1 },
-                postId: { type: "integer", description: "게시글 ID", example: 1 }
+                momentId: { type: "integer", description: "게시글 ID", example: 1 }
               }
             }
           }
@@ -108,7 +108,7 @@ export const handleAddComment = async (req, res, next) => {
       console.log("댓글 추가를 요청했습니다!");  
       console.log("body:", req.body);
       const momentId = parseInt(req.params.momentId);
-      const commentData = bodyToComment(req.body, req.query.userId,momentId);         
+      const commentData = bodyToComment(req.body, req.query.userId,req.params.momentId);         
 
       const newComment = await addUserComment(commentData);
       res.status(StatusCodes.OK).success(newComment); 
@@ -123,7 +123,7 @@ export const handleAddComment = async (req, res, next) => {
       /*
   #swagger.summary = '댓글 수정 API'
   #swagger.description = '지정된 게시글의 특정 댓글 내용을 수정합니다.'
-  #swagger.parameters['postId'] = {
+  #swagger.parameters['momentId'] = {
     in: 'path',
     required: true,
     description: '댓글이 속한 게시글 ID',
@@ -169,7 +169,7 @@ export const handleAddComment = async (req, res, next) => {
                 content: { type: "string", description: "수정된 댓글 내용", example: "수정된 댓글 내용입니다." },
                 updatedAt: { type: "string", format: "date-time", description: "수정 시간", example: "2025-01-28T12:34:56Z" },
                 userId: { type: "integer", description: "댓글 작성자 ID", example: 1 },
-                postId: { type: "integer", description: "게시글 ID", example: 1 }
+                momentId: { type: "integer", description: "게시글 ID", example: 1 }
               }
             }
           }
@@ -390,7 +390,7 @@ swagger.responses[404] = {
         /*
   #swagger.summary = '댓글 목록 조회 API'
   #swagger.description = '지정된 게시글의 댓글 목록을 조회합니다.'
-  #swagger.parameters['postId'] = {
+  #swagger.parameters['momentId'] = {
     in: 'path',
     required: true,
     description: '댓글을 조회할 게시글의 ID',
@@ -423,7 +423,7 @@ swagger.responses[404] = {
                       content: { type: "string", description: "댓글 내용", example: "테스트 댓글입니다." },
                       createdAt: { type: "string", format: "date-time", description: "생성 시간", example: "2025-01-28T12:34:56Z" },
                       userId: { type: "integer", description: "작성자 ID", example: 1 },
-                      postId: { type: "integer", description: "게시글 ID", example: 1 }
+                      momentId: { type: "integer", description: "게시글 ID", example: 1 }
                     }
                   }
                 },
