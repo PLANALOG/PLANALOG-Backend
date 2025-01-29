@@ -1,8 +1,8 @@
 import { prisma } from "../db.config.js";
 
 // 좋아요 추가
-export const addPostLike = async (data) => {
-  const existingLike = await prisma.like.findFirst({
+export const addMomentLike = async (data) => {
+  const existingLike = await prisma.like.findFirst({ 
     where: {
       fromUserId: data.fromUserId,
       userId: data.userId,
@@ -29,7 +29,7 @@ export const addPostLike = async (data) => {
 };
 
 // 좋아요 삭제
-export const removePostLike = async (data) => {
+export const removeMomentLike = async (data) => {
   const existingLike = await prisma.like.findUnique({
     where: { id: data.likeId ,
     user: { isDeleted: false },

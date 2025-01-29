@@ -16,7 +16,7 @@ import { body, query, param } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 import { userDeleteScheduler } from "./scheduler.js";
 import { upload } from "./multer.js";
-import{handleLikePost,handleDeleteLikePost} from './controllers/like.controller.js';
+import{handleLikeMoment,handleDeleteLikeMoment} from './controllers/like.controller.js';
 
 dotenv.config();
 
@@ -260,8 +260,8 @@ app.delete("/users", handleDeleteUser)
 app.post("/users/test", handleTestDeleteUser)
 
 //좋아요 추가, 삭제
-app.post("/posts/:postId/likes", handleLikePost);
-app.delete("/posts/:postId/likes", handleDeleteLikePost);
+app.post("/moments/:momentId/likes", handleLikeMoment);
+app.delete("/moments/:momentId/likes", handleDeleteLikeMoment);
 
 
 /**

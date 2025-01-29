@@ -53,7 +53,7 @@ export class authError extends Error {
   }
 }
 //중복 좋아요
-export class DuplicateLikePostError extends Error{
+export class DuplicateLikeMomentError extends Error{
   errorCode = "L001";
 
   constructor(reason, data) {
@@ -74,7 +74,7 @@ export class DuplicateLikePostError extends Error{
   }
  }
 
- //본인이 누른 좋아요 X
+ //권한 없는 좋아요(본인이 누른 좋아요 X)
  export class LikeNotOwnedByUserError extends Error{
   errorCode = "L003";
 
@@ -85,8 +85,8 @@ export class DuplicateLikePostError extends Error{
  }
 }
 
-//postId X
-export class PostIdNotFoundError extends Error{
+//momentId X
+export class MomentIdNotFoundError extends Error{
   errorCode = "C001";
 
   constructor(reason, data) {
@@ -96,7 +96,7 @@ export class PostIdNotFoundError extends Error{
   }
 }
 
-
+//좋아요id 누락
 export class LikeIdMissingError extends Error{
   errorCode = "L004";
 
