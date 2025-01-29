@@ -62,7 +62,7 @@ export class momentIdNotFoundError extends Error{
     this.data = data;
   }
 }
-
+//댓글 내용 공백
 export class ContentNotFoundError extends Error{
   errorCode = "C002";
 
@@ -83,9 +83,20 @@ export class CommentIdNotFoundError extends Error{
   }
 }
 
-
+//수정 권한
 export class PermissionDeniedError extends Error{
   errorCode = "C004";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+
+//500자 이상 댓글
+export class ContentTooLongError extends Error{
+  errorCode = "C005";
 
   constructor(reason, data) {
     super(reason);

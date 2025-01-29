@@ -3,38 +3,47 @@ import { bodyToComment, bodyToEditComment, bodyToDeleteComment } from "../dtos/c
 import { addUserComment, editUserComment, deleteUserComment,listComments } from "../services/comment.service.js";
 
 export const handleAddComment = async (req, res, next) => {
-  /*
+ /*
+  #swagger.tags = ['Comments']
   #swagger.summary = '댓글 추가 API'
-  #swagger.description = '지정된 게시글에 댓글을 추가합니다.'
+  #swagger.description = '지정된 Moment에 댓글을 추가합니다.'
+
   #swagger.parameters['momentId'] = {
     in: 'path',
     required: true,
-    description: '댓글을 추가할 게시글의 ID',
+    description: '댓글을 추가할 Moment의 ID',
     schema: { type: 'integer' }
   }
-#swagger.requestBody = {
-  required: true,
-  content: {
-    "application/json": {
-      schema: {
-        type: "object",
-        properties: {
-          comment: {
-            type: "object",
-            properties: {
-              content: {
-                type: "string",
-                description: "댓글 내용 (최대 500자)",
-                maxLength: 500,
-                example: "이것은 댓글 내용입니다."
-              }
+
+  #swagger.requestBody = {
+    required: true,
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          properties: {
+            comment: {
+              type: "object",
+              properties: {
+                content: {
+                  type: "string",
+                  description: "댓글 내용 (최대 500자)",
+                  maxLength: 500,
+                  example: "이것은 댓글 내용입니다."
+                }
+              },
+              required: ["content"]
             }
+          }
+        },
+        example: {
+          comment: {
+            content: "이것은 댓글 내용입니다."
           }
         }
       }
     }
-  }                              
-}
+  }
 
   #swagger.responses[200] = {
     description: "댓글 추가 성공",
@@ -52,7 +61,7 @@ export const handleAddComment = async (req, res, next) => {
                 content: { type: "string", description: "댓글 내용", example: "이것은 테스트 댓글입니다." },
                 createdAt: { type: "string", format: "date-time", description: "생성 시간", example: "2025-01-28T12:34:56Z" },
                 userId: { type: "integer", description: "댓글 작성자 ID", example: 1 },
-                momentId: { type: "integer", description: "게시글 ID", example: 1 }
+                momentId: { type: "integer", description: "Moment ID", example: 1 }
               }
             }
           }
@@ -60,29 +69,53 @@ export const handleAddComment = async (req, res, next) => {
       }
     }
   }
-  #swagger.responses[400] = {
-    description: "잘못된 요청 (필수 데이터 누락)",
-    content: {
-      "application/json": {
-        schema: {
-          type: "object",
-          properties: {
-            resultType: { type: "string", example: "FAIL" },
-            error: {
-              type: "object",
-              properties: {
-                errorCode: { type: "string", example: "C002" },
-                reason: { type: "string", example: "댓글 내용이 비어 있습니다." }
-              }
-            },
-            success: { type: "object", nullable: true, example: null }
-          }
+
+ #swagger.responses[400] = {
+  description: "잘못된 요청 - 댓글 내용이 비어 있음 (C002)",
+  content: {
+    "application/json": {
+      schema: {
+        type: "object",
+        properties: {
+          resultType: { type: "string", example: "FAIL" },
+          error: {
+            type: "object",
+            properties: {
+              errorCode: { type: "string", example: "C002" },
+              reason: { type: "string", example: "댓글 내용이 비어 있습니다." }
+            }
+          },
+          success: { type: "object", nullable: true, example: null }
         }
       }
     }
   }
+}
+
+#swagger.responses[422] = {
+  description: "잘못된 요청 - 댓글 내용이 500자를 초과함 (C005)",
+  content: {
+    "application/json": {
+      schema: {
+        type: "object",
+        properties: {
+          resultType: { type: "string", example: "FAIL" },
+          error: {
+            type: "object",
+            properties: {
+              errorCode: { type: "string", example: "C005" },
+              reason: { type: "string", example: "댓글 내용이 500자를 초과할 수 없습니다." }
+            }
+          },
+          success: { type: "object", nullable: true, example: null }
+        }
+      }
+    }
+  }
+}
+
   #swagger.responses[404] = {
-    description: "존재하지 않는 게시글",
+    description: "존재하지 않는 Moment",
     content: {
       "application/json": {
         schema: {
@@ -92,8 +125,8 @@ export const handleAddComment = async (req, res, next) => {
             error: {
               type: "object",
               properties: {
-                errorCode: { type: "string", example: "C001" },
-                reason: { type: "string", example: "존재하지 않는 게시글입니다." }
+                errorCode: { type: "C001" },
+                reason: { type: "string", example: "존재하지 않는 Moment입니다." }
               }
             },
             success: { type: "object", nullable: true, example: null }
@@ -102,7 +135,7 @@ export const handleAddComment = async (req, res, next) => {
       }
     }
   }
-  */
+*/
 
     try{ 
       console.log("댓글 추가를 요청했습니다!");  
@@ -114,10 +147,9 @@ export const handleAddComment = async (req, res, next) => {
     }
       };
 
-  
-
    export const handleEditComment = async (req, res, next) => {
       /*
+  #swagger.tags = ['Comments']
   #swagger.summary = '댓글 수정 API'
   #swagger.description = '지정된 게시글의 특정 댓글 내용을 수정합니다.'
   #swagger.parameters['momentId'] = {
@@ -175,27 +207,49 @@ export const handleAddComment = async (req, res, next) => {
     }
   }
 
-  #swagger.responses[400] = {
-    description: "잘못된 요청 (필수 데이터 누락)",
-    content: {
-      "application/json": {
-        schema: {
-          type: "object",
-          properties: {
-            resultType: { type: "string", example: "FAIL" },
-            error: {
-              type: "object",
-              properties: {
-                errorCode: { type: "string", example: "C002" },
-                reason: { type: "string", example: "댓글 내용이 비어 있습니다." }
-              }
-            },
-            success: { type: "object", nullable: true, example: null }
-          }
+#swagger.responses[400] = {
+  description: "잘못된 요청 - 댓글 내용이 비어 있음 (C002)",
+  content: {
+    "application/json": {
+      schema: {
+        type: "object",
+        properties: {
+          resultType: { type: "string", example: "FAIL" },
+          error: {
+            type: "object",
+            properties: {
+              errorCode: { type: "string", example: "C002" },
+              reason: { type: "string", example: "댓글 내용이 비어 있습니다." }
+            }
+          },
+          success: { type: "object", nullable: true, example: null }
         }
       }
     }
   }
+}
+
+#swagger.responses[422] = {
+  description: "잘못된 요청 - 댓글 내용이 500자를 초과함 (C005)",
+  content: {
+    "application/json": {
+      schema: {
+        type: "object",
+        properties: {
+          resultType: { type: "string", example: "FAIL" },
+          error: {
+            type: "object",
+            properties: {
+              errorCode: { type: "string", example: "C005" },
+              reason: { type: "string", example: "댓글 내용이 500자를 초과할 수 없습니다." }
+            }
+          },
+          success: { type: "object", nullable: true, example: null }
+        }
+      }
+    }
+  }
+}
 
   #swagger.responses[404] = {
     description: "존재하지 않는 댓글",
@@ -276,7 +330,8 @@ export const handleAddComment = async (req, res, next) => {
 
     //댓글 삭제
     export const handleDeleteComment = async (req,res,next) => {
-        /*
+  /*
+  #swagger.tags = ['Comments']        
   #swagger.summary = '댓글 삭제 API'
   #swagger.description = '지정된 댓글을 삭제합니다.'
   
@@ -383,6 +438,7 @@ swagger.responses[404] = {
       //댓글 목록 조회
       export const handleListComment = async (req, res, next) => {
         /*
+  #swagger.tags = ['Comments']        
   #swagger.summary = '댓글 목록 조회 API'
   #swagger.description = '지정된 게시글의 댓글 목록을 조회합니다.'
   #swagger.parameters['momentId'] = {
