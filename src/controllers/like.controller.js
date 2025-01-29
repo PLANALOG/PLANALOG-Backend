@@ -234,7 +234,6 @@ export const handleDeleteLikeMoment =  async (req, res, next) =>{
 
   try{ 
   console.log("Like 삭제를 요청했습니다!");
-  console.log(req.body);
   const like = await deleteMomentLike(bodyToDeleteLike(req.body), req.query.userId);
   res.status(StatusCodes.OK).success(like);
   } catch (error) {
