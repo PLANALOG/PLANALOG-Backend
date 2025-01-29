@@ -15,6 +15,7 @@ import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile
 import { body, query, param } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 import { userDeleteScheduler } from "./scheduler.js";
+import { handleCreateMoment } from "./controllers/moment.controller.js";
 import { upload } from "./multer.js";
 
 dotenv.config();
@@ -251,6 +252,10 @@ app.get('/planners', [
 app.delete("/planners/:plannerId", [
   param("plannerId").exists().withMessage("plannerId를 입력하세요.").isInt().withMessage("plannerId는 숫자여야 합니다."),
 ], handleDeletePlanner);
+
+//모먼트 생성
+app.post("/moments", handleCreateMoment);
+
 
 //회원 탈퇴 
 app.delete("/users", handleDeleteUser)
