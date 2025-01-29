@@ -1,5 +1,7 @@
 import {DuplicateLikePostError, PostIdNotFoundError, LikeIdNotExistError,LikeIdMissingError} from "../errors.js";
 import {addPostLike, removePostLike} from "../repositories/like.repository.js";
+import { prisma } from "../db.config.js"; 
+
 
  export const likePost = async (data) => {
     if (!data.entityId || !data.entityType || !data.userId) {
