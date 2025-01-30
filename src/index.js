@@ -7,7 +7,7 @@ import taskCategory from "./routes/category.js"; //라우터 객체 가져오기
 // import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 // import session from "express-session";
 import passport from "passport";
-import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
+import { googleStrategy, handleRefreshToken, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
@@ -17,7 +17,7 @@ import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner
 import { userDeleteScheduler } from "./scheduler.js";
 import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
-import { handleNaverTokenLogin } from "./auth.config.js";
+import { handleNaverTokenLogin, handleKakaoTokenLogin, handleGoogleTokenLogin } from "./auth.config.js";
 
 
 dotenv.config();
@@ -109,25 +109,17 @@ app.get("/openapi.json", async (req, res, next) => {
       title: "PLANALOG",
       description: "PLANALOG 테스트 문서입니다.",
     },
-    host: "15.164.83.14:3000",
+    host: "localhost:3000",
     components: {
       securitySchemes: {
-        OAuth2: {
-          type: 'oauth2',
-          flows: {
-            authorizationCode: {
-              authorizationUrl: 'http://15.164.83.14:3000/oauth2/login/google',
-              tokenUrl: 'http://15.164.83.14:3000/oauth2/callback/google',
-              scopes: {
-                read: 'Grants read access',
-                write: 'Grants write access',
-                admin: 'Grants access to admin operations'
-              }
-            }
-          }
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "Authorization 헤더에 'Bearer {token}' 형식으로 입력하세요."
         }
       }
-    }
+    },
   };
 
   const result = await swaggerAutogen(options)(outputFile, routes, doc);
@@ -231,6 +223,12 @@ app.get("/logout", (req, res) => {
 
 app.post("/oauth2/naver/token", handleNaverTokenLogin);
 
+app.post("/oauth2/kakao/token", handleKakaoTokenLogin);
+
+app.post("/oauth2/google/token", handleGoogleTokenLogin);
+//리프레시 토큰 이용해 액세스 토큰 재발급 
+app.post("/refresh_token", handleRefreshToken);
+
 
 // Mock 인증 미들웨어
 const mockAuthMiddleware = (req, res, next) => {
@@ -248,10 +246,10 @@ app.patch("/users/profile", [
   body("type").optional().isIn(["memo_user", "category_user"]).withMessage("type은 memo 또는 category만 가능합니다."),
   body("introduction").optional().isString().withMessage("introduction은 문자열이어야 합니다."),
   body("link").optional().isURL().withMessage("link는 URL 형식이어야 합니다."),
-], handleEditUser);
+], authenticateJWT, handleEditUser);
 
 // 프로필 사진 변경 
-app.post("/users/profile/image", upload.single("image"), handleEditUserImage);
+app.post("/users/profile/image", authenticateJWT, upload.single("image"), handleEditUserImage);
 
 //닉네임 중복 조회 API
 app.get("/users/check_nickname",
@@ -272,15 +270,15 @@ app.get("/users/:userId", [
 app.get('/planners', [
   query("userId").optional().isInt().withMessage("userId는 숫자여야 합니다."),
   query("date").optional().isDate().withMessage("date는 날짜형식이어야 합니다.ex)2025-01-01"),
-], handleDisplayPlanner);
+], authenticateJWT, handleDisplayPlanner);
 
 //플래너 삭제 
 app.delete("/planners/:plannerId", [
   param("plannerId").exists().withMessage("plannerId를 입력하세요.").isInt().withMessage("plannerId는 숫자여야 합니다."),
-], handleDeletePlanner);
+], authenticateJWT, handleDeletePlanner);
 
 //회원 탈퇴 
-app.delete("/users", handleDeleteUser)
+app.delete("/users", authenticateJWT, handleDeleteUser)
 
 //테스트용 : 회원탈퇴복구 (탈퇴 회원 바로 회원가입 가능)
 app.post("/users/test", handleTestDeleteUser)
