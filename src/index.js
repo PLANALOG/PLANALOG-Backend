@@ -38,6 +38,16 @@ const app = express()
 const port = process.env.PORT;
 
 
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your-secret", // 반드시 비밀 키 설정
+    resave: false, // 세션 변경이 없을 때 저장 방지
+    saveUninitialized: false, // 초기화되지 않은 세션을 저장하지 않음
+    cookie: { secure: false }, // HTTPS 사용 시 secure: true로 설정
+  })
+);
+
+
 
 
 /**
@@ -283,13 +293,25 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
+import { saveSearchRecord/*, getSearchRecords, deleteSearchRecord, deleteAllSearchRecords*/ } from "./controllers/search.controller.js";
+
+import { searchUsers } from "./controllers/search.controller.js";
+import { getSearchRecords } from "./controllers/search.controller.js";
+import { deleteSearchRecord } from "./controllers/search.controller.js";
+
+
+
 import { updateNoticeReadStatus } from "./controllers/notice.controller.js";
 import { createNotice } from "./controllers/notice.controller.js";
 import { deleteNotice } from "./controllers/notice.controller.js";
 import { getNotices } from "./controllers/notice.controller.js";
 
 
+app.get("/searches/users", searchUsers);
+app.post("/searches", saveSearchRecord);
+app.get("/searches/records", getSearchRecords);
 app.post("/post/notices", createNotice);
 app.patch("/notices/:noticeId/read", updateNoticeReadStatus);
 app.get("/notices", getNotices);
 app.delete("/notices/:noticeId", deleteNotice);
+app.delete("/searches/records/:recordId", deleteSearchRecord);
