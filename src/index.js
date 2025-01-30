@@ -17,7 +17,7 @@ import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner
 import { userDeleteScheduler } from "./scheduler.js";
 import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
-import { handleNaverTokenLogin } from "./auth.config.js";
+import { handleNaverTokenLogin, handleKakaoTokenLogin } from "./auth.config.js";
 
 
 dotenv.config();
@@ -217,6 +217,7 @@ app.get("/logout", (req, res) => {
 });
 
 app.post("/oauth2/naver/token", handleNaverTokenLogin);
+app.post("/oauth2/kakao/token", handleKakaoTokenLogin);
 //리프레시 토큰 이용해 액세스 토큰 재발급 
 app.post("/refresh_token", handleRefreshToken);
 
