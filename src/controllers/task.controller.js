@@ -62,7 +62,7 @@ export const handleCreateTask = async (req, res, next) => {
                                     example: "생성완료", 
                                     description: "성공 메시지"
                                 },
-                                title: { npm r
+                                title: { 
                                     type: "string", 
                                     example: "오늘 할일 1", 
                                     description: "생성된 할일 제목"
