@@ -1,18 +1,20 @@
-import { searchUsersService, saveSearchRecordService } from "../services/search.service.js";
-import { deleteSearchRecordService } from "../services/search.service.js";
+import { searchUsersService, saveSearchRecordService, deleteSearchRecordService, getSearchRecordsService } from "../services/search.service.js";
 import { validateDeleteSearchRecordDTO } from "../dtos/search.dto.js";
-import { getSearchRecordsService } from "../services/search.service.js";
-
 
 export const searchUsers = async (req, res) => {
+  /*
+  #swagger.tags = ['Search']
+  #swagger.summary = '사용자 검색 API'
+  */
+
   try {
-    const { query } = req.query; 
-    const userId = req.user?.id;
+    const { query } = req.query;
+    const userId = req.query.userId;
 
     if (!userId) {
       return res.error({
         errorCode: "USER001",
-        reason: "사용자 인증 정보가 필요합니다.",
+        reason: "userId 쿼리 파라미터가 필요합니다.",
         data: null,
       });
     }
@@ -34,8 +36,6 @@ export const searchUsers = async (req, res) => {
       data: users,
     });
   } catch (error) {
-    console.error("사용자 검색 중 에러:", error.message);
-
     return res.error({
       errorCode: "SERVER001",
       reason: "사용자 검색 중 서버 오류가 발생했습니다.",
@@ -44,18 +44,20 @@ export const searchUsers = async (req, res) => {
   }
 };
 
-
-
-
 export const saveSearchRecord = async (req, res) => {
+  /*
+  #swagger.tags = ['Search']
+  #swagger.summary = '검색 기록 저장 API'
+  */
+
   try {
-    const userId = req.user?.id;
+    const userId = req.query.userId;
     const { content } = req.body;
 
     if (!userId) {
       return res.error({
         errorCode: "USER001",
-        reason: "사용자 인증 정보가 필요합니다.",
+        reason: "userId 쿼리 파라미터가 필요합니다.",
         data: null,
       });
     }
@@ -67,8 +69,6 @@ export const saveSearchRecord = async (req, res) => {
       data: record,
     });
   } catch (error) {
-    console.error("검색 기록 저장 중 에러:", error.message);
-
     return res.error({
       errorCode: "SERVER001",
       reason: "검색 기록 저장 중 서버 오류가 발생했습니다.",
@@ -77,19 +77,19 @@ export const saveSearchRecord = async (req, res) => {
   }
 };
 
-
-
-
 export const getSearchRecords = async (req, res) => {
-  try {
-    console.log("검색 기록 조회 요청이 들어왔습니다!");
+  /*
+  #swagger.tags = ['Search']
+  #swagger.summary = '검색 기록 조회 API'
+  */
 
-    const userId = req.user?.id;
+  try {
+    const userId = req.query.userId;
 
     if (!userId) {
       return res.error({
         errorCode: "USER001",
-        reason: "사용자 인증 정보가 필요합니다.",
+        reason: "userId 쿼리 파라미터가 필요합니다.",
         data: null,
       });
     }
@@ -101,8 +101,6 @@ export const getSearchRecords = async (req, res) => {
       data: records,
     });
   } catch (error) {
-    console.error("검색 기록 조회 중 에러:", error.message);
-
     return res.error({
       errorCode: "SERVER001",
       reason: "검색 기록 조회 중 서버 오류가 발생했습니다.",
@@ -111,16 +109,20 @@ export const getSearchRecords = async (req, res) => {
   }
 };
 
-
 export const deleteSearchRecord = async (req, res) => {
+  /*
+  #swagger.tags = ['Search']
+  #swagger.summary = '검색 기록 삭제 API'
+  */
+
   try {
-    const userId = req.user?.id;
+    const userId = req.query.userId;
     const { recordId } = req.params;
 
     if (!userId) {
       return res.error({
         errorCode: "USER001",
-        reason: "사용자 인증 정보가 필요합니다.",
+        reason: "userId 쿼리 파라미터가 필요합니다.",
         data: null,
       });
     }
@@ -133,8 +135,6 @@ export const deleteSearchRecord = async (req, res) => {
       message: "검색 기록 삭제 성공",
     });
   } catch (error) {
-    console.error("검색 기록 삭제 중 에러:", error.message);
-
     return res.error({
       errorCode: "DELETE001",
       reason: "검색 기록 삭제 중 오류가 발생했습니다.",
