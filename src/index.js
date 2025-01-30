@@ -241,10 +241,10 @@ app.patch("/users/profile", [
   body("type").optional().isIn(["memo_user", "category_user"]).withMessage("type은 memo 또는 category만 가능합니다."),
   body("introduction").optional().isString().withMessage("introduction은 문자열이어야 합니다."),
   body("link").optional().isURL().withMessage("link는 URL 형식이어야 합니다."),
-], handleEditUser);
+], authenticateJWT, handleEditUser);
 
 // 프로필 사진 변경 
-app.post("/users/profile/image", upload.single("image"), handleEditUserImage);
+app.post("/users/profile/image", authenticateJWT, upload.single("image"), handleEditUserImage);
 
 //닉네임 중복 조회 API
 app.get("/users/check_nickname",
@@ -265,15 +265,15 @@ app.get("/users/:userId", [
 app.get('/planners', [
   query("userId").optional().isInt().withMessage("userId는 숫자여야 합니다."),
   query("date").optional().isDate().withMessage("date는 날짜형식이어야 합니다.ex)2025-01-01"),
-], handleDisplayPlanner);
+], authenticateJWT, handleDisplayPlanner);
 
 //플래너 삭제 
 app.delete("/planners/:plannerId", [
   param("plannerId").exists().withMessage("plannerId를 입력하세요.").isInt().withMessage("plannerId는 숫자여야 합니다."),
-], handleDeletePlanner);
+], authenticateJWT, handleDeletePlanner);
 
 //회원 탈퇴 
-app.delete("/users", handleDeleteUser)
+app.delete("/users", authenticateJWT, handleDeleteUser)
 
 //테스트용 : 회원탈퇴복구 (탈퇴 회원 바로 회원가입 가능)
 app.post("/users/test", handleTestDeleteUser)
