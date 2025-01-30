@@ -1,14 +1,24 @@
-import { StatusCodes } from 'http-status-codes'; // HTTP 상태 코드를 활용하기 위해 추가
+import { StatusCodes } from "http-status-codes";
 import { prisma } from "../db.config.js";
-import { addFriendService, getFriendsService } from '../services/friend.service.js';
-import { getFriendCountService } from '../services/friend.service.js';
-import { createFriendCountDTO } from '../dtos/friend.dto.js';
-import { deleteFriendService } from "../services/friend.service.js";
-import { deleteFriendDeleteDTO } from "../dtos/friend.dto.js";
+import {
+  addFriendService,
+  getFriendsService,
+  getFriendCountService,
+  deleteFriendService,
+  acceptFriendService
+} from "../services/friend.service.js";
+import {
+  createFriendCountDTO,
+  deleteFriendDeleteDTO
+} from "../dtos/friend.dto.js";
 
+/*
+#swagger.tags = ['Friends']
+#swagger.summary = '친구 추가 API'
+*/
 export const addFriend = async (req, res) => {
   try {
-    const fromUserId = req.query.userId; // 쿼리 파라미터에서 가져옴
+    const fromUserId = req.query.userId;
     if (!fromUserId) {
       return res.status(StatusCodes.UNAUTHORIZED).json({
         errorCode: "A001",
@@ -38,19 +48,22 @@ export const addFriend = async (req, res) => {
   }
 };
 
+/*
+#swagger.tags = ['Friends']
+#swagger.summary = '팔로워 목록 조회 API'
+*/
 export const getFollowers = async (req, res) => {
   try {
-    const userId = req.query.userId; 
+    const userId = req.query.userId;
     if (!userId) {
       return res.json({ message: "userId 쿼리 파라미터가 필요합니다." });
     }
 
-    const { search } = req.query; 
+    const { search } = req.query;
     const followers = await getFollowersService(userId, search);
 
     res.json({ message: "팔로워 목록 조회 성공", data: followers });
   } catch (error) {
-    console.error("팔로워 조회 중 에러:", error.message);
     res.json({
       errorCode: "F001",
       reason: "팔로워 목록 조회 중 에러가 발생했습니다.",
@@ -59,6 +72,10 @@ export const getFollowers = async (req, res) => {
   }
 };
 
+/*
+#swagger.tags = ['Friends']
+#swagger.summary = '팔로우 목록 조회 API'
+*/
 export const getFollowing = async (req, res) => {
   try {
     const userId = req.query.userId;
@@ -66,12 +83,11 @@ export const getFollowing = async (req, res) => {
       return res.json({ message: "userId 쿼리 파라미터가 필요합니다." });
     }
 
-    const { search } = req.query; 
+    const { search } = req.query;
     const following = await getFollowingService(userId, search);
 
     res.json({ message: "팔로우하는 사람 목록 조회 성공", data: following });
   } catch (error) {
-    console.error("팔로우 조회 중 에러:", error.message);
     res.json({
       errorCode: "F002",
       reason: "팔로우 목록 조회 중 에러가 발생했습니다.",
@@ -80,10 +96,14 @@ export const getFollowing = async (req, res) => {
   }
 };
 
+/*
+#swagger.tags = ['Friends']
+#swagger.summary = '친구 삭제 API'
+*/
 export const deleteFriend = async (req, res) => {
   try {
-    const { friendId } = req.params; 
-    const userId = req.query.userId;     
+    const { friendId } = req.params;
+    const userId = req.query.userId;
 
     if (!friendId || !userId) {
       return res.status(StatusCodes.BAD_REQUEST).json({
@@ -100,7 +120,6 @@ export const deleteFriend = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    console.error("친구 삭제 중 에러:", error.message);
     res.status(error.statusCode || StatusCodes.BAD_REQUEST).json({
       errorCode: error.errorCode || "D002",
       reason: error.message || "친구 삭제 중 오류가 발생했습니다.",
@@ -109,13 +128,17 @@ export const deleteFriend = async (req, res) => {
   }
 };
 
+/*
+#swagger.tags = ['Friends']
+#swagger.summary = '친구 수 조회 API'
+*/
 export const getFriendCount = async (req, res) => {
   try {
     const userId = req.query.userId;
     if (!userId) {
       return res.json({
-        errorCode: 'USER001',
-        reason: 'userId 쿼리 파라미터가 필요합니다.',
+        errorCode: "USER001",
+        reason: "userId 쿼리 파라미터가 필요합니다.",
         data: null,
       });
     }
@@ -124,22 +147,25 @@ export const getFriendCount = async (req, res) => {
     const friendCount = await getFriendCountService(dto.userId);
 
     return res.json({
-      message: '팔로워 수 조회 성공',
+      message: "팔로워 수 조회 성공",
       data: { friendCount },
     });
   } catch (error) {
-    console.error('팔로워 수 조회 중 에러:', error.message);
     return res.json({
-      errorCode: 'FRIEND001',
+      errorCode: "FRIEND001",
       reason: error.message,
       data: null,
     });
   }
 };
 
+/*
+#swagger.tags = ['Friends']
+#swagger.summary = '친구 요청 수락 API'
+*/
 export const acceptFriend = async (req, res) => {
   try {
-    const { friendId } = req.params; 
+    const { friendId } = req.params;
     const userId = req.query.userId;
 
     if (!userId) {
@@ -163,7 +189,6 @@ export const acceptFriend = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    console.error("친구 요청 수락 중 에러:", error.message);
     res.json({
       errorCode: "FRIEND002",
       reason: error.message,
