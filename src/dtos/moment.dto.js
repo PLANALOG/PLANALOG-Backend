@@ -1,4 +1,5 @@
 // moment 생성 DTO
+// moment 수정 DTO
 
 export const bodyToCreateMoment = (body) => {
     
@@ -73,6 +74,64 @@ export const responseFromCreateMoment = (moment, plannerId) => {
             momentContentId: content.momentContentId,
             content: content.content,
             url: content.url,
+        })),
+    };
+};
+
+export const bodyToUpdateMoment = (body) => {
+    
+    // 유효성 검증: status 필수
+    if (!body.status) {
+        throw new Error("저장할 상태를 지정해주세요.");
+    }
+
+    // momentContents가 배열인지 확인하고 기본값 설정
+    const momentContents = Array.isArray(body.momentContents) ? body.momentContents : [];
+
+    // status가 public인 경우: title 필수
+    if (body.status === "public" && !body.title) {
+        throw new Error("공개(public) 상태에서는 제목(title)이 필수입니다.");
+    }
+
+    // momentContents 배열 검증 (수정할 내용이 하나 이상 있어야 함)
+    if (momentContents.length === 0) {
+        throw new Error("수정할 momentContents 데이터가 최소 하나 이상 필요합니다.");
+    }
+
+    // momentContents 내부의 momentContentId 중복 검사
+    const momentContentIds = momentContents.map(content => content.momentContentId);
+    const hasDuplicateIds = new Set(momentContentIds).size !== momentContentIds.length;
+    if (hasDuplicateIds) {
+        throw new Error("momentContents 내부의 momentContentId 값이 중복되었습니다.");
+    }
+
+    // momentContents 내 content 필수 검증
+    if (momentContents.some(momentContent => momentContent.content === undefined)) {
+        throw new Error("각 momentContent에는 content 필드가 포함되어야 합니다.");
+    }
+
+    return {
+        title: body.title || null, // title이 없는 경우 null로 설정
+        status: body.status,
+        momentContents: momentContents.map(content => ({
+            momentContentId: content.momentContentId,
+            content: content.content ?? null, // 기존에 없는 값이면 null 처리
+        }))
+    };
+};
+
+export const responseFromUpdateMoment = (moment) => {
+    return {
+        id: moment.id,
+        userId: moment.userId,
+        title: moment.title,
+        status: moment.status,
+        plannerId: moment.plannerId || null,
+        createdAt: moment.createdAt,
+        updatedAt: moment.updatedAt,
+        momentContents: moment.momentContents.map(content => ({
+            momentContentId: content.momentContentId,
+            content: content.content,
         })),
     };
 };
