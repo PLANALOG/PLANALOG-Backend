@@ -56,7 +56,7 @@ export const googleStrategy = new GoogleStrategy(
     {
         clientID: process.env.PASSPORT_GOOGLE_CLIENT_ID,
         clientSecret: process.env.PASSPORT_GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/oauth2/callback/google",
+        callbackURL: "http://15.164.83.14:3000/oauth2/callback/google",
         scope: ["email", "profile"],
         state: true,
     },
@@ -113,7 +113,7 @@ export const kakaoStrategy = new KakaoStrategy(
     {
         clientID: process.env.PASSPORT_KAKAO_CLIENT_ID,
         clientSecret: process.env.PASSPORT_KAKAO_CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/oauth2/callback/kakao",
+        callbackURL: "http://15.164.83.14:3000/oauth2/callback/kakao",
     },
     (accessToken, refreshToken, profile, cb) => {
         const email = profile._json.kakao_account?.email;
@@ -136,7 +136,7 @@ export const naverStrategy = new NaverStrategy(
     {
         clientID: process.env.PASSPORT_NAVER_CLIENT_ID,
         clientSecret: process.env.PASSPORT_NAVER_CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/oauth2/callback/naver",
+        callbackURL: "http://15.164.83.14:3000/oauth2/callback/naver",
     },
     (accessToken, refreshToken, profile, cb) => {
         const email = profile.emails?.[0]?.value;
