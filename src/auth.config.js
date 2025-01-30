@@ -262,3 +262,52 @@ export const naverDisconnect = async (userId, refreshToken) => {
     console.log('네이버 연결 끊기 성공', userIdInNaver.data.result);
 
 }
+
+
+// 네이버 액세스 토큰 받아서 로그인 구현
+export const handleNaverTokenLogin = async (req, res, next) => {
+
+    const { accessToken } = req.body;
+
+    if (!accessToken) {
+        return res.status(400).json({ message: "accessToken is required" });
+    }
+
+    try {
+        // 네이버 API를 사용하여 유저 정보 요청
+        const naverUser = await axios.get("https://openapi.naver.com/v1/nid/me", {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        const email = naverUser.data.response?.email;
+        if (!email) throw new Error("이메일이 없습니다.");
+
+        // DB에서 사용자 조회 또는 새로 생성
+        let user = await prisma.user.findFirst({ where: { email } });
+        if (user && user.platform !== "naver") throw new Error("다른 플랫폼으로 가입한 계정이 존재합니다.")
+        if (!user) {
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    platform: "naver",
+                    name: naverUser.data.response?.name,
+                    nickname: "추후 수정",
+                    type: "null",
+                    introduction: "추후 수정",
+                    link: "추후 수정",
+                },
+            });
+        }
+
+        // JWT 발급
+        const jwtToken = jwt.sign(
+            { id: user.id, email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+
+        res.success({ accessToken: jwtToken });
+    } catch (error) {
+        throw new Error("OAuth 검증 실패", error);
+    }
+}

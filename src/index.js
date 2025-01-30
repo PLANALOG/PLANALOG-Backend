@@ -17,6 +17,7 @@ import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner
 import { userDeleteScheduler } from "./scheduler.js";
 import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
+import { handleNaverTokenLogin } from "./auth.config.js";
 
 
 dotenv.config();
@@ -36,16 +37,6 @@ passport.use(naverStrategy);
 
 const app = express()
 const port = process.env.PORT;
-
-
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "your-secret", // 반드시 비밀 키 설정
-    resave: false, // 세션 변경이 없을 때 저장 방지
-    saveUninitialized: false, // 초기화되지 않은 세션을 저장하지 않음
-    cookie: { secure: false }, // HTTPS 사용 시 secure: true로 설정
-  })
-);
 
 
 
@@ -224,6 +215,8 @@ app.get("/logout", (req, res) => {
   });
 
 });
+
+app.post("/oauth2/naver/token", handleNaverTokenLogin);
 
 
 // Mock 인증 미들웨어
