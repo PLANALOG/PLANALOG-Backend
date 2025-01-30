@@ -49,6 +49,7 @@ app.use(
 
 
 
+
 /**
  * 공통 응답을 사용할 수 있는 헬퍼 함수 등록 -> 모든 요청에서 실행되는 미들웨어 함수 
  */
@@ -299,7 +300,18 @@ import { getSearchRecords } from "./controllers/search.controller.js";
 import { deleteSearchRecord } from "./controllers/search.controller.js";
 
 
+
+import { updateNoticeReadStatus } from "./controllers/notice.controller.js";
+import { createNotice } from "./controllers/notice.controller.js";
+import { deleteNotice } from "./controllers/notice.controller.js";
+import { getNotices } from "./controllers/notice.controller.js";
+
+
 app.get("/searches/users", searchUsers);
 app.post("/searches", saveSearchRecord);
 app.get("/searches/records", getSearchRecords);
+app.post("/post/notices", createNotice);
+app.patch("/notices/:noticeId/read", updateNoticeReadStatus);
+app.get("/notices", getNotices);
+app.delete("/notices/:noticeId", deleteNotice);
 app.delete("/searches/records/:recordId", deleteSearchRecord);
