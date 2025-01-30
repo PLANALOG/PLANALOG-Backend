@@ -622,7 +622,7 @@ export const handleGoogleTokenLogin = async (req, res, next) => {
 export const handleRefreshToken = async (req, res, next) => {
     /*
         #swagger.summary = '액세스 토큰 재발급 API'
-        #swagger.description = '로그인 또는 인증 과정에서 액세스 토큰과 리프레시 토큰을 발급받습니다.'
+        #swagger.description = '리프레시 토큰을 이용해 액세스 토큰을 재발급 받습니다. 만약 리프레시토큰의 만료일이 2일 이하라면 리프레시토큰도 재발급합니다다'
         #swagger.requestBody = {
         required: true,
         content: {

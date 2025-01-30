@@ -111,22 +111,14 @@ app.get("/openapi.json", async (req, res, next) => {
     host: "localhost:3000",
     components: {
       securitySchemes: {
-        OAuth2: {
-          type: 'oauth2',
-          flows: {
-            authorizationCode: {
-              authorizationUrl: 'http://15.164.83.14:3000/oauth2/login/google',
-              tokenUrl: 'http://15.164.83.14:3000/oauth2/callback/google',
-              scopes: {
-                read: 'Grants read access',
-                write: 'Grants write access',
-                admin: 'Grants access to admin operations'
-              }
-            }
-          }
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "Authorization 헤더에 'Bearer {token}' 형식으로 입력하세요."
         }
       }
-    }
+    },
   };
 
   const result = await swaggerAutogen(options)(outputFile, routes, doc);

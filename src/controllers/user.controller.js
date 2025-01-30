@@ -12,15 +12,9 @@ export const handleEditUser = async (req, res, next) => {
     /*
     #swagger.tags = ['Users']
     #swagger.summary = '회원정보 수정 API'
-    #swagger.parameters['Authorization'] = {
-        in: 'header',
-        description: 'JWT 액세스 토큰 (Bearer 포함)',
-        required: true,
-        schema: {
-            type: 'string',
-            example: 'Bearer abc123.jwt.token'
-        }
-    }
+    #swagger.security = [{
+        "bearerAuth": []
+    }]
     #swagger.requestBody = {
         required: true,
         content: {
@@ -143,15 +137,9 @@ export const handleMyProfile = async (req, res, next) => {
     /*
     #swagger.tags = ['Users']
     #swagger.summary = '본인 회원 정보 조회 API'
-    #swagger.parameters['Authorization'] = {
-        in: 'header',
-        description: 'JWT 액세스 토큰 (Bearer 포함)',
-        required: true,
-        schema: {
-            type: 'string',
-            example: 'Bearer abc123.jwt.token'
-        }
-    }
+    #swagger.security = [{
+        "bearerAuth": []
+    }]
     #swagger.responses[200] = {
         description: "회원 정보 조회 성공 응답",
         content: {
@@ -249,15 +237,9 @@ export const handleDeleteUser = async (req, res, next) => {
     /* 
     #swagger.tags = ['Users']
     #swagger.summary = '회원탈퇴 API'
-    #swagger.parameters['Authorization'] = {
-        in: 'header',
-        description: 'JWT 액세스 토큰 (Bearer 포함)',
-        required: true,
-        schema: {
-            type: 'string',
-            example: 'Bearer abc123.jwt.token'
-        }
-    }
+    #swagger.security = [{
+        "bearerAuth": []
+    }]
     */
     console.log("회원탈퇴를 요청했습니다.")
 
@@ -304,15 +286,9 @@ export const handleEditUserImage = async (req, res, next) => {
         #swagger.description = `
             파일 업로드 시 이미지 파일을 받아 프로필 사진을 변경합니다. 
             기본 이미지를 사용할 경우, 'basicImage' 필드에 1~8 사이의 숫자를 입력합니다.`
-        #swagger.parameters['Authorization'] = {
-        in: 'header',
-        description: 'JWT 액세스 토큰 (Bearer 포함)',
-        required: true,
-        schema: {
-            type: 'string',
-            example: 'Bearer abc123.jwt.token'
-        }
-    }
+        #swagger.security = [{
+        "bearerAuth": []
+    }]
         #swagger.requestBody = {
             required: true,
             content: {
