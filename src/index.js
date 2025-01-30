@@ -7,7 +7,7 @@ import taskCategory from "./routes/category.js"; //라우터 객체 가져오기
 // import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 // import session from "express-session";
 import passport from "passport";
-import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
+import { googleStrategy, handleRefreshToken, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
@@ -217,6 +217,8 @@ app.get("/logout", (req, res) => {
 });
 
 app.post("/oauth2/naver/token", handleNaverTokenLogin);
+//리프레시 토큰 이용해 액세스 토큰 재발급 
+app.post("/refresh_token", handleRefreshToken);
 
 
 // Mock 인증 미들웨어
