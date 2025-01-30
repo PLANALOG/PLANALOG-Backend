@@ -39,6 +39,7 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
+    "express-list-routes": "^1.2.4",
     "nodemon": "^3.1.9",
     "prisma": "^6.2.1"
   }

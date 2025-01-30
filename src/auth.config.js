@@ -382,7 +382,7 @@ export const handleNaverTokenLogin = async (req, res, next) => {
 
         res.success({ accessToken: newAccessToken, refreshToken });
     } catch (error) {
-        throw new Error("OAuth 검증 실패", error);
+        throw new Error("OAuth 검증 실패", error.message);
     }
 }
 
@@ -498,11 +498,125 @@ export const handleKakaoTokenLogin = async (req, res, next) => {
         res.success({ accessToken: newAccessToken, refreshToken });
 
     } catch (error) {
-        console.error("카카오 로그인 오류:", error);
         return res.status(500).json({ message: "OAuth 검증 실패", error: error.message });
     }
 };
 
+
+export const handleGoogleTokenLogin = async (req, res, next) => {
+    /*
+        #swagger.summary = '구글 액세스 토큰을 이용한 로그인'
+        #swagger.description = '네이티브 앱에서 구글 액세스 토큰을 받아와 JWT를 발급하는 API입니다.'
+        #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        accessToken: { 
+                            type: "string", 
+                            example: "abc123.jwt.token" 
+                        }
+                    },
+                    required: ["accessToken"]
+                }
+            }
+        }
+    }
+        #swagger.responses[200] = {
+            description: "구글 로그인 성공 응답",
+            content: {
+                "application/json": {
+                    schema: {
+                        type: "object",
+                        properties: {
+                            resultType: { type: "string", example: "SUCCESS" },
+                            error: { type: "object", nullable: true, example: null },
+                            success: {
+                                type: "object",
+                                properties: {
+                                    accessToken: { type: "string", example: "abc123.jwt.token" },
+                                    refreshToken: { type: "string", example: "xyz456.refresh.token" }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #swagger.responses[400] = {
+        description: "잘못된 요청 - 다른 플랫폼으로 가입한 계정이 존재함",
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: { 
+                            type: "string", 
+                            example: "다른 플랫폼으로 가입한 계정이 존재합니다." 
+                        }
+                    }
+                }
+            }
+        }
+    }
+    */
+    const { accessToken } = req.body;
+
+    if (!accessToken) {
+        return res.status(401).json({ message: "accessToken이 필요합니다." });
+    }
+
+    try {
+        // 구글 API를 사용하여 유저 정보 요청
+        const googleUser = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        // 구글에서 받은 유저 정보 확인
+        const email = googleUser.data.email;
+        if (!email) {
+            return res.status(400).json({ message: "구글 계정에서 이메일 정보를 가져올 수 없습니다." });
+        }
+
+        // DB에서 사용자 조회
+        let user = await prisma.user.findFirst({ where: { email } });
+
+        // 만약 유저가 존재하지만, 구글이 아닌 다른 플랫폼으로 가입했으면 에러 반환
+        if (user && user.platform !== "google") {
+            return res.status(400).json({ message: "다른 플랫폼으로 가입한 계정이 존재합니다." });
+        }
+
+        // 유저가 없으면 새로 생성
+        if (!user) {
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    platform: "google",
+                    name: googleUser.data.name || "Unknown",
+                    nickname: "추후 수정",
+                    type: "null",
+                    introduction: "추후 수정",
+                    link: "추후 수정",
+                },
+            });
+        }
+
+        // 새로운 JWT 및 리프레시 토큰 발급
+        const { accessToken: newAccessToken, refreshToken } = generateTokens(user);
+
+        // 리프레시 토큰을 DB에 저장
+        await prisma.refreshToken.create({
+            data: { userId: user.id, token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }, // 7일 유지
+        });
+
+        res.success({ accessToken: newAccessToken, refreshToken });
+
+    } catch (error) {
+        return res.status(500).json({ message: "OAuth 검증 실패", error: error.message });
+    }
+};
 
 
 export const handleRefreshToken = async (req, res, next) => {

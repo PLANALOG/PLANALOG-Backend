@@ -17,7 +17,7 @@ import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner
 import { userDeleteScheduler } from "./scheduler.js";
 import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
-import { handleNaverTokenLogin, handleKakaoTokenLogin } from "./auth.config.js";
+import { handleNaverTokenLogin, handleKakaoTokenLogin, handleGoogleTokenLogin } from "./auth.config.js";
 
 
 dotenv.config();
@@ -108,7 +108,7 @@ app.get("/openapi.json", async (req, res, next) => {
       title: "PLANALOG",
       description: "PLANALOG 테스트 문서입니다.",
     },
-    host: "15.164.83.14:3000",
+    host: "localhost:3000",
     components: {
       securitySchemes: {
         OAuth2: {
@@ -217,7 +217,10 @@ app.get("/logout", (req, res) => {
 });
 
 app.post("/oauth2/naver/token", handleNaverTokenLogin);
+
 app.post("/oauth2/kakao/token", handleKakaoTokenLogin);
+
+app.post("/oauth2/google/token", handleGoogleTokenLogin);
 //리프레시 토큰 이용해 액세스 토큰 재발급 
 app.post("/refresh_token", handleRefreshToken);
 
