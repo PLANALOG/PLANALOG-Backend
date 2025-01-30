@@ -6,8 +6,22 @@ import { prisma } from "./db.config.js";
 import { UserWithOtherPlatformError } from "./errors.js";
 import axios from "axios";
 import { isDeletedUser } from "./repositories/user.repository.js";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
+
+// JWT 비밀 키
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
+// JWT 생성 함수
+const generateToken = (user) => {
+    console.log("Generating JWT for user:", user);
+    return jwt.sign(
+        { id: user.id, email: user.email },
+        JWT_SECRET,
+        { expiresIn: "1h" } // 토큰 만료 시간 설정 (1시간)
+    );
+};
 
 const verify = async (profile, email, platform, refreshToken) => {
 
@@ -52,7 +66,10 @@ export const googleStrategy = new GoogleStrategy(
         console.log(accessToken);
 
         return googleVerify(profile, accessToken)
-            .then((user) => cb(null, user))
+            .then((user) => {
+                const token = generateToken(user);
+                cb(null, { user, token });
+            })
             .catch((err) => cb(err));
     }
 );
@@ -106,7 +123,11 @@ export const kakaoStrategy = new KakaoStrategy(
         }
 
         return verify(profile, email, "kakao", refreshToken)
-            .then((user) => cb(null, user))
+            .then((user) => {
+                // JWT 생성 후 반환
+                const token = generateToken(user);
+                cb(null, { user, token }); // JWT와 함께 사용자 정보 반환
+            })
             .catch((err) => cb(err));
     }
 );
@@ -127,10 +148,33 @@ export const naverStrategy = new NaverStrategy(
         console.log('refreshToken', refreshToken);
 
         return verify(profile, email, "naver", refreshToken)
-            .then((user) => cb(null, user))
+            .then((user) => {
+                // JWT 생성 후 반환
+                const token = generateToken(user);
+                cb(null, { user, token }); // JWT와 함께 사용자 정보 반환
+            })
             .catch((err) => cb(err));
     }
 );
+
+
+// JWT 인증 미들웨어
+export const authenticateJWT = (req, res, next) => {
+    console.log(req.headers)
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+        const token = authHeader.split(" ")[1]; // 'Bearer <token>'에서 <token> 추출
+        jwt.verify(token, JWT_SECRET, (err, user) => {
+            if (err) {
+                return res.status(403).json({ message: "Invalid or expired token" });
+            }
+            req.user = user; // 사용자 정보 추가
+            next();
+        });
+    } else {
+        res.status(401).json({ message: "Authorization header missing" });
+    }
+};
 
 
 //카카오 연결끊기
