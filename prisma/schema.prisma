@@ -241,11 +241,11 @@ model Moment {
 }
 
 model MomentContent {
-  id              BigInt @id @default(autoincrement())
-  momentId        BigInt @map("moment_id")
-  momentContentId Int    @map("moment_content_id") // 페이지(콘텐츠) 순서 ID
-  content         String @db.Text
-  url             String @db.VarChar(300)
+  id              BigInt  @id @default(autoincrement())
+  momentId        BigInt  @map("moment_id")
+  momentContentId Int     @map("moment_content_id") // 페이지(콘텐츠) 순서 ID
+  content         String  @db.Text
+  url             String? @db.VarChar(300)
 
   // Relationships
   moment Moment @relation(fields: [momentId], references: [id], onDelete: Cascade)

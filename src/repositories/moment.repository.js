@@ -120,3 +120,24 @@ export const updateMoment = async (momentId, data) => {
         return updatedMoment;
     });
 };
+
+export const deleteMomentFromDB = async (momentId) => {
+    return await prisma.$transaction(async (prisma) => {
+        // 삭제할 Moment가 존재하는지 확인
+        const existingMoment = await prisma.moment.findUnique({
+            where: { id: momentId },
+        });
+
+        if (!existingMoment) {
+            throw new Error("삭제할 Moment를 찾을 수 없습니다.");
+        }
+
+        // Moment 삭제 (momentContents도 같이 삭제됨됨)
+        await prisma.moment.delete({
+            where: { id: momentId },
+        });
+
+        // 성공적으로 삭제되었으면 true 반환
+        return true;
+    });
+};

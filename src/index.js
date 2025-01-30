@@ -15,7 +15,7 @@ import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile
 import { body, query, param } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 import { userDeleteScheduler } from "./scheduler.js";
-import { handleCreateMoment, handleUpdateMoment} from "./controllers/moment.controller.js";
+import { handleCreateMoment, handleUpdateMoment, handleDeleteMoment} from "./controllers/moment.controller.js";
 import { upload } from "./multer.js";
 
 dotenv.config();
@@ -258,6 +258,9 @@ app.post("/moments", handleCreateMoment);
 
 //모먼트 수정
 app.patch("/moments/:momentId", handleUpdateMoment);
+
+//모먼트 삭제
+app.delete("/moments/:momentId", handleDeleteMoment);
 
 
 //회원 탈퇴 

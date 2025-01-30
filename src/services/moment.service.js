@@ -1,4 +1,4 @@
-import { createMoment, updateMoment } from "../repositories/moment.repository.js";
+import { createMoment, updateMoment, deleteMomentFromDB } from "../repositories/moment.repository.js";
 import { responseFromCreateMoment, responseFromUpdateMoment } from "../dtos/moment.dto.js";
 
 export const momentCreate = async (data) => {
@@ -46,3 +46,25 @@ export const momentUpdate = async (momentId, data) => {
     }
 };
 
+
+export const momentDelete = async (momentId) => {
+    try {
+        if (!momentId) {
+            throw new Error("Moment ID가 필요합니다.");
+        }
+
+        console.log(`Moment 삭제 요청: momentId=${momentId}`);
+
+        // Moment 삭제 실행
+        const isDeleted = await deleteMomentFromDB(momentId);
+
+        if (!isDeleted) {
+            throw new Error("Moment 삭제에 실패했습니다.");
+        }
+
+        return momentId; // 삭제된 Moment ID 반환
+    } catch (error) {
+        console.error("Moment 삭제 중 오류 발생:", error.message);
+        throw new Error("Moment 삭제에 실패했습니다. 다시 시도해주세요.");
+    }
+};

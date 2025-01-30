@@ -1,5 +1,6 @@
 // moment 생성 DTO
 // moment 수정 DTO
+// moment 삭제 DTO (없음)
 
 export const bodyToCreateMoment = (body) => {
     
@@ -135,3 +136,6 @@ export const responseFromUpdateMoment = (moment) => {
         })),
     };
 };
+
+
+

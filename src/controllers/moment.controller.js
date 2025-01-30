@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { bodyToCreateMoment, bodyToUpdateMoment } from "../dtos/moment.dto.js";
-import { momentCreate, momentUpdate } from "../services/moment.service.js";
+import { momentCreate, momentUpdate, momentDelete } from "../services/moment.service.js";
 
 export const handleCreateMoment = async (req, res, next) => {
     /*
@@ -234,3 +234,76 @@ export const handleUpdateMoment = async (req, res, next) => {
         next(error);
     }
 };
+
+export const handleDeleteMoment = async (req, res, next) => {
+    /*
+        #swagger.tags = ['Moments']
+        #swagger.summary = 'Moment 삭제 API'
+        #swagger.description = '기존의 Moment를 삭제합니다.'
+        #swagger.parameters['momentId'] = {
+            in: "path",
+            required: true,
+            description: "삭제할 Moment의 ID",
+            schema: { type: "integer", example: 123 }
+        }
+
+    #swagger.responses[200] = {
+        description: 'Moment 삭제 성공',
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        resultType: { type: "string", example: "SUCCESS", description: "결과 타입" },
+                        error: { type: "null", example: null, description: "에러 정보 (없을 경우 null)" },
+                        success: {
+                            type: "object",
+                            properties: {
+                                message: { type: "string", example: "Moment가 성공적으로 삭제되었습니다.", description: "성공 메시지" },
+                                data: {
+                                    type: "object",
+                                    properties: {
+                                        momentId: { type: "integer", example: 123, description: "삭제된 Moment ID" }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    */
+   
+
+
+
+    
+    
+    try {
+        console.log("Moment 삭제 요청");
+
+        // 삭제할 Moment ID를 경로 변수에서 추출
+        const momentId = parseInt(req.params.momentId, 10);
+
+        if (!momentId) {
+            throw new Error("Moment ID가 필요합니다.");
+        }
+
+        // 서비스 계층에서 Moment 삭제 처리
+        const deletedMomentId = await momentDelete(momentId);
+
+        res.status(StatusCodes.OK).json({
+            resultType: "SUCCESS",
+            error: null,
+            success: {
+                message: "Moment가 성공적으로 삭제되었습니다.",
+                deletedMomentId: deletedMomentId
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
