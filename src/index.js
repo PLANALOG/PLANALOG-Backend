@@ -17,6 +17,7 @@ import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner
 import { userDeleteScheduler } from "./scheduler.js";
 import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
+import { handleNaverTokenLogin } from "./auth.config.js";
 
 
 dotenv.config();
@@ -227,6 +228,8 @@ app.get("/logout", (req, res) => {
   });
 
 });
+
+app.post("/oauth2/naver/token", handleNaverTokenLogin);
 
 
 // Mock 인증 미들웨어
