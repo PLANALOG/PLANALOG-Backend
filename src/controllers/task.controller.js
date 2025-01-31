@@ -8,88 +8,86 @@ import { prisma } from "../db.config.js";
 
 export const handleCreateTask = async (req, res, next) => {
     /*
-        #swagger.tags = ['Tasks']
-        #swagger.summary = '할일 생성 API'
-        #swagger.description = '할일을 생성하는 API입니다.'
-        #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        type: "object",
-                        properties: {
-                            title: { 
-                                type: "string", 
-                                example: "오늘 할일 1", 
-                                description: "할일 제목"
-                            },
-                            planner_date: { 
-                                type: "string", 
-                                format: "date", 
-                                example: "2025-01-10", 
-                                description: "할일 일정 날짜 (YYYY-MM-DD)"
-                            }
+    #swagger.tags = ['Tasks']
+    #swagger.summary = '할일 생성 API'
+    #swagger.description = '할일을 생성하는 API입니다.'
+    #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        title: { 
+                            type: "string", 
+                            example: "오늘 할일 1", 
+                            description: "할일 제목"
                         },
-                        required: ["title", "planner_date"]
-                    }
+                        planner_date: { 
+                            type: "string", 
+                            format: "date", 
+                            example: "2025-01-10", 
+                            description: "할일 일정 날짜 (YYYY-MM-DD)"
+                        }
+                    },
+                    required: ["title", "planner_date"]
                 }
             }
         }
-    
-        #swagger.responses[200] = {
-            description: "할일 생성 성공 응답",
-            content: {
-                "application/json": {
-                    schema: {
-                        type: "object",
-                        properties: {
-                            resultType: { 
-                                type: "string", 
-                                example: "SUCCESS", 
-                                description: "결과 상태"
-                            },
-                            error: { 
-                                type: "object", 
-                                nullable: true, 
-                                example: null, 
-                                description: "에러 정보 (없을 경우 null)"
-                            },
-                            success: { 
-                                type: "object", 
-                                properties: {
-                                    message: { 
-                                        type: "string", 
-                                        example: "생성완료", 
-                                        description: "성공 메시지"
-                                    },
-                                    title: { npm 
-                                        type: "string", 
-                                        example: "오늘 할일 1", 
-                                        description: "생성된 할일 제목"
-                                    },
-                                    task_id: { 
-                                        type: "integer", 
-                                        example: 123, 
-                                        description: "생성된 할일 ID"
-                                    },
-                                    is_completed: { 
-                                        type: "boolean", 
-                                        example: false, 
-                                        description: "완료 여부"
-                                    },
-                                    created_at: { 
-                                        type: "string", 
-                                        format: "date-time", 
-                                        example: "2025-01-01T00:00:00Z", 
-                                        description: "생성 일시 (ISO 8601)"
-                                    },
-                                    updated_at: { 
-                                        type: "string", 
-                                        format: "date-time", 
-                                        example: "2025-01-01T00:00:00Z", 
-                                        description: "수정 일시 (ISO 8601)"
-                                        }
-                                    }
+    }
+
+    #swagger.responses[200] = {
+        description: "할일 생성 성공 응답",
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        resultType: { 
+                            type: "string", 
+                            example: "SUCCESS", 
+                            description: "결과 상태"
+                        },
+                        error: { 
+                            type: "object", 
+                            nullable: true, 
+                            example: null, 
+                            description: "에러 정보 (없을 경우 null)"
+                        },
+                        success: { 
+                            type: "object", 
+                            properties: {
+                                message: { 
+                                    type: "string", 
+                                    example: "생성완료", 
+                                    description: "성공 메시지"
+                                },
+                                title: { 
+                                    type: "string", 
+                                    example: "오늘 할일 1", 
+                                    description: "생성된 할일 제목"
+                                },
+                                task_id: { 
+                                    type: "integer", 
+                                    example: 123, 
+                                    description: "생성된 할일 ID"
+                                },
+                                is_completed: { 
+                                    type: "boolean", 
+                                    example: false, 
+                                    description: "완료 여부"
+                                },
+                                created_at: { 
+                                    type: "string", 
+                                    format: "date-time", 
+                                    example: "2025-01-01T00:00:00Z", 
+                                    description: "생성 일시 (ISO 8601)"
+                                },
+                                updated_at: { 
+                                    type: "string", 
+                                    format: "date-time", 
+                                    example: "2025-01-01T00:00:00Z", 
+                                    description: "수정 일시 (ISO 8601)"
                                 }
                             }
                         }
@@ -97,9 +95,10 @@ export const handleCreateTask = async (req, res, next) => {
                 }
             }
         }
-    
-    */
-        try {
+    }
+*/
+
+    try {
         // 1. req.session에서 userId 가져오기
         const userId = req.user.id;
         if (!userId) {

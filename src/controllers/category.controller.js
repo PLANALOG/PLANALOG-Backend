@@ -127,8 +127,8 @@ export const handleCreateCategory = async (req, res, next) => {
         if (!req.user || !req.user.id) {
             throw new Error("사용자 인증 정보가 누락되었습니다.");
         }
-        
-        const createdTaskCategory = await createCategory({userId, name}); // 서비스 호출
+
+        const createdTaskCategory = await createCategory({ userId, name }); // 서비스 호출
         res.success(createdTaskCategory); // 성공 응답
     } catch (error) {
         next(error); // 전역 오류 처리 미들웨어로 전달
