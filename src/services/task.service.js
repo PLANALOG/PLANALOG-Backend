@@ -5,7 +5,8 @@ export const createTask= async (taskData) => {
         // Task 생성 로직
         const task = {
             "title": taskData.title,
-            "planner_date": taskData.planner_date
+            "planner_date": taskData.planner_date,
+            "userId": taskData.userId
         }
     
          // 2. Repository 계층에 저장 요청

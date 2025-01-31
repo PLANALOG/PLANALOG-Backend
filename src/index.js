@@ -219,15 +219,11 @@ app.post("/refresh_token", handleRefreshToken);
 //테스트용 (로컬 DB에 유저 추가 및 토큰 발급)
 app.post("/test/create_user", testUserMiddleware);
 
-// Mock 인증 미들웨어
-const mockAuthMiddleware = (req, res, next) => {
-  req.user = { id: 1 }; // Mock user ID
-  next();
-};
+
 //task 관련 작업 
-app.use("/tasks", mockAuthMiddleware, task);
+app.use("/tasks", authenticateJWT, task);
 //task_category 관련작업
-app.use("/task_category", mockAuthMiddleware, taskCategory)
+app.use("/task_category", authenticateJWT, taskCategory)
 
 //회원정보 수정 API
 app.patch("/users/profile", [

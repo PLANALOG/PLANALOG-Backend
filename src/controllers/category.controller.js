@@ -10,6 +10,9 @@ export const handleCreateCategory = async (req, res, next) => {
     /*
         #swagger.tags = ['Categories']
         #swagger.summary = '카테고리 생성 API'
+        #swagger.security = [{
+        "bearerAuth": []
+        }]
         #swagger.requestBody = {
         required: true,
         content: {
@@ -33,89 +36,7 @@ export const handleCreateCategory = async (req, res, next) => {
                 }
             }
         }   
-        #swagger.responses[200] = {
-        description: "카테고리 생성 성공",
-        content: {
-            "application/json": {
-                schema: {
-                    type: "object",
-                    properties: {
-                        resultType: { 
-                            type: "string", 
-                            example: "SUCCESS", 
-                            description: "결과 상태 (SUCCESS: 성공)"
-                        },
-                        error: { 
-                            type: "object", 
-                            nullable: true, 
-                            example: null, 
-                            description: "에러 정보 (없을 경우 null)"
-                        },
-                        success: { 
-                            type: "object", 
-                            properties: {
-                                id: { 
-                                    type: "integer", 
-                                    description: "카테고리 ID", 
-                                    example: 1 
-                                    },
-                                name: { 
-                                    type: "string", 
-                                    description: "생성된 카테고리 이름", 
-                                    example: "Work" 
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        #swagger.responses[400] = {
-            description: "잘못된 입력 데이터",
-            content: {
-                "application/json": {
-                    schema: {
-                        type: "object",
-                        properties: {
-                            resultType: { 
-                                type: "string", 
-                                example: "FAIL", 
-                                description: "결과 상태 (FAIL: 실패)"
-                            },
-                            error: { 
-                                type: "object", 
-                                nullable: false, 
-                                properties: {
-                                errorCode: { 
-                                    type: "string", 
-                                    example: "invalid_data", 
-                                    description: "에러 코드"
-                                },
-                                reason: { 
-                                    type: "string", 
-                                    example: "유효하지 않은 데이터입니다.", 
-                                    description: "에러 사유"
-                                },
-                                data: { 
-                                    type: "object", 
-                                    nullable: true, 
-                                    description: "추가 에러 데이터",
-                                    example: null
-                                }
-                            }
-                        },
-                        success: { 
-                            type: "object", 
-                            nullable: true, 
-                            example: null, 
-                            description: "성공 데이터 (실패 시 null)"
-                        }
-                    }
-                }
-            }
-        }
-    }
+        
         */
     try {
         //세션에서 userId 가져오기 
@@ -141,6 +62,9 @@ export const handleUpdateCategory = async (req, res, next) => {
 /*
     #swagger.tags = ['Categories']
     #swagger.summary = '카테고리 수정 API'
+    #swagger.security = [{
+        "bearerAuth": []
+        }]
     #swagger.requestBody = {
         required: true,
         content: {
@@ -159,47 +83,9 @@ export const handleUpdateCategory = async (req, res, next) => {
             }
         }
     }
-    #swagger.responses[200] = {
-        description: "카테고리 수정 성공",
-        content: {
-            "application/json": {
-                schema: {
-                    type: "object",
-                    properties: {
-                        resultType: { 
-                            type: "string", 
-                            example: "SUCCESS", 
-                            description: "결과 상태 (SUCCESS: 성공)"
-                        },
-                        error: { 
-                            type: "object", 
-                            nullable: true, 
-                            example: null, 
-                            description: "에러 정보 (없을 경우 null)"
-                        },
-                        success: { 
-                            type: "object", 
-                            properties: {
-                                id: { 
-                                    type: "integer", 
-                                    description: "카테고리 ID", 
-                                    example: 1 
-                                },
-                                name: { 
-                                    type: "string", 
-                                    description: "수정된 카테고리 이름", 
-                                    example: "Personal" 
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-}
     */
     try {
-        const { task_categories_id } = req.params; // URL에서 ID 추출
+        const { task_category_id } = req.params; // URL에서 ID 추출
         const { name } = req.body; // 요청 본문에서 새로운 카테고리 이름 추출
 
         if (!name) {
@@ -209,7 +95,7 @@ export const handleUpdateCategory = async (req, res, next) => {
             });
         }
 
-        const updatedTaskCategory = await updateCategory(task_categories_id, name); // 서비스 호출
+        const updatedTaskCategory = await updateCategory(task_category_id, name); // 서비스 호출
         res.success(updatedTaskCategory); // 성공 응답
     } catch (error) {
         next(error); // 전역 오류 처리 미들웨어로 전달
@@ -221,6 +107,9 @@ export const handleViewCategory = async (req, res, next) => {
     /*
         #swagger.tags = ['Categories']
         #swagger.summary = '카테고리 조회 API'
+        #swagger.security = [{
+        "bearerAuth": []
+        }]
         #swagger.responses[200] = {
         description: "카테고리 조회 성공",
         content: {
@@ -284,7 +173,16 @@ export const handleViewCategory = async (req, res, next) => {
 export const handleDeleteCategory = async (req, res, next) => {
    /*
     #swagger.tags = ['Categories']
-    #swagger.summary = '카테고리 생성 API'
+    #swagger.summary = '카테고리 삭제 API'
+    #swagger.security = [{
+        "bearerAuth": []
+        }]
+    #swagger.parameters['task_category_id'] = {
+        in: 'path',
+        description: '삭제할 카테고리 ID',
+        required: true,
+        schema: { type: 'integer', example: 1 }
+    }
     #swagger.responses[200] = {
     description: "카테고리 삭제 성공",
     content: {
@@ -323,109 +221,18 @@ export const handleDeleteCategory = async (req, res, next) => {
         }
     }
 }
-#swagger.responses[400] = {
-    description: "잘못된 입력 데이터",
-    content: {
-        "application/json": {
-            schema: {
-                type: "object",
-                properties: {
-                    resultType: { 
-                        type: "string", 
-                        example: "FAIL", 
-                        description: "결과 상태 (FAIL: 실패)"
-                    },
-                    error: { 
-                        type: "object", 
-                        nullable: false, 
-                        properties: {
-                            errorCode: { 
-                                type: "string", 
-                                example: "invalid_data", 
-                                description: "에러 코드"
-                            },
-                            reason: { 
-                                type: "string", 
-                                example: "카테고리 ID가 유효하지 않습니다.", 
-                                description: "에러 사유"
-                            },
-                            data: { 
-                                type: "object", 
-                                nullable: true, 
-                                description: "추가 에러 데이터",
-                                example: null
-                            }
-                        }
-                    },
-                    success: { 
-                        type: "object", 
-                        nullable: true, 
-                        example: null, 
-                        description: "성공 데이터 (실패 시 null)"
-                    }
-                }
-            }
-        }
-    }
-}
-#swagger.responses[404] = {
-    description: "카테고리를 찾을 수 없음",
-    content: {
-        "application/json": {
-            schema: {
-                type: "object",
-                properties: {
-                    resultType: { 
-                        type: "string", 
-                        example: "FAIL", 
-                        description: "결과 상태 (FAIL: 실패)"
-                    },
-                    error: { 
-                        type: "object", 
-                        nullable: false, 
-                        properties: {
-                            errorCode: { 
-                                type: "string", 
-                                example: "category_not_found", 
-                                description: "에러 코드"
-                            },
-                            reason: { 
-                                type: "string", 
-                                example: "해당 카테고리를 찾을 수 없습니다.", 
-                                description: "에러 사유"
-                            },
-                            data: { 
-                                type: "object", 
-                                nullable: true, 
-                                description: "추가 에러 데이터",
-                                example: null
-                            }
-                        }
-                    },
-                    success: { 
-                        type: "object", 
-                        nullable: true, 
-                        example: null, 
-                        description: "성공 데이터 (실패 시 null)"
-                    }
-                }
-            }
-        }
-    }
-}
-}
     */
     try {
-        const { task_categories_id } = req.params; // Extract ID from URL
-
-        if (!task_categories_id) {
+        const { task_category_id } = req.params; // Extract ID from URL
+        console.log("task_category_id", task_category_id);
+        if (!task_category_id) {
             return res.error({
                 errorCode: "INVALID_INPUT",
                 reason: "Task category ID is required",
             });
         }
 
-        await deleteCategory(task_categories_id); // Call service to delete category
+        await deleteCategory(task_category_id); // Call service to delete category
 
         res.success({ message: "Task category deleted successfully" }); // Respond with success
     } catch (error) {
@@ -437,6 +244,9 @@ export const handleCreateTaskCategory = async (req, res, next) => {
     /*
         #swagger.tags = ['Categories']
         #swagger.summary = '카테고리형 유저 할일 생성 API'
+        #swagger.security = [{
+        "bearerAuth": []
+        }]
         #swagger.requestBody = {
             required: true,
             content: {
@@ -460,55 +270,6 @@ export const handleCreateTaskCategory = async (req, res, next) => {
                 }
             }
         }
-        #swagger.responses[200] = {
-            description: "할일 카테고리 생성 성공",
-            content: {
-                "application/json": {
-                    schema: {
-                        type: "object",
-                        properties: {
-                            resultType: { 
-                                type: "string", 
-                                example: "SUCCESS", 
-                                description: "결과 상태 (SUCCESS: 성공)"
-                            },
-                            error: { 
-                                type: "object", 
-                                nullable: true, 
-                                example: null, 
-                                description: "에러 정보 (없을 경우 null)"
-                            },
-                            success: { 
-                                type: "object", 
-                                properties: {
-                                    id: { 
-                                        type: "integer", 
-                                        description: "할일 ID", 
-                                        example: 1 
-                                    },
-                                    title: { 
-                                        type: "string", 
-                                        description: "할일 제목", 
-                                        example: "Work" 
-                                    },
-                                    planner_date: { 
-                                        type: "string", 
-                                        description: "할일 계획 날짜", 
-                                        example: "2022-12-25" 
-                                    },
-                                    category_id: {
-                                        type: "integer",
-                                        description: "카테고리 ID",
-                                        example: 1
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
         */
     try {
         // URL에서 ID 추출
