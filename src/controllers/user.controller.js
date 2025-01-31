@@ -321,7 +321,6 @@ export const handleEditUserImage = async (req, res, next) => {
     console.log(req.file);
 
     let imagePaths;
-    let isBasicImage = false;
 
     if (req.file) {
         //저장된 이미지 url을 받아옴
@@ -329,7 +328,6 @@ export const handleEditUserImage = async (req, res, next) => {
     } else {
         const BasicImageNum = req.body.basicImage;
         imagePaths = `https://planalog-s3.s3.ap-northeast-2.amazonaws.com/basic_images/${BasicImageNum}.png`;
-        isBasicImage = true;
     }
 
 
@@ -339,7 +337,7 @@ export const handleEditUserImage = async (req, res, next) => {
     const userId = parseInt(req.user.id);
 
 
-    const savedUrl = await profileImageEdit(imagePaths, userId, isBasicImage);
+    const savedUrl = await profileImageEdit(imagePaths, userId);
 
 
     res.status(StatusCodes.OK).success({ message: "프로필 사진 변경 성공", savedUrl: savedUrl.profileImage });

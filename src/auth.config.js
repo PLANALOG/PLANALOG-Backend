@@ -173,6 +173,7 @@ export const naverStrategy = new NaverStrategy(
 
 // JWT 인증 미들웨어
 export const authenticateJWT = (req, res, next) => {
+    console.log("JWT 토큰 인증 미들웨어 실행")
     const authHeader = req.headers.authorization;
     if (authHeader) {
         const token = authHeader.split(" ")[1]; // 'Bearer <token>'에서 <token> 추출
