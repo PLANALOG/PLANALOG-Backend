@@ -169,6 +169,29 @@ app.delete("/users", authenticateJWT, handleDeleteUser)
 //테스트용 : 회원탈퇴복구 (탈퇴 회원 바로 회원가입 가능)
 app.post("/users/test", handleTestDeleteUser)
 
+import { saveSearchRecord/*, getSearchRecords, deleteSearchRecord, deleteAllSearchRecords*/ } from "./controllers/search.controller.js";
+import { searchUsers } from "./controllers/search.controller.js";
+import { getSearchRecords } from "./controllers/search.controller.js";
+import { deleteSearchRecord } from "./controllers/search.controller.js";
+import { updateNoticeReadStatus } from "./controllers/notice.controller.js";
+import { createNotice } from "./controllers/notice.controller.js";
+import { deleteNotice } from "./controllers/notice.controller.js";
+import { getNotices } from "./controllers/notice.controller.js";
+
+
+app.get("/searches/users", searchUsers);
+app.post("/searches", saveSearchRecord);
+app.get("/searches/records", getSearchRecords);
+app.post("/post/notices", createNotice);
+app.patch("/notices/:noticeId/read", updateNoticeReadStatus);
+app.get("/notices", getNotices);
+app.delete("/notices/:noticeId", deleteNotice);
+app.delete("/searches/records/:recordId", deleteSearchRecord);
+
+
+
+
+
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의
  */
@@ -191,25 +214,3 @@ app.listen(port, () => {
 })
 
 
-import { saveSearchRecord/*, getSearchRecords, deleteSearchRecord, deleteAllSearchRecords*/ } from "./controllers/search.controller.js";
-
-import { searchUsers } from "./controllers/search.controller.js";
-import { getSearchRecords } from "./controllers/search.controller.js";
-import { deleteSearchRecord } from "./controllers/search.controller.js";
-
-
-
-import { updateNoticeReadStatus } from "./controllers/notice.controller.js";
-import { createNotice } from "./controllers/notice.controller.js";
-import { deleteNotice } from "./controllers/notice.controller.js";
-import { getNotices } from "./controllers/notice.controller.js";
-
-
-app.get("/searches/users", searchUsers);
-app.post("/searches", saveSearchRecord);
-app.get("/searches/records", getSearchRecords);
-app.post("/post/notices", createNotice);
-app.patch("/notices/:noticeId/read", updateNoticeReadStatus);
-app.get("/notices", getNotices);
-app.delete("/notices/:noticeId", deleteNotice);
-app.delete("/searches/records/:recordId", deleteSearchRecord);
