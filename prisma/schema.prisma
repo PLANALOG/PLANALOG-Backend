@@ -327,15 +327,6 @@ model Comment {
   @@map("comment")
 }
 
-model Session {
-  id        String   @id
-  sid       String   @unique
-  data      String   @db.VarChar(1024)
-  expiresAt DateTime @map("expires_at")
-
-  @@map("session")
-}
-
 model RefreshToken {
   id        String   @id @default(uuid())
   userId    BigInt   @unique

@@ -4,10 +4,6 @@ import express from 'express';          // -> ES Module
 import cors from "cors";
 import task from "./routes/task.js";
 import taskCategory from "./routes/category.js"; //라우터 객체 가져오기 
-// import { PrismaSessionStore } from "@quixo3/prisma-session-store";
-// import session from "express-session";
-import passport from "passport";
-import { googleStrategy, handleRefreshToken, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
@@ -17,23 +13,11 @@ import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner
 import { userDeleteScheduler } from "./scheduler.js";
 import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
-import { handleNaverTokenLogin, handleKakaoTokenLogin, handleGoogleTokenLogin } from "./auth.config.js";
+import { handleNaverTokenLogin, handleKakaoTokenLogin, handleGoogleTokenLogin, handleRefreshToken } from "./auth.config.js";
 import { testUserMiddleware } from "./test.js";
 
 dotenv.config();
 
-passport.use(googleStrategy);
-passport.use(kakaoStrategy);
-passport.use(naverStrategy);
-// passport.serializeUser((user, done) => {
-//   // ｕｓｅｒ는 콜백함수 ｖｅｒｉｆｙ에서 반환된 객체임¡
-//   console.log('serializeUser success', user)
-//   done(null, user)
-// });
-// passport.deserializeUser((user, done) => {
-//   //console.log('deserializeUser success')
-//   done(null, user)
-// });
 
 const app = express()
 const port = process.env.PORT;
@@ -64,25 +48,6 @@ app.use(cors());                            // cors 방식 허용
 app.use(express.static('public'));          // 정적 파일 접근
 app.use(express.json());                    // request의 본문을 json으로 해석할 수 있도록 함 (JSON 형태의 요청 body를 파싱하기 위함)
 app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
-
-// app.use(
-//   session({
-//     cookie: { //세션 ID 쿠키의 옵션을 지정하는 객체
-//       maxAge: 7 * 24 * 60 * 1000, //ms
-//     },
-//     resave: false, //수정되지 않은 세션일지라도 다시 저장할지(세션을 언제나 저장할지) 나타내는 부울 값.
-//     saveUninitalized: false, //초기화되지 않은 세션을 저장할지(세션에 저장할 내역이 없더라도 처음부터 세션을 생성할지) 
-//     secret: process.env.EXPRESS_SESSION_SECRET, //세션 ID 쿠키를 서명하는 데 사용할 문자열. 보안 목적으로 필수적.
-//     store: new PrismaSessionStore(prisma, { // 세션 데이터의 저장 메커니즘
-//       checkPeriod: 2 * 60 * 1000, //ms
-//       dbRecordIdIsSessionId: true,
-//       dbRecordIdFunction: undefined
-//     })
-//   })
-// );
-
-app.use(passport.initialize());
-// app.use(passport.session()); //사용자의 모든 요청에 HTTP Cookie 중 sid 값이 있다면, 이를 MySQL DB에서 찾아, 일치하는 Session이 있다면 사용자 데이터를 가져와 req.user
 
 app.use(
   "/docs",
@@ -136,63 +101,6 @@ app.get('/', (req, res) => {
   console.log(req.user)
 })
 
-//소셜로그인 - 구글 
-app.get("/oauth2/login/google", passport.authenticate("google"), (req, res) => {
-  // #swagger.ignore = true
-});
-app.get(
-  "/oauth2/callback/google",
-  passport.authenticate("google", {
-    session: false,
-    failureRedirect: "/oauth2/login/google",
-    failureMessage: true,
-  }),
-  (req, res) => {
-
-    // #swagger.ignore = true
-    res.success({ message: "로그인 성공" })
-  }
-);
-
-//소셜로그인 - 카카오
-app.get("/oauth2/login/kakao", passport.authenticate("kakao"), (req, res) => {
-  // #swagger.ignore = true
-});
-
-app.get(
-  "/oauth2/callback/kakao",
-  passport.authenticate("kakao", {
-    session: false,
-    failureRedirect: "/oauth2/login/kakao",
-    failureMessage: true,
-  }),
-  (req, res) => {
-    res.cookie('access_token', req.user.token, {
-      httpOnly: false, // 클라이언트에서 직접 접근 불가
-      maxAge: 24 * 60 * 60 * 1000, // 1일 동안 유효
-    });
-    // #swagger.ignore = true
-    res.success({ message: "로그인 성공" })
-  }
-);
-
-//소셜로그인 - 네이버
-app.get("/oauth2/login/naver", passport.authenticate("naver"), (req, res) => {
-  // #swagger.ignore = true
-});
-app.get(
-  "/oauth2/callback/naver",
-  passport.authenticate("naver", {
-    session: false,
-    failureRedirect: "/oauth2/login/naver",
-    failureMessage: true,
-  }),
-  (req, res) => {
-    // #swagger.ignore = true
-    res.success({ message: "로그인 성공" })
-  }
-);
-
 //로그아웃
 app.get("/logout", authenticateJWT, handleLogOut);
 
@@ -201,6 +109,7 @@ app.post("/oauth2/naver/token", handleNaverTokenLogin);
 app.post("/oauth2/kakao/token", handleKakaoTokenLogin);
 
 app.post("/oauth2/google/token", handleGoogleTokenLogin);
+
 //리프레시 토큰 이용해 액세스 토큰 재발급 
 app.post("/refresh_token", handleRefreshToken);
 
