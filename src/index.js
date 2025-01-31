@@ -232,7 +232,7 @@ app.use("/task_category", mockAuthMiddleware, taskCategory)
 //회원정보 수정 API
 app.patch("/users/profile", [
   body("nickname").optional().isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),
-  body("type").optional().isIn(["memo_user", "category_user"]).withMessage("type은 memo 또는 category만 가능합니다."),
+  body("type").optional().isIn(["memo_user", "category_user"]).withMessage("type은 memo_user 또는 category_user만 가능합니다."),
   body("introduction").optional().isString().withMessage("introduction은 문자열이어야 합니다."),
   body("link").optional().isURL().withMessage("link는 URL 형식이어야 합니다."),
 ], authenticateJWT, handleEditUser);
