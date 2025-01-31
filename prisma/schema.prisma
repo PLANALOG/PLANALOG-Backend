@@ -338,7 +338,7 @@ model Session {
 
 model RefreshToken {
   id        String   @id @default(uuid())
-  userId    String   @unique
+  userId    BigInt   @unique
   token     String   @unique
   expiresAt DateTime @map("expires_at")
 
