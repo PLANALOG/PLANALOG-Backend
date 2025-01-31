@@ -11,22 +11,22 @@ import {
   validateUpdateNoticeReadDTO,
 } from "../dtos/notice.dto.js";
 
-
 export const createNotice = async (req, res) => {
   /* 
   #swagger.tags = ['Notices']
   #swagger.summary = '알림 생성 API'
-  #swagger.description = `새로운 알림을 생성합니다. <br> userId가 필요합니다.`
+  #swagger.description = `새로운 알림을 생성합니다.`
+  #swagger.security = [{ "bearerAuth": [] }]
   */
 
   try {
-    const userId = req.query.userId; 
+    const userId = req.user?.id; 
     const { message, entityType, entityId } = req.body;
 
     if (!userId) {
       return res.error({
         errorCode: "USER001",
-        reason: "userId 쿼리 파라미터가 필요합니다.",
+        reason: "사용자 인증 정보가 필요합니다.",
         data: null,
       });
     }
@@ -53,23 +53,23 @@ export const createNotice = async (req, res) => {
   }
 };
 
-
 export const updateNoticeReadStatus = async (req, res) => {
   /* 
   #swagger.tags = ['Notices']
   #swagger.summary = '알림 읽음 상태 수정 API'
   #swagger.description = `특정 알림을 읽음 상태로 변경합니다.`
+  #swagger.security = [{ "bearerAuth": [] }]
   */
 
   try {
-    const userId = req.query.userId; 
+    const userId = req.user?.id; 
     const { noticeId } = req.params;
     const { isRead } = req.body;
 
     if (!userId) {
       return res.error({
         errorCode: "USER001",
-        reason: "userId 쿼리 파라미터가 필요합니다.",
+        reason: "사용자 인증 정보가 필요합니다.",
         data: null,
       });
     }
@@ -96,22 +96,22 @@ export const updateNoticeReadStatus = async (req, res) => {
   }
 };
 
-
 export const deleteNotice = async (req, res) => {
   /* 
   #swagger.tags = ['Notices']
   #swagger.summary = '알림 삭제 API'
   #swagger.description = `특정 알림을 삭제합니다.`
+  #swagger.security = [{ "bearerAuth": [] }]
   */
 
   try {
-    const userId = req.query.userId; 
+    const userId = req.user?.id; 
     const { noticeId } = req.params;
 
     if (!userId) {
       return res.error({
         errorCode: "USER001",
-        reason: "userId 쿼리 파라미터가 필요합니다.",
+        reason: "사용자 인증 정보가 필요합니다.",
         data: null,
       });
     }
@@ -133,21 +133,21 @@ export const deleteNotice = async (req, res) => {
   }
 };
 
-
 export const getNotices = async (req, res) => {
   /* 
   #swagger.tags = ['Notices']
   #swagger.summary = '알림 조회 API'
   #swagger.description = `현재 로그인한 사용자의 알림 목록을 조회합니다.`
+  #swagger.security = [{ "bearerAuth": [] }]
   */
 
   try {
-    const userId = req.query.userId; 
+    const userId = req.user?.id; 
 
     if (!userId) {
       return res.error({
         errorCode: "USER001",
-        reason: "userId 쿼리 파라미터가 필요합니다.",
+        reason: "사용자 인증 정보가 필요합니다.",
         data: null,
       });
     }

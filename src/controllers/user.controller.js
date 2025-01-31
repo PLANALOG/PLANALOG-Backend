@@ -13,10 +13,7 @@ export const handleEditUser = async (req, res, next) => {
     #swagger.tags = ['Users']
     #swagger.summary = '회원정보 수정 API'
     #swagger.security = [{
-            "OAuth2": [
-                'read', 
-                'write'
-            ]
+        "bearerAuth": []
     }]
     #swagger.requestBody = {
         required: true,
@@ -140,6 +137,9 @@ export const handleMyProfile = async (req, res, next) => {
     /*
     #swagger.tags = ['Users']
     #swagger.summary = '본인 회원 정보 조회 API'
+    #swagger.security = [{
+        "bearerAuth": []
+    }]
     #swagger.responses[200] = {
         description: "회원 정보 조회 성공 응답",
         content: {
@@ -233,10 +233,40 @@ export const handleUserProfile = async (req, res, next) => {
     res.status(StatusCodes.OK).success(user);
 }
 
+export const handleLogOut = async (req, res, next) => {
+    /* 
+    #swagger.tags = ['Users']
+    #swagger.summary = '로그아웃 API'
+    #swagger.description = '로그아웃 요청을 합니다. 토큰을을 삭제하고, 로그아웃 성공 메시지를 반환합니다.'
+    #swagger.security = [{
+        "bearerAuth": []
+    }]
+    */
+    console.log("로그아웃 요청")
+
+    if (!req.user || !req.user.id) {
+        throw new authError();
+    }
+
+    const userId = parseInt(req.user.id);
+
+    // 해당 유저의 리프레시 토큰 삭제 (재사용 방지)
+    await prisma.refreshToken.deleteMany({
+        where: { userId: userId }
+    });
+    console.log("리프레시 토큰 삭제 완료");
+
+    return res.success({ message: "로그아웃 성공" });
+
+}
+
 export const handleDeleteUser = async (req, res, next) => {
     /* 
     #swagger.tags = ['Users']
     #swagger.summary = '회원탈퇴 API'
+    #swagger.security = [{
+        "bearerAuth": []
+    }]
     */
     console.log("회원탈퇴를 요청했습니다.")
 
@@ -249,10 +279,7 @@ export const handleDeleteUser = async (req, res, next) => {
 
     console.log(req.user)
 
-
     const deletedUser = await userDelete(userId, req.user);
-
-    req.session.destroy()
 
     res.status(StatusCodes.OK).success({ deletedUser });
 }
@@ -283,6 +310,9 @@ export const handleEditUserImage = async (req, res, next) => {
         #swagger.description = `
             파일 업로드 시 이미지 파일을 받아 프로필 사진을 변경합니다. 
             기본 이미지를 사용할 경우, 'basicImage' 필드에 1~8 사이의 숫자를 입력합니다.`
+        #swagger.security = [{
+        "bearerAuth": []
+    }]
         #swagger.requestBody = {
             required: true,
             content: {
@@ -315,7 +345,6 @@ export const handleEditUserImage = async (req, res, next) => {
     console.log(req.file);
 
     let imagePaths;
-    let isBasicImage = false;
 
     if (req.file) {
         //저장된 이미지 url을 받아옴
@@ -323,7 +352,6 @@ export const handleEditUserImage = async (req, res, next) => {
     } else {
         const BasicImageNum = req.body.basicImage;
         imagePaths = `https://planalog-s3.s3.ap-northeast-2.amazonaws.com/basic_images/${BasicImageNum}.png`;
-        isBasicImage = true;
     }
 
 
@@ -333,7 +361,7 @@ export const handleEditUserImage = async (req, res, next) => {
     const userId = parseInt(req.user.id);
 
 
-    const savedUrl = await profileImageEdit(imagePaths, userId, isBasicImage);
+    const savedUrl = await profileImageEdit(imagePaths, userId);
 
 
     res.status(StatusCodes.OK).success({ message: "프로필 사진 변경 성공", savedUrl: savedUrl.profileImage });

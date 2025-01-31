@@ -4,49 +4,24 @@ import express from 'express';          // -> ES Module
 import cors from "cors";
 import task from "./routes/task.js";
 import taskCategory from "./routes/category.js"; //라우터 객체 가져오기 
-// import { PrismaSessionStore } from "@quixo3/prisma-session-store";
-// import session from "express-session";
-import passport from "passport";
-import { googleStrategy, kakaoStrategy, naverStrategy } from "./auth.config.js";
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
-import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile, handleDeleteUser, handleTestDeleteUser, handleEditUserImage } from "./controllers/user.controller.js";
+import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile, handleDeleteUser, handleTestDeleteUser, handleEditUserImage, handleLogOut } from "./controllers/user.controller.js";
 import { body, query, param } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 import { userDeleteScheduler } from "./scheduler.js";
 import { handleCreateMoment, handleUpdateMoment, handleDeleteMoment} from "./controllers/moment.controller.js";
 import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
-
+import { handleNaverTokenLogin, handleKakaoTokenLogin, handleGoogleTokenLogin, handleRefreshToken } from "./auth.config.js";
+import { testUserMiddleware } from "./test.js";
 
 dotenv.config();
 
-passport.use(googleStrategy);
-passport.use(kakaoStrategy);
-passport.use(naverStrategy);
-// passport.serializeUser((user, done) => {
-//   // ｕｓｅｒ는 콜백함수 ｖｅｒｉｆｙ에서 반환된 객체임¡
-//   console.log('serializeUser success', user)
-//   done(null, user)
-// });
-// passport.deserializeUser((user, done) => {
-//   //console.log('deserializeUser success')
-//   done(null, user)
-// });
 
 const app = express()
 const port = process.env.PORT;
-
-
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "your-secret", // 반드시 비밀 키 설정
-    resave: false, // 세션 변경이 없을 때 저장 방지
-    saveUninitialized: false, // 초기화되지 않은 세션을 저장하지 않음
-    cookie: { secure: false }, // HTTPS 사용 시 secure: true로 설정
-  })
-);
 
 
 
@@ -75,25 +50,6 @@ app.use(express.static('public'));          // 정적 파일 접근
 app.use(express.json());                    // request의 본문을 json으로 해석할 수 있도록 함 (JSON 형태의 요청 body를 파싱하기 위함)
 app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
 
-// app.use(
-//   session({
-//     cookie: { //세션 ID 쿠키의 옵션을 지정하는 객체
-//       maxAge: 7 * 24 * 60 * 1000, //ms
-//     },
-//     resave: false, //수정되지 않은 세션일지라도 다시 저장할지(세션을 언제나 저장할지) 나타내는 부울 값.
-//     saveUninitalized: false, //초기화되지 않은 세션을 저장할지(세션에 저장할 내역이 없더라도 처음부터 세션을 생성할지) 
-//     secret: process.env.EXPRESS_SESSION_SECRET, //세션 ID 쿠키를 서명하는 데 사용할 문자열. 보안 목적으로 필수적.
-//     store: new PrismaSessionStore(prisma, { // 세션 데이터의 저장 메커니즘
-//       checkPeriod: 2 * 60 * 1000, //ms
-//       dbRecordIdIsSessionId: true,
-//       dbRecordIdFunction: undefined
-//     })
-//   })
-// );
-
-app.use(passport.initialize());
-// app.use(passport.session()); //사용자의 모든 요청에 HTTP Cookie 중 sid 값이 있다면, 이를 MySQL DB에서 찾아, 일치하는 Session이 있다면 사용자 데이터를 가져와 req.user
-
 app.use(
   "/docs",
   swaggerUiExpress.serve,
@@ -118,25 +74,17 @@ app.get("/openapi.json", async (req, res, next) => {
       title: "PLANALOG",
       description: "PLANALOG 테스트 문서입니다.",
     },
-    host: "15.164.83.14:3000",
+    host: "localhost:3000",
     components: {
       securitySchemes: {
-        OAuth2: {
-          type: 'oauth2',
-          flows: {
-            authorizationCode: {
-              authorizationUrl: 'http://15.164.83.14:3000/oauth2/login/google',
-              tokenUrl: 'http://15.164.83.14:3000/oauth2/callback/google',
-              scopes: {
-                read: 'Grants read access',
-                write: 'Grants write access',
-                admin: 'Grants access to admin operations'
-              }
-            }
-          }
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "토큰을 입력하세요."
         }
       }
-    }
+    },
   };
 
   const result = await swaggerAutogen(options)(outputFile, routes, doc);
@@ -154,99 +102,37 @@ app.get('/', (req, res) => {
   console.log(req.user)
 })
 
-//소셜로그인 - 구글 
-app.get("/oauth2/login/google", passport.authenticate("google"), (req, res) => {
-  // #swagger.ignore = true
-});
-app.get(
-  "/oauth2/callback/google",
-  passport.authenticate("google", {
-    session: false,
-    failureRedirect: "/oauth2/login/google",
-    failureMessage: true,
-  }),
-  (req, res) => {
-
-    // #swagger.ignore = true
-    res.success({ message: "로그인 성공" })
-  }
-);
-
-//소셜로그인 - 카카오
-app.get("/oauth2/login/kakao", passport.authenticate("kakao"), (req, res) => {
-  // #swagger.ignore = true
-});
-
-app.get(
-  "/oauth2/callback/kakao",
-  passport.authenticate("kakao", {
-    session: false,
-    failureRedirect: "/oauth2/login/kakao",
-    failureMessage: true,
-  }),
-  (req, res) => {
-    res.cookie('access_token', req.user.token, {
-      httpOnly: false, // 클라이언트에서 직접 접근 불가
-      maxAge: 24 * 60 * 60 * 1000, // 1일 동안 유효
-    });
-    // #swagger.ignore = true
-    res.success({ message: "로그인 성공" })
-  }
-);
-
-//소셜로그인 - 네이버
-app.get("/oauth2/login/naver", passport.authenticate("naver"), (req, res) => {
-  // #swagger.ignore = true
-});
-app.get(
-  "/oauth2/callback/naver",
-  passport.authenticate("naver", {
-    session: false,
-    failureRedirect: "/oauth2/login/naver",
-    failureMessage: true,
-  }),
-  (req, res) => {
-    // #swagger.ignore = true
-    res.success({ message: "로그인 성공" })
-  }
-);
-
 //로그아웃
-app.get("/logout", (req, res) => {
-  /* 
-  #swagger.tags = ['Users']
-  #swagger.summary = '로그아웃 API'
-  #swagger.description = '로그아웃 요청을 합니다. 세션을 삭제하고, 로그아웃 성공 메시지를 반환합니다.'
-  */
-  console.log("로그아웃 요청")
-  req.logout(() => {
-    req.session.destroy();
-    res.success();
-  });
+app.get("/logout", authenticateJWT, handleLogOut);
 
-});
+app.post("/oauth2/naver/token", handleNaverTokenLogin);
+
+app.post("/oauth2/kakao/token", handleKakaoTokenLogin);
+
+app.post("/oauth2/google/token", handleGoogleTokenLogin);
+
+//리프레시 토큰 이용해 액세스 토큰 재발급 
+app.post("/refresh_token", handleRefreshToken);
+
+//테스트용 (로컬 DB에 유저 추가 및 토큰 발급)
+app.post("/test/create_user", testUserMiddleware);
 
 
-// Mock 인증 미들웨어
-const mockAuthMiddleware = (req, res, next) => {
-  req.user = { id: 1 }; // Mock user ID
-  next();
-};
 //task 관련 작업 
-app.use("/tasks", mockAuthMiddleware, task);
+app.use("/tasks", authenticateJWT, task);
 //task_category 관련작업
-app.use("/task_category", mockAuthMiddleware, taskCategory)
+app.use("/task_category", authenticateJWT, taskCategory)
 
 //회원정보 수정 API
 app.patch("/users/profile", [
   body("nickname").optional().isString().isLength({ max: 20 }).withMessage("nickname은 20자 이내의 문자열이어야 합니다."),
-  body("type").optional().isIn(["memo_user", "category_user"]).withMessage("type은 memo 또는 category만 가능합니다."),
+  body("type").optional().isIn(["memo_user", "category_user"]).withMessage("type은 memo_user 또는 category_user만 가능합니다."),
   body("introduction").optional().isString().withMessage("introduction은 문자열이어야 합니다."),
   body("link").optional().isURL().withMessage("link는 URL 형식이어야 합니다."),
-], handleEditUser);
+], authenticateJWT, handleEditUser);
 
 // 프로필 사진 변경 
-app.post("/users/profile/image", upload.single("image"), handleEditUserImage);
+app.post("/users/profile/image", authenticateJWT, upload.single("image"), handleEditUserImage);
 
 //닉네임 중복 조회 API
 app.get("/users/check_nickname",
@@ -267,12 +153,12 @@ app.get("/users/:userId", [
 app.get('/planners', [
   query("userId").optional().isInt().withMessage("userId는 숫자여야 합니다."),
   query("date").optional().isDate().withMessage("date는 날짜형식이어야 합니다.ex)2025-01-01"),
-], handleDisplayPlanner);
+], authenticateJWT, handleDisplayPlanner);
 
 //플래너 삭제 
 app.delete("/planners/:plannerId", [
   param("plannerId").exists().withMessage("plannerId를 입력하세요.").isInt().withMessage("plannerId는 숫자여야 합니다."),
-], handleDeletePlanner);
+], authenticateJWT, handleDeletePlanner);
 
 //모먼트 생성
 app.post("/moments", handleCreateMoment);
@@ -285,10 +171,42 @@ app.delete("/moments/:momentId", handleDeleteMoment);
 
 
 //회원 탈퇴 
-app.delete("/users", handleDeleteUser)
+app.delete("/users", authenticateJWT, handleDeleteUser)
 
 //테스트용 : 회원탈퇴복구 (탈퇴 회원 바로 회원가입 가능)
 app.post("/users/test", handleTestDeleteUser)
+
+import { saveSearchRecord/*, getSearchRecords, deleteSearchRecord, deleteAllSearchRecords*/ } from "./controllers/search.controller.js";
+import { searchUsers } from "./controllers/search.controller.js";
+import { getSearchRecords } from "./controllers/search.controller.js";
+import { deleteSearchRecord } from "./controllers/search.controller.js";
+import { updateNoticeReadStatus } from "./controllers/notice.controller.js";
+import { createNotice } from "./controllers/notice.controller.js";
+import { deleteNotice } from "./controllers/notice.controller.js";
+import { getNotices } from "./controllers/notice.controller.js";
+import { addFriend, acceptFriend, getFollowing, getFollowers,deleteFriend, getFriendCount } from "./controllers/friend.controller.js";
+
+
+
+app.get("/searches/users",authenticateJWT ,searchUsers);
+app.post("/searches",authenticateJWT ,saveSearchRecord);
+app.get("/searches/records",authenticateJWT, getSearchRecords);
+app.post("/notices",authenticateJWT, createNotice);
+app.patch("/notices/:noticeId/read",authenticateJWT ,updateNoticeReadStatus);
+app.get("/notices",authenticateJWT ,getNotices);
+app.post('/friends', authenticateJWT ,addFriend);            // 친구 추가 기능
+app.get('/friends/following', authenticateJWT ,getFollowing); // 내가 팔로우하는 사람 목록
+app.get('/friends/followers',authenticateJWT , getFollowers); // 나를 팔로우하는 사람 목록
+app.get('/friends/count',authenticateJWT , getFriendCount);  // count 엔드포인트를 위로 이동
+//app.get('/friends/list', getFriends);       // 친구 목록 조회, 친구 검색 기능
+app.patch("/friends/:friendId", authenticateJWT ,acceptFriend); // 친구 요청 수락
+app.delete("/notices/:noticeId", authenticateJWT,deleteNotice);
+app.delete("/searches/records/:recordId", authenticateJWT,deleteSearchRecord);
+app.delete('/friends/:friendId', authenticateJWT ,deleteFriend); //친구 삭제 기능
+
+
+
+
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의
@@ -312,25 +230,3 @@ app.listen(port, () => {
 })
 
 
-import { saveSearchRecord/*, getSearchRecords, deleteSearchRecord, deleteAllSearchRecords*/ } from "./controllers/search.controller.js";
-
-import { searchUsers } from "./controllers/search.controller.js";
-import { getSearchRecords } from "./controllers/search.controller.js";
-import { deleteSearchRecord } from "./controllers/search.controller.js";
-
-
-
-import { updateNoticeReadStatus } from "./controllers/notice.controller.js";
-import { createNotice } from "./controllers/notice.controller.js";
-import { deleteNotice } from "./controllers/notice.controller.js";
-import { getNotices } from "./controllers/notice.controller.js";
-
-
-app.get("/searches/users", searchUsers);
-app.post("/searches", saveSearchRecord);
-app.get("/searches/records", getSearchRecords);
-app.post("/post/notices", createNotice);
-app.patch("/notices/:noticeId/read", updateNoticeReadStatus);
-app.get("/notices", getNotices);
-app.delete("/notices/:noticeId", deleteNotice);
-app.delete("/searches/records/:recordId", deleteSearchRecord);

@@ -66,3 +66,21 @@ export const deleteCategoryRepository = async (id) => {
         throw new Error("Database error: Failed to delete task category");
     }
 };
+
+export const createTaskCategoryRepository = async ({ task_category_id, title, planner_date }) => {
+    try {
+        // 데이터베이스에 카테고리 추가
+        const newTaskCategory = await prisma.task.create({
+            data: {
+                title,
+                plannerDate: new Date(planner_date),
+                taskCategoryId: BigInt(task_category_id, 10), // task_category_id와 연결
+            },
+        });
+
+        return newTaskCategory;
+    } catch (error) {
+        console.error("Error creating task category:", error);
+        throw new Error("Database error occurred while creating task category.");
+    }
+};
