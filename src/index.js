@@ -18,7 +18,7 @@ import { userDeleteScheduler } from "./scheduler.js";
 import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
 import { handleNaverTokenLogin, handleKakaoTokenLogin, handleGoogleTokenLogin } from "./auth.config.js";
-
+import { testUserMiddleware } from "./test.js";
 
 dotenv.config();
 
@@ -115,7 +115,7 @@ app.get("/openapi.json", async (req, res, next) => {
           type: "http",
           scheme: "bearer",
           bearerFormat: "JWT",
-          description: "Authorization 헤더에 'Bearer {token}' 형식으로 입력하세요."
+          description: "토큰을 입력하세요."
         }
       }
     },
@@ -216,6 +216,8 @@ app.post("/oauth2/google/token", handleGoogleTokenLogin);
 //리프레시 토큰 이용해 액세스 토큰 재발급 
 app.post("/refresh_token", handleRefreshToken);
 
+//테스트용 (로컬 DB에 유저 추가 및 토큰 발급)
+app.post("/test/create_user", testUserMiddleware);
 
 // Mock 인증 미들웨어
 const mockAuthMiddleware = (req, res, next) => {
