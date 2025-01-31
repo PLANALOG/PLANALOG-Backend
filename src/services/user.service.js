@@ -3,6 +3,7 @@ import { getUserByNickname, updateUserProfile, getMyProfile, getUserProfile, del
 import { responseFromUser } from "../dtos/user.dto.js";
 import { kakaoDisconnect, googleDisconnect, naverDisconnect } from "../auth.config.js";
 import { deleteFile } from "../multer.js";
+import { prisma } from "../db.config.js"
 
 
 export const userEdit = async (data, userId) => {
@@ -51,9 +52,15 @@ export const userDelete = async (userId, user) => {
     const isUserExist = await getMyProfile(userId);
     if (!isUserExist) throw new NoExistsUserError(userId);
 
+    // 유저의 리프레시 토큰 삭제 
+    await prisma.refreshToken.deleteMany({
+        where: { userId: userId }
+    });
+    console.log('리프레시 토큰 삭제 완료');
+
+
+    // DB에서 유저 삭제 
     const deletedUser = await deleteUser(userId);
-
-
     console.log('DB에서 유저 삭제 성공');
 
 
@@ -73,15 +80,7 @@ export const userDelete = async (userId, user) => {
         await naverDisconnect(userId, refreshToken);
     }
 
-
-    // 세션 없애기 
-    //### DB에서 30일 뒤 사용자 삭제하는 스케줄러 설정 
-    // ### user정보 조회/수정하는 모든 로직에서 isDeleted 고려하도록 수정 
-
-
-
     return deletedUser;
-
 }
 
 

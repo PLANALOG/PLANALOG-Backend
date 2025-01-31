@@ -11,7 +11,7 @@ import { googleStrategy, handleRefreshToken, kakaoStrategy, naverStrategy } from
 import { prisma } from "./db.config.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
-import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile, handleDeleteUser, handleTestDeleteUser, handleEditUserImage } from "./controllers/user.controller.js";
+import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile, handleDeleteUser, handleTestDeleteUser, handleEditUserImage, handleLogOut } from "./controllers/user.controller.js";
 import { body, query, param } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 import { userDeleteScheduler } from "./scheduler.js";
@@ -194,19 +194,7 @@ app.get(
 );
 
 //로그아웃
-app.get("/logout", (req, res) => {
-  /* 
-  #swagger.tags = ['Users']
-  #swagger.summary = '로그아웃 API'
-  #swagger.description = '로그아웃 요청을 합니다. 세션을 삭제하고, 로그아웃 성공 메시지를 반환합니다.'
-  */
-  console.log("로그아웃 요청")
-  req.logout(() => {
-    req.session.destroy();
-    res.success();
-  });
-
-});
+app.get("/logout", authenticateJWT, handleLogOut);
 
 app.post("/oauth2/naver/token", handleNaverTokenLogin);
 

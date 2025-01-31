@@ -233,6 +233,33 @@ export const handleUserProfile = async (req, res, next) => {
     res.status(StatusCodes.OK).success(user);
 }
 
+export const handleLogOut = async (req, res, next) => {
+    /* 
+    #swagger.tags = ['Users']
+    #swagger.summary = '로그아웃 API'
+    #swagger.description = '로그아웃 요청을 합니다. 토큰을을 삭제하고, 로그아웃 성공 메시지를 반환합니다.'
+    #swagger.security = [{
+        "bearerAuth": []
+    }]
+    */
+    console.log("로그아웃 요청")
+
+    if (!req.user || !req.user.id) {
+        throw new authError();
+    }
+
+    const userId = parseInt(req.user.id);
+
+    // 해당 유저의 리프레시 토큰 삭제 (재사용 방지)
+    await prisma.refreshToken.deleteMany({
+        where: { userId: userId }
+    });
+    console.log("리프레시 토큰 삭제 완료");
+
+    return res.success({ message: "로그아웃 성공" });
+
+}
+
 export const handleDeleteUser = async (req, res, next) => {
     /* 
     #swagger.tags = ['Users']
@@ -252,10 +279,7 @@ export const handleDeleteUser = async (req, res, next) => {
 
     console.log(req.user)
 
-
     const deletedUser = await userDelete(userId, req.user);
-
-    req.session.destroy()
 
     res.status(StatusCodes.OK).success({ deletedUser });
 }
