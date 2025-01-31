@@ -179,14 +179,14 @@ import { deleteNotice } from "./controllers/notice.controller.js";
 import { getNotices } from "./controllers/notice.controller.js";
 
 
-app.get("/searches/users", searchUsers);
-app.post("/searches", saveSearchRecord);
-app.get("/searches/records", getSearchRecords);
-app.post("/post/notices", createNotice);
-app.patch("/notices/:noticeId/read", updateNoticeReadStatus);
-app.get("/notices", getNotices);
-app.delete("/notices/:noticeId", deleteNotice);
-app.delete("/searches/records/:recordId", deleteSearchRecord);
+app.get("/searches/users",authenticateJWT ,searchUsers);
+app.post("/searches",authenticateJWT ,saveSearchRecord);
+app.get("/searches/records",authenticateJWT, getSearchRecords);
+app.post("/post/notices",authenticateJWT, createNotice);
+app.patch("/notices/:noticeId/read",authenticateJWT ,updateNoticeReadStatus);
+app.get("/notices",authenticateJWT ,getNotices);
+app.delete("/notices/:noticeId", authenticateJWT,deleteNotice);
+app.delete("/searches/records/:recordId", authenticateJWT,deleteSearchRecord);
 
 
 
