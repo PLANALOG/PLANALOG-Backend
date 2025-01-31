@@ -107,7 +107,7 @@ model Task {
   plannerId      BigInt        @map("planner_id")
   taskCategoryId BigInt?       @map("task_category_id")
   title          String        @db.VarChar(100)
-  isCompleted    Boolean       @map("is_completed")
+  isCompleted    Boolean       @default(false) @map("is_completed")
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @updatedAt @map("updated_at")
   // Relationships
