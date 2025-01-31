@@ -17,7 +17,7 @@
     };
     export const bodyToDeleteComment = (userId, commentId) => {
         return{
-            userId: parseInt(userId), // 문자열로 전달될 수 있으므로 정수로 변환
+            userId: userId, 
             commentId: parseInt(commentId),
         };
     };

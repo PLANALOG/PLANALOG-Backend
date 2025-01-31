@@ -262,11 +262,11 @@ app.delete("/users", handleDeleteUser)
 app.post("/users/test", handleTestDeleteUser)
 
 //댓글 추가
-app.post("/moments/:momentId/comments", handleAddComment);
+app.post("/moments/:momentId/comments", authenticateJWT, handleAddComment);
 //댓글 수정
-app.patch("/moments/:momentId/comments/:commentId",handleEditComment);
+app.patch("/moments/:momentId/comments/:commentId", authenticateJWT, handleEditComment);
 //댓글 삭제
-app.delete("/comments/:commentId",handleDeleteComment);
+app.delete("/comments/:commentId", authenticateJWT, handleDeleteComment);
 //댓글 목록
 app.get("/moments/:momentId/comments", handleListComment);
 
