@@ -194,9 +194,13 @@ export const handleGetTask = async(req, res, next) => {
     }
     */
     //Task 조회. 
+    
     const task_id = req.params;
-
-    const validTaskId = getTaskDto(task_id);
+    
+    
+    const validTaskId = getTaskDto(task_id.task_id); 
+    console.log(validTaskId);
+    
     
     try {
         const task = await getTask(validTaskId);
@@ -320,7 +324,7 @@ export const handleToggleCompletion = async(req, res, next) => {
     */
     // Task ID 추출
     const task_id = req.params;
-    const validTaskId = await getTaskDto(task_id);
+    const validTaskId = await getTaskDto(task_id.task_id);
     
     try {
         const toggledTask = await toggleTaskCompletion(validTaskId);

@@ -52,4 +52,92 @@ export class authError extends Error {
     this.reason = reason;
   }
 }
+//중복 좋아요
+export class DuplicateLikeMomentError extends Error{
+  errorCode = "L001";
 
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+ }
+ //좋아요 존재 X
+ export class LikeIdNotExistError extends Error{ 
+  errorCode = "L002";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+ }
+ //권한 없는 좋아요(본인이 누른 좋아요 X)
+ export class LikeNotOwnedByUserError extends Error{
+  errorCode = "L003";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+ }
+}
+//좋아요id 누락
+export class LikeIdMissingError extends Error{
+  errorCode = "L004";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+export class momentIdNotFoundError extends Error{
+  errorCode = "C001";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+//댓글 내용 공백
+export class ContentNotFoundError extends Error{
+  errorCode = "C002";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+
+export class CommentIdNotFoundError extends Error{
+  errorCode = "C003";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+//수정 권한
+export class PermissionDeniedError extends Error{
+  errorCode = "C004";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+//500자 이상 댓글
+export class ContentTooLongError extends Error{
+  errorCode = "C005";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}

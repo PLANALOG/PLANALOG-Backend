@@ -56,7 +56,7 @@ export const deleteCategoryRepository = async (id) => {
     try {
         const deletedCategory = await prisma.taskCategory.delete({
             where: {
-                id: BigInt(id, 10), // Convert ID to integer
+                id: BigInt(id), // Convert ID to integer
             },
         });
 
@@ -74,7 +74,7 @@ export const createTaskCategoryRepository = async ({ task_category_id, title, pl
             data: {
                 title,
                 plannerDate: new Date(planner_date),
-                taskCategoryId: BigInt(task_category_id, 10), // task_category_id와 연결
+                taskCategoryId: BigInt(task_category_id), // task_category_id와 연결
             },
         });
 

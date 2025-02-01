@@ -14,12 +14,12 @@ enum platform_type {
 }
 
 enum notice_type {
-  post
+  moment
   comment
   friend
 }
 
-enum like_post_type {
+enum like_type {
   shared_planner
   moment
 }
@@ -177,7 +177,7 @@ model Notice {
   userId     BigInt      @map("user_id")
   isRead     Boolean     @map("is_read")
   message    String      @db.VarChar(100)
-  entityType notice_type @map("entity_type") // ENUM (post, comment, friend)
+  entityType notice_type @map("entity_type") // ENUM (moment, comment, friend)
   entityId   Int         @map("entity_id")
   createdAt  DateTime    @default(now()) @map("created_at")
 
@@ -189,12 +189,12 @@ model Notice {
 }
 
 model Like {
-  id         BigInt         @id @default(autoincrement())
-  userId     BigInt         @map("user_id")
-  fromUserId BigInt         @map("from_user_id")
-  entityType like_post_type @map("entity_type") // ENUM (shared_planner, post)
-  entityId   Int            @map("entity_id")
-  createdAt  DateTime       @default(now()) @map("created_at")
+  id         BigInt    @id @default(autoincrement())
+  userId     BigInt    @map("user_id")
+  fromUserId BigInt    @map("from_user_id")
+  entityType like_type @map("entity_type") // ENUM (shared_planner, moment)
+  entityId   Int       @map("entity_id")
+  createdAt  DateTime  @default(now()) @map("created_at")
 
   // Relationships
   user     User @relation(name: "LikeToUser", fields: [userId], references: [id])

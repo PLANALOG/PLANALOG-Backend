@@ -14,15 +14,12 @@ import {
     getMyMomentDetail, 
     getFriendsMoments, 
     getFriendMomentDetail  } from "../services/moment.service.js";
-
 export const handleCreateMoment = async (req, res, next) => {
-    /*
+/*
     #swagger.tags = ['Moments']
     #swagger.summary = 'Moment 생성 API'
     #swagger.description = '새로운 Moment를 생성합니다.'
-    #swagger.security = [{
-        "bearerAuth": []
-    }]
+    #swagger.security = [{ "bearerAuth": [] }]
     #swagger.requestBody = {
         required: true,
         content: {
@@ -30,9 +27,8 @@ export const handleCreateMoment = async (req, res, next) => {
                 schema: {
                     type: "object",
                     properties: {
-                        title: { type: "string", example: "25년 1월7일", description: "Moment 제목" },
-                        status: { type: "string", enum: ["draft", "public"], example: "draft", description: "Moment 상태" },
-                        plannerId: { type: "integer", example: 123, description: "해당 Moment가 연결된 Planner의 ID" },
+                        title: { type: "string", example: "25년 1월7일" },
+                        status: { type: "string", enum: ["draft", "public"], example: "draft" },
                         momentContents: {
                             type: "array",
                             items: {
@@ -40,25 +36,9 @@ export const handleCreateMoment = async (req, res, next) => {
                                     {
                                         type: "object",
                                         properties: {
-                                            sortOrder: { type: "integer", example: 1, description: "Moment 페이지 순서" },
-                                            content: { type: "string", example: "오늘 하루 열심히 공부했어요!", description: "Moment 페이지 내용" },
-                                            url: { type: "string", nullable: true, example: "https://image1.com/image1.jpg", description: "이미지 URL" }
-                                        }
-                                    },
-                                    {
-                                        type: "object",
-                                        properties: {
-                                            sortOrder: { type: "integer", example: 2, description: "Moment 페이지 순서" },
-                                            content: { type: "string", example: "카페에서 공부 중 ☕", description: "Moment 페이지 내용" },
-                                            url: { type: "string", example: "https://image2.com/image2.jpg", description: "이미지 URL" }
-                                        }
-                                    },
-                                    {
-                                        type: "object",
-                                        properties: {
-                                            sortOrder: { type: "integer", example: 3, description: "Moment 페이지 순서" },
-                                            content: { type: "string", example: "독서실에서 마지막 정리!", description: "Moment 페이지 내용" },
-                                            url: { type: "string", nullable: true, example: "https://image3.com/image3.jpg", description: "이미지 URL" }
+                                            sortOrder: { type: "integer", example: 1 },
+                                            content: { type: "string", example: "오늘 하루 열심히 공부했어요!" },
+                                            url: { type: "string", nullable: true, example: "https://image1.com/image1.jpg" }
                                         }
                                     }
                                 ]
@@ -70,73 +50,17 @@ export const handleCreateMoment = async (req, res, next) => {
             }
         }
     }
-    #swagger.responses[200] = {
-        description: "Moment 생성 성공",
-        content: {
-            "application/json": {
-                schema: {
-                    type: "object",
-                    properties: {
-                        resultType: { type: "string", example: "SUCCESS", description: "결과 상태" },
-                        error: { type: "object", nullable: true, example: null, description: "에러 정보" },
-                        success: { 
-                            type: "object",
-                            properties: {
-                                data: {
-                                    type: "object",
-                                    properties: {
-                                        userId: { type: "integer", example: 5, description: "생성한 사용자 ID" },
-                                        momentId: { type: "integer", example: 456, description: "생성된 Moment의 ID" },
-                                        plannerId: { type: "integer", example: 123, description: "Planner ID" },
-                                        title: { type: "string", example: "25년 1월 7일", description: "Moment 제목" },
-                                        status: { type: "string", example: "draft", description: "Moment 상태" },
-                                        createdAt: { type: "string", format: "date-time", example: "2025-01-21T12:34:56Z", description: "Moment 생성 시간" },
-                                        updatedAt: { type: "string", format: "date-time", example: "2025-01-21T13:00:00Z", description: "Moment 수정 시간" },
-                                        momentContents: {
-                                            type: "array",
-                                            items: {
-                                                oneOf: [
-                                                    {
-                                                        type: "object",
-                                                        properties: {
-                                                            sortOrder: { type: "integer", example: 1, description: "Moment 페이지 순서" },
-                                                            content: { type: "string", example: "오늘 하루 열심히 공부했어요!", description: "Moment 페이지 내용" },
-                                                            url: { type: "string", nullable: true, example: "https://image1.com/image1.jpg", description: "이미지 URL" }
-                                                        }
-                                                    },
-                                                    {
-                                                        type: "object",
-                                                        properties: {
-                                                            sortOrder: { type: "integer", example: 2, description: "Moment 페이지 순서" },
-                                                            content: { type: "string", example: "카페에서 공부 중 ", description: "Moment 페이지 내용" },
-                                                            url: { type: "string", example: "https://image2.com/image2.jpg", description: "이미지 URL" }
-                                                        }
-                                                    },
-                                                    {
-                                                        type: "object",
-                                                        properties: {
-                                                            sortOrder: { type: "integer", example: 3, description: "Moment 페이지 순서" },
-                                                            content: { type: "string", example: "독서실에서 마지막 정리!", description: "Moment 페이지 내용" },
-                                                            url: { type: "string", nullable: true, example: "https://image3.com/image3.jpg", description: "이미지 URL" }
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    */
+*/
+
     try {
-        console.log("moment 생성요청");
-        const momentData = await momentCreate(bodyToCreateMoment(req.body, req.user.id));
-        res.status(StatusCodes.OK).json({
+        console.log("moment 생성 요청");
+        const momentData = await momentCreate({
+            ...bodyToCreateMoment(req.body),
+            userId: req.user.id,
+            plannerId: req.body.plannerId || null
+        });
+
+        res.status(200).json({
             resultType: "SUCCESS",
             error: null,
             success: {
@@ -144,10 +68,10 @@ export const handleCreateMoment = async (req, res, next) => {
             }
         });
     } catch (error) {
+        console.error("Moment 생성 중 오류 발생:", error.message);
         next(error);
     }
 };
-
 
 
 export const handleUpdateMoment = async (req, res, next) => {
@@ -155,9 +79,13 @@ export const handleUpdateMoment = async (req, res, next) => {
     #swagger.tags = ['Moments']
     #swagger.summary = 'Moment 수정 API'
     #swagger.description = '기존의 Moment를 수정합니다.'
-    #swagger.security = [{
-        "bearerAuth": []
-    }]
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['momentId'] = {
+        in: 'path',
+        description: '수정할 Moment의 ID',
+        required: true,
+        schema: { type: 'integer', example: 2 }
+    }
     #swagger.requestBody = {
         required: true,
         content: {
@@ -170,33 +98,12 @@ export const handleUpdateMoment = async (req, res, next) => {
                         momentContents: {
                             type: "array",
                             items: {
-                                oneOf: [
-                                    {
-                                        type: "object",
-                                        properties: {
-                                            sortOrder: { type: "integer", example: 2, description: "수정할 페이지 순서" },
-                                            content: { type: "string", example: "수정된 내용 (기존 페이지)", description: "수정된 페이지 내용" },
-                                            url: { type: "string", example: "https://newimage1.com/newimage1.jpg", description: "수정된 이미지 URL" }
-                                        }
-                                    },
-                                    {
-                                        type: "object",
-                                        properties: {
-                                            sortOrder: { type: "integer", nullable: true, example: null, description: "새로운 페이지의 경우 null" },
-                                            content: { type: "string", example: "새로 추가된 페이지 (2번째와 3번째 사이 삽입)", description: "새로 추가된 페이지 내용" },
-                                            url: { type: "string", example: "https://newimage2.com/image2.jpg", description: "새로 추가된 이미지 URL" },
-                                            insertAfterId: { type: "integer", example: 2, description: "새로운 페이지를 삽입할 위치의 ID" }
-                                        }
-                                    }
-                                ]
-                            }
-                        },
-                        deletedSortOrders: {
-                            type: "array",
-                            description: "삭제할 페이지의 sortOrder 목록",
-                            items: {
-                                type: "integer",
-                                example: 4
+                                type: "object",
+                                properties: {
+                                    sortOrder: { type: "integer", example: 2, description: "수정할 페이지 순서" },
+                                    content: { type: "string", example: "수정된 내용 (기존 페이지)", description: "수정된 페이지 내용" },
+                                    url: { type: "string", example: "https://newimage1.com/newimage1.jpg", description: "수정된 이미지 URL" }
+                                }
                             }
                         }
                     },
@@ -205,65 +112,13 @@ export const handleUpdateMoment = async (req, res, next) => {
             }
         }
     }
-
-    #swagger.responses[200] = {
-        description: 'Moment 수정 성공',
-        content: {
-            "application/json": {
-                schema: {
-                    type: "object",
-                    properties: {
-                        resultType: { type: "string", example: "SUCCESS", description: "결과 타입" },
-                        error: { type: "null", example: null, description: "에러 정보 (없을 경우 null)" },
-                        success: {
-                            type: "object",
-                            properties: {
-                                message: { type: "string", example: "게시물이 성공적으로 수정되었습니다.", description: "성공 메시지" },
-                                data: {
-                                    type: "object",
-                                    properties: {
-                                        userId: { type: "integer", example: 5, description: "사용자 ID" },
-                                        momentId: { type: "integer", example: 456, description: "수정된 Moment ID" },
-                                        title: { type: "string", example: "수정된 제목", description: "수정된 Moment 제목" },
-                                        status: { type: "string", enum: ["draft", "public"], example: "public", description: "수정된 Moment 상태" },
-                                        plannerId: { type: "integer", nullable: true, example: 123, description: "연결된 Planner ID" },
-                                        updatedAt: { type: "string", format: "date-time", example: "2025-01-11T12:34:56Z", description: "수정된 시간" },
-                                        momentContents: {
-                                            type: "array",
-                                            items: {
-                                                oneOf: [
-                                                    {
-                                                        type: "object",
-                                                        properties: {
-                                                            sortOrder: { type: "integer", example: 2, description: "Moment 페이지 순서" },
-                                                            content: { type: "string", example: "수정된 내용 (기존 페이지)", description: "Moment 콘텐츠 내용" }
-                                                        }
-                                                    },
-                                                    {
-                                                        type: "object",
-                                                        properties: {
-                                                            sortOrder: { type: "integer", example: 5, description: "새로 추가된 페이지 순서" },
-                                                            content: { type: "string", example: "새로 추가된 페이지 (2번째와 3번째 사이 삽입)", description: "새로 추가된 콘텐츠 내용" }
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
     */
 
     try {
         console.log("moment 수정 요청");
-        const momentData = await momentUpdate(bodyToUpdateMoment(req.body, req.user.id));
-        res.status(StatusCodes.OK).json({
+        const { momentId } = req.params; // 경로 파라미터에서 momentId 가져오기
+        const momentData = await momentUpdate(momentId, bodyToUpdateMoment(req.body));
+        res.status(200).json({
             resultType: "SUCCESS",
             error: null,
             success: {
@@ -272,9 +127,11 @@ export const handleUpdateMoment = async (req, res, next) => {
             }
         });
     } catch (error) {
+        console.error("Moment 수정 중 오류 발생:", error.message);
         next(error);
     }
 };
+
 
 
 export const handleDeleteMoment = async (req, res, next) => {
@@ -346,76 +203,27 @@ export const handleDeleteMoment = async (req, res, next) => {
 
 export const handleGetMyMoments = async (req, res, next) => {
     /*
-        #swagger.tags = ['Moments']
-        #swagger.summary = '나의 Moment 목록 조회 API'
-        #swagger.description = '사용자의 Moment 목록을 조회합니다.'
-        #swagger.security = [{
-        "bearerAuth": []
-    }]
-
-        #swagger.responses[200] = {
-            description: '나의 Moment 목록 조회 성공',
-            content: {
-                "application/json": {
-                    schema: {
-                        type: "object",
-                        properties: {
-                            resultType: { type: "string", example: "SUCCESS", description: "결과 상태" },
-                            error: { type: "null", example: null, description: "에러 정보 (없을 경우 null)" },
-                            success: {
-                                type: "object",
-                                properties: {
-                                    data: {
-                                        type: "array",
-                                        description: "나의 Moment 목록",
-                                        items: {
-                                            oneOf: [
-                                                {
-                                                    type: "object",
-                                                    properties: {
-                                                        momentId: { type: "integer", example: 101, description: "Moment ID" },
-                                                        title: { type: "string", example: "25년 1월 7일", description: "Moment 제목" },
-                                                        status: { type: "string", example: "public", description: "Moment 상태 (공개 여부)" },
-                                                        createdAt: { type: "string", format: "date-time", example: "2025-01-21T12:34:56Z", description: "Moment 생성일" },
-                                                        updatedAt: { type: "string", format: "date-time", example: "2025-01-21T13:00:00Z", description: "Moment 수정일" },
-                                                        thumbnailUrl: { type: "string", example: "https://image1.com/image1.jpg", description: "Moment 썸네일 URL" }
-                                                    }
-                                                },
-                                                {
-                                                    type: "object",
-                                                    properties: {
-                                                        momentId: { type: "integer", example: 102, description: "Moment ID" },
-                                                        title: { type: "string", example: "25년 1월 8일", description: "Moment 제목" },
-                                                        status: { type: "string", example: "public", description: "Moment 상태 (공개 여부)" },
-                                                        createdAt: { type: "string", format: "date-time", example: "2025-01-22T14:00:00Z", description: "Moment 생성일" },
-                                                        updatedAt: { type: "string", format: "date-time", example: "2025-01-22T15:30:00Z", description: "Moment 수정일" },
-                                                        thumbnailUrl: { type: "string", example: "https://image2.com/image2.jpg", description: "Moment 썸네일 URL" }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    #swagger.tags = ['Moments']
+    #swagger.summary = '나의 Moment 목록 조회 API'
+    #swagger.description = '사용자의 Moment 목록을 조회합니다.'
+    #swagger.security = [{ "bearerAuth": [] }]
     */
 
     try {
-        console.log("나의 Moment 목록 조회 요청");
+        console.log("JWT 토큰의 userId:", req.user.id); // ✅ userId 확인
         const moments = await getMyMoments(req.user.id);
-        res.status(StatusCodes.OK).json({ 
+
+        res.status(200).json({ 
             resultType: "SUCCESS", 
             error: null, 
-            success: { data: responseFromMyMoments(moments) } 
+            success: { data: moments } 
         });
     } catch (error) {
+        console.error("응답 반환 중 오류 발생:", error);
         next(error);
     }
 };
+
 
 
 export const handleGetMyMomentDetail = async (req, res, next) => {
@@ -502,7 +310,13 @@ export const handleGetMyMomentDetail = async (req, res, next) => {
 
     try {
         console.log("나의 특정 Moment 상세 조회 요청");
-        const momentId = parseInt(req.params.momentId, 10);
+        console.log("Request Params:", req.params);  // ✅ 요청 데이터 확인
+
+        const momentId = Number(req.params.momentId);
+        if (isNaN(momentId)) {  // ✅ momentId 유효성 검사 추가
+            throw new Error("유효하지 않은 Moment ID입니다.");
+        }
+
         const moment = await getMyMomentDetail(req.user.id, momentId);
         res.status(StatusCodes.OK).json({ 
             resultType: "SUCCESS", 
@@ -510,9 +324,11 @@ export const handleGetMyMomentDetail = async (req, res, next) => {
             success: { data: responseFromMyMomentDetail(moment) } 
         });
     } catch (error) {
+        console.error("Moment 상세 조회 오류:", error.message);  // ✅ 에러 로그 추가
         next(error);
     }
 };
+
 
 
 export const handleGetFriendsMoments = async (req, res, next) => {

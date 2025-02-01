@@ -286,7 +286,7 @@ export const handleDeleteUser = async (req, res, next) => {
 
 export const handleTestDeleteUser = async (req, res, next) => {
     /* 
-    #swagger.tags = ['Users']
+    #swagger.tags = ['Test']
     #swagger.summary = '[테스트용] 회원탈퇴복구 API'
     #swagger.description = '탈퇴 후 14일 후 재가입 가능한 계정의 이메일과 가입 플랫폼 (google, naver, kakao)를 body에 담아 요청하면 바로 재가입할 수 있습니다.'
     */

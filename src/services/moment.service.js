@@ -3,6 +3,7 @@ import {
     updateMoment, 
     deleteMomentFromDB, 
     findMyMoments, 
+    findAllMomentsForDebug,
     findMyMomentDetail, 
     findFriendsMoments, 
     findFriendMomentDetail 
@@ -32,9 +33,11 @@ export const momentCreate = async (data) => {
         return responseFromCreateMoment(createdMoment, data.plannerId || null);
     } catch (error) {
         console.error("Moment 생성 중 오류 발생:", error.message);
-        throw new Error("Moment 생성에 실패했습니다. 다시 시도해주세요.");
+        throw new Error(error.message || "Moment 생성에 실패했습니다. 다시 시도해주세요.");
     }
 };
+
+
 
 export const momentUpdate = async (momentId, data) => {
     try {
@@ -80,27 +83,36 @@ export const momentDelete = async (momentId) => {
     }
 };
 
+
+
 export const getMyMoments = async (userId) => {
     try {
         const myMoments = await findMyMoments(userId);
+        const allMoments = await findAllMomentsForDebug(); // ✅ 모든 데이터 조회
 
-        if (!myMoments) {
-            throw new Error("나의 Moment 목록 조회에 실패했습니다.");
-        }
+        console.log("현재 로그인한 사용자의 Moments:", JSON.stringify(myMoments, null, 2));
+        console.log("DB에 존재하는 모든 Moments:", JSON.stringify(allMoments, null, 2));
 
         return responseFromMyMoments(myMoments);
     } catch (error) {
-        console.error("나의 Moment 목록 조회 중 오류 발생:", error.message);
-        throw new Error("나의 Moment 목록 조회에 실패했습니다. 다시 시도해주세요.");
+        console.error("나의 Moment 목록 조회 오류:", error);
+        throw new Error("Moment 목록 조회 실패");
     }
 };
 
+
+
+
+
 export const getMyMomentDetail = async (userId, momentId) => {
     try {
+        console.log("조회 요청 - userId:", userId, "momentId:", momentId); // ✅ 추가된 로그
+
         const momentDetail = await findMyMomentDetail(userId, momentId);
+        console.log("DB 조회 결과:", momentDetail); // ✅ DB 결과 확인
 
         if (!momentDetail) {
-            throw new Error("나의 Moment 상세 조회에 실패했습니다.");
+            throw new Error("Moment를 찾을 수 없습니다.");
         }
 
         return responseFromMyMomentDetail(momentDetail);
@@ -109,6 +121,8 @@ export const getMyMomentDetail = async (userId, momentId) => {
         throw new Error("나의 Moment 상세 조회에 실패했습니다. 다시 시도해주세요.");
     }
 };
+
+
 
 export const getFriendsMoments = async (userId) => {
     try {
