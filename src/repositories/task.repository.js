@@ -1,32 +1,34 @@
 import { prisma } from "../db.config.js";
+import { getPlannerWithTasks } from "./planner.repository.js"; // 기존 코드 활용
+
 
 export const addTask = async (data) => {
     // Prisma를 사용하여 DB에 새로운 Task 생성
-    console.log("taskData received to repository", data);
-    let category_id = null;
+    // task_category_id가 있으면 BigInt 변환, 없으면 null
+    const category_id = data.task_category_id ? BigInt(data.task_category_id) : null;
+    
     if (data.category_id) {
         category_id = data.category_id;
     }
     // 해당 날짜에 플래너가 있는지 조회
-    let planner = await prisma.planner.findFirst({
-        where: {
-            plannerDate: new Date(data.planner_date)
-        }
-    });
+    // 해당 날짜의 플래너 확인 (기존 코드 활용)
+    let planner = await getPlannerWithTasks(data.userId, data.planner_date);
     console.log("planner 날짜로 확인", planner);
 
     // 플래너가 있는지 확인하고 없으면 플래너 생성. 
+
     // 아직 미완성 
+    // 플래너가 없으면 새로 생성
     if (!planner) {
-        console.log("Planner not found. Creating a new planner.");
+        console.log("Planner not found. Creating a new planner...");
         planner = await prisma.planner.create({
-        data: {
-            plannerDate: data.planner_date,
-            userId: 1,
-            isCompleted: false, 
+            data: {
+                plannerDate: new Date(data.planner_date),
+                userId: data.userId,
+                isCompleted: false, 
             },
         });
-        console.log("planner 새로 생성", planner);
+        console.log("New planner created:", planner);
     }
         
     // 중복존재하는지 여부는 플래너 id와 task 이름으로 확인 
@@ -78,7 +80,7 @@ export const addTask = async (data) => {
     })
     
     return updatedTask;
-  }
+  };
 
   export const getTaskFromRepository = async(data) => {
         const task = await prisma.task.findUnique({
@@ -91,25 +93,34 @@ export const addTask = async (data) => {
             throw new Error("No such Task exists");
         }
         return task;
-  }
-  export const deleteTaskFromRepository = async(data) => {
+  };
+
+  export const deleteTaskFromRepository = async (ids) => {
     try {
-        const task = await prisma.task.delete({
-            where: {
-                id: data.task_id,
-            },
+        // 삭제할 항목 조회
+        const tasksToDelete = await prisma.task.findMany({
+            where: { id: { in: ids } },
         });
-        //삭제된 task 정보 반환 
-        return task; 
-    } catch (error) {
-        
-        if (error.code === 'P2025') { 
-            throw new Error("No such Task exists");
+
+        if (tasksToDelete.length === 0) {
+            throw new Error("No tasks found for the given IDs.");
         }
-        // 다른 에러 발생시 추가로 던지기
-        throw error; 
+
+        // 삭제 실행
+        await prisma.task.deleteMany({
+            where: { id: { in: ids } },
+        });
+
+        // 삭제된 항목 반환
+        return tasksToDelete; // 삭제 전에 조회한 데이터를 반환
+    } catch (error) {
+        if (error.code === "P2025") {
+            throw new Error("No such Tasks exist.");
+        }
+        throw error;
     }
-  }
+};
+
   export const taskCompletionChange = async(data) => {
     try {
         // 있는지 확인 
@@ -136,7 +147,7 @@ export const addTask = async (data) => {
     } catch (error) {
         throw error;
     }
-}
+};
 export const findTaskWithPlanner = async (data) => {
     // task_id를 bigint로 바꾸기 
     const taskId = typeof (data.task_id) === "string" ? BigInt(data.task_id) : data.task_id;
