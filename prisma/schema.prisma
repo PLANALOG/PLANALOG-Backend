@@ -13,7 +13,7 @@ enum platform_type {
   google
 }
 
-enum notice_type {  
+enum notice_type {
   moment
   comment
   friend
@@ -189,12 +189,12 @@ model Notice {
 }
 
 model Like {
-  id         BigInt         @id @default(autoincrement())
-  userId     BigInt         @map("user_id")
-  fromUserId BigInt         @map("from_user_id")
+  id         BigInt    @id @default(autoincrement())
+  userId     BigInt    @map("user_id")
+  fromUserId BigInt    @map("from_user_id")
   entityType like_type @map("entity_type") // ENUM (shared_planner, moment)
-  entityId   Int            @map("entity_id")
-  createdAt  DateTime       @default(now()) @map("created_at")
+  entityId   Int       @map("entity_id")
+  createdAt  DateTime  @default(now()) @map("created_at")
 
   // Relationships
   user     User @relation(name: "LikeToUser", fields: [userId], references: [id])
@@ -241,11 +241,11 @@ model Moment {
 }
 
 model MomentContent {
-  id              BigInt @id @default(autoincrement())
-  momentId        BigInt @map("moment_id")
-  momentContentId Int    @map("moment_content_id") // 페이지(콘텐츠) 순서 ID
-  content         String @db.Text
-  url             String @db.VarChar(300)
+  id        BigInt  @id @default(autoincrement())
+  momentId  BigInt  @map("moment_id")
+  sortOrder Int     @map("sort_order") // 페이지 순서 
+  content   String  @db.Text
+  url       String? @db.VarChar(300)
 
   // Relationships
   moment Moment @relation(fields: [momentId], references: [id], onDelete: Cascade)

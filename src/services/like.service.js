@@ -1,4 +1,4 @@
-import {DuplicateLikeMomentError, MomentIdNotFoundError, LikeIdNotExistError,LikeIdMissingError} from "../errors.js";
+import {DuplicateLikeMomentError, momentIdNotFoundError, LikeIdNotExistError,LikeIdMissingError} from "../errors.js";
 import {addMomentLike, removeMomentLike} from "../repositories/like.repository.js";
 import { prisma } from "../db.config.js"; 
 
@@ -11,7 +11,7 @@ import { prisma } from "../db.config.js";
         where: { id: data.entityId }, 
       });
       if (!momentExists) {
-        throw new MomentIdNotFoundError("존재하지 않는 게시글입니다.", { entityId: data.entityId }); 
+        throw new momentIdNotFoundError("존재하지 않는 게시글입니다.", { entityId: data.entityId }); 
       }
 
     const likeMomentId = await addMomentLike({
