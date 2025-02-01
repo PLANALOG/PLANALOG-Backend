@@ -52,4 +52,57 @@ export class authError extends Error {
     this.reason = reason;
   }
 }
+//중복 좋아요
+export class DuplicateLikeMomentError extends Error{
+  errorCode = "L001";
 
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+ }
+
+ //좋아요 존재 X
+ export class LikeIdNotExistError extends Error{ 
+  errorCode = "L002";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+ }
+
+ //권한 없는 좋아요(본인이 누른 좋아요 X)
+ export class LikeNotOwnedByUserError extends Error{
+  errorCode = "L003";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+ }
+}
+
+//momentId X
+export class MomentIdNotFoundError extends Error{
+  errorCode = "C001";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+
+//좋아요id 누락
+export class LikeIdMissingError extends Error{
+  errorCode = "L004";
+
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}

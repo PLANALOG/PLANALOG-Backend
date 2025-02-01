@@ -15,6 +15,7 @@ import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
 import { handleNaverTokenLogin, handleKakaoTokenLogin, handleGoogleTokenLogin, handleRefreshToken } from "./auth.config.js";
 import { testUserMiddleware } from "./test.js";
+import{handleLikeMoment,handleDeleteLikeMoment} from './controllers/like.controller.js';
 
 dotenv.config();
 
@@ -196,6 +197,11 @@ app.delete('/friends/:friendId', authenticateJWT ,deleteFriend); //친구 삭제
 
 
 
+
+
+//좋아요 추가, 삭제
+app.post("/moments/:momentId/likes", authenticateJWT ,handleLikeMoment);
+app.delete("/moments/:momentId/likes", authenticateJWT ,handleDeleteLikeMoment);
 
 
 /**
