@@ -177,12 +177,6 @@ export const handleDeleteCategory = async (req, res, next) => {
     #swagger.security = [{
         "bearerAuth": []
         }]
-    #swagger.parameters['task_category_id'] = {
-        in: 'path',
-        description: '삭제할 카테고리 ID',
-        required: true,
-        schema: { type: 'integer', example: 1 }
-    }
     #swagger.responses[200] = {
     description: "카테고리 삭제 성공",
     content: {
