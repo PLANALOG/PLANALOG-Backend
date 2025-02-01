@@ -4,6 +4,8 @@ import {
   addFriendService,
   getFriendsService,
   getFriendCountService,
+  getFollowingService,
+  getFollowersService,
   deleteFriendService,
   acceptFriendService
 } from "../services/friend.service.js";
@@ -14,11 +16,11 @@ import {
 
 
 export const addFriend = async (req, res) => {
-/*
-#swagger.tags = ['Friends']
-#swagger.summary = '친구 추가 API'
-#swagger.security = [{ "bearerAuth": [] }]
-*/
+  /*
+  #swagger.tags = ['Friends']
+  #swagger.summary = '친구 추가 API'
+  #swagger.security = [{ "bearerAuth": [] }]
+  */
   try {
     const fromUserId = req.user?.id;
     if (!fromUserId) {
@@ -52,11 +54,11 @@ export const addFriend = async (req, res) => {
 
 
 export const getFollowers = async (req, res) => {
-/*
-#swagger.tags = ['Friends']
-#swagger.summary = '팔로워 목록 조회 API'
-#swagger.security = [{ "bearerAuth": [] }]
-*/
+  /*
+  #swagger.tags = ['Friends']
+  #swagger.summary = '팔로워 목록 조회 API'
+  #swagger.security = [{ "bearerAuth": [] }]
+  */
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -70,7 +72,7 @@ export const getFollowers = async (req, res) => {
   } catch (error) {
     res.json({
       errorCode: "F001",
-      reason: "팔로워 목록 조회 중 에러가 발생했습니다.",
+      reason: `팔로워 목록 조회 중 에러가 발생했습니다. ${error.message}`,
       data: null,
     });
   }
@@ -78,11 +80,11 @@ export const getFollowers = async (req, res) => {
 
 
 export const getFollowing = async (req, res) => {
-/*
-#swagger.tags = ['Friends']
-#swagger.summary = '팔로우 목록 조회 API'
-#swagger.security = [{ "bearerAuth": [] }]
-*/
+  /*
+  #swagger.tags = ['Friends']
+  #swagger.summary = '팔로우 목록 조회 API'
+  #swagger.security = [{ "bearerAuth": [] }]
+  */
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -96,7 +98,7 @@ export const getFollowing = async (req, res) => {
   } catch (error) {
     res.json({
       errorCode: "F002",
-      reason: "팔로우 목록 조회 중 에러가 발생했습니다.",
+      reason: `팔로워 목록 조회 중 에러가 발생했습니다. ${error.message}`,
       data: null,
     });
   }
@@ -104,11 +106,11 @@ export const getFollowing = async (req, res) => {
 
 
 export const deleteFriend = async (req, res) => {
-/*
-#swagger.tags = ['Friends']
-#swagger.summary = '친구 삭제 API'
-#swagger.security = [{ "bearerAuth": [] }]
-*/
+  /*
+  #swagger.tags = ['Friends']
+  #swagger.summary = '친구 삭제 API'
+  #swagger.security = [{ "bearerAuth": [] }]
+  */
   try {
     const { friendId } = req.params;
     const userId = req.user?.id;
@@ -138,11 +140,11 @@ export const deleteFriend = async (req, res) => {
 
 
 export const getFriendCount = async (req, res) => {
-/*
-#swagger.tags = ['Friends']
-#swagger.summary = '친구 수 조회 API'
-#swagger.security = [{ "bearerAuth": [] }]
-*/
+  /*
+  #swagger.tags = ['Friends']
+  #swagger.summary = '친구 수 조회 API'
+  #swagger.security = [{ "bearerAuth": [] }]
+  */
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -171,11 +173,11 @@ export const getFriendCount = async (req, res) => {
 
 
 export const acceptFriend = async (req, res) => {
-/*
-#swagger.tags = ['Friends']
-#swagger.summary = '친구 요청 수락 API'
-#swagger.security = [{ "bearerAuth": [] }]
-*/
+  /*
+  #swagger.tags = ['Friends']
+  #swagger.summary = '친구 요청 수락 API'
+  #swagger.security = [{ "bearerAuth": [] }]
+  */
   try {
     const { friendId } = req.params;
     const userId = req.user?.id;

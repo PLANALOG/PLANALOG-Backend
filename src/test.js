@@ -5,7 +5,7 @@ export const testUserMiddleware = async (req, res, next) => {
     /*
         #swagger.summary = "로컬 테스트용 유저 생성 및 JWT 발급"
         #swagger.description = "이 API는 로컬 테스트 환경에서 사용할 유저를 데이터베이스에 추가하고, JWT 토큰을 발급합니다."
-        #swagger.tags = ["Local Test"]
+        #swagger.tags = ["Test"]
 
         #swagger.responses[200] = {
             description: "테스트 유저 생성 성공 응답",
