@@ -185,4 +185,4 @@ export const responseFromFriendMomentDetail = (moment) => {
             url: content.url,
         }))
     };
-};
+}; 
