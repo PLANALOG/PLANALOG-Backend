@@ -28,7 +28,7 @@ export const createMoment = async (data) => {
         if (data.momentContents?.length > 0) {
             const contents = data.momentContents.map((content, index) => ({
                 momentId: createMoment.id,
-                momentContentId: content.momentContentId || index + 1,
+                sortOrder: content.sortOrder || index + 1,
                 content: content.content ?? null,
                 url: content.url || null,
             }));
@@ -37,7 +37,7 @@ export const createMoment = async (data) => {
             await prisma.momentContent.create({
                 data: {
                     momentId: createMoment.id,
-                    momentContentId: 1,
+                    sortOrder: 1,
                     content: null,
                     url: null,
                 },
@@ -50,68 +50,73 @@ export const createMoment = async (data) => {
 
 export const updateMoment = async (momentId, data) => {
     return await prisma.$transaction(async (prisma) => {
-        // 1️⃣ Moment 수정 (title, status 변경)
         const updatedMoment = await prisma.moment.update({
             where: { id: momentId },
             data: {
                 title: data.title,
                 status: data.status,
             },
-            include: { momentContents: true }, // 수정 후 momentContents 포함
+            include: { momentContents: true },
         });
 
-        // 2️⃣ MomentContent 수정 및 추가
+        // 1️⃣ 페이지를 삭제 처리할 경우
+        if (data.deletedSortOrders?.length > 0) {
+            for (const sortOrder of data.deletedSortOrders) {
+                // 해당 콘텐츠 삭제
+                await prisma.momentContent.deleteMany({
+                    where: {
+                        momentId: momentId,
+                        sortOrder: sortOrder,
+                    },
+                });
+
+                // 삭제한 콘텐츠 이후의 sortOrder를 -1로 조정
+                await prisma.momentContent.updateMany({
+                    where: {
+                        momentId: momentId,
+                        sortOrder: { gt: sortOrder },
+                    },
+                    data: {
+                        sortOrder: { decrement: 1 }, 
+                    },
+                });
+            }
+        }
+
+        // 2️⃣ 페이지의 콘텐츠를 수정 및 추가할 경우
         for (const content of data.momentContents) {
-            if (content.momentContentId) {
-                // 기존 momentContent 업데이트
+            if (content.sortOrder) {
+                // 그중에서 기존 콘텐츠를 수정할 경우
                 await prisma.momentContent.update({
                     where: {
-                        momentId_momentContentId: {
+                        momentId_sortOrder: {
                             momentId: momentId,
-                            momentContentId: content.momentContentId,
+                            sortOrder: content.sortOrder,
                         },
                     },
                     data: {
                         content: content.content ?? null,
+                        url: content.url || null,
                     },
                 });
-            } else {
-                // 새로운 momentContent 추가 (중간 삽입을 고려한 로직)
-                const { insertAfterId } = content; // 사용자가 몇 번째 뒤에 삽입할지 명시함 (예: 2번째 뒤에 삽입)
-
-                // 현재 momentId에 속한 모든 momentContents 조회 (momentContentId 기준 정렬)
-                const existingContents = await prisma.momentContent.findMany({
-                    where: { momentId: momentId },
-                    orderBy: { momentContentId: "asc" },
+            } else if (content.insertAfterId) {
+                // 3️⃣ 아니면 새로운 콘텐츠 삽입할 경우
+                await prisma.momentContent.updateMany({
+                    where: {
+                        momentId: momentId,
+                        sortOrder: { gt: content.insertAfterId },
+                    },
+                    data: {
+                        sortOrder: { increment: 1 },
+                    },
                 });
 
-                let newMomentContentId;
-                if (insertAfterId) {
-                    // 사용자가 특정 ID(insertAfterId) 뒤에 삽입할 경우
-                    newMomentContentId = insertAfterId + 1;
-
-                    // 기존 momentContents에서 newMomentContentId 이상인 것들을 모두 +1 시켜 정렬
-                    await prisma.momentContent.updateMany({
-                        where: {
-                            momentId: momentId,
-                            momentContentId: { gte: newMomentContentId }, // insertAfterId보다 크거나 같은 값들
-                        },
-                        data: {
-                            momentContentId: { increment: 1 }, // 모두 1씩 증가시켜 밀어냄
-                        },
-                    });
-                } else {
-                    // 기본적으로 마지막에 추가
-                    const lastContent = existingContents[existingContents.length - 1];
-                    newMomentContentId = lastContent ? lastContent.momentContentId + 1 : 1;
-                }
-
-                // 새로운 momentContent 삽입
                 await prisma.momentContent.create({
                     data: {
                         momentId: momentId,
-                        momentContentId: newMomentContentId,
+                        sortOrder: content.insertAfterId + 1,
                         content: content.content ?? null,
+                        url: content.url || null,
                     },
                 });
             }
@@ -120,6 +125,7 @@ export const updateMoment = async (momentId, data) => {
         return updatedMoment;
     });
 };
+
 
 export const deleteMomentFromDB = async (momentId) => {
     return await prisma.$transaction(async (prisma) => {
@@ -141,3 +147,90 @@ export const deleteMomentFromDB = async (momentId) => {
         return true;
     });
 };
+
+
+// 나의 Moment 목록 조회
+export const findMyMoments = async (userId) => {
+  return await prisma.moment.findMany({
+    where: {
+      userId: BigInt(userId),
+      status: { not: "draft" }
+    },
+    include: {
+      momentContents: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+};
+
+// 나의 특정 Moment 상세 조회
+export const findMyMomentDetail = async (userId, momentId) => {
+  return await prisma.moment.findFirst({
+    where: {
+        id: BigInt(momentId),
+        userId: BigInt(userId),
+        status: { not: "draft" }
+    },
+    include: {
+      momentContents: true,
+    },
+  });
+};
+
+// 친구들의 Moment 목록 조회 (status: public만 조회)
+export const findFriendsMoments = async (userId) => {
+  // 친구 목록 조회
+  const friendIds = await prisma.friend.findMany({
+    where: {
+        fromUserId: BigInt(userId),
+        isAccepted: true,
+    },
+    select: {
+        toUserId: true,
+    },
+  });
+
+  const friendUserIds = friendIds.map(friend => friend.toUserId);
+
+  return await prisma.moment.findMany({
+    where: {
+      userId: { in: friendUserIds },
+      status: 'public',
+    },
+    include: {
+      momentContents: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+};
+
+// 친구의 특정 Moment 상세 조회 (status: public만 조회)
+export const findFriendMomentDetail = async (userId, momentId) => {
+  // 친구인지 확인
+  const isFriend = await prisma.friend.findFirst({
+    where: {
+      fromUserId: BigInt(userId),
+      isAccepted: true,
+    },
+  });
+
+  if (!isFriend) {
+    throw new Error("친구가 아닌 사용자입니다.");
+  }
+
+  return await prisma.moment.findFirst({
+    where: {
+      id: BigInt(momentId),
+      userId: isFriend.toUserId,
+      status: 'public',
+    },
+    include: {
+      momentContents: true,
+    },
+  });
+};
+
