@@ -11,6 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // JWT 생성 함수
 const generateToken = (user) => {
+    console.log("Generating JWT for user:", user);
     return jwt.sign(
         { id: user.id, email: user.email },
         JWT_SECRET,
@@ -212,6 +213,8 @@ export const handleNaverTokenLogin = async (req, res, next) => {
             headers: { Authorization: `Bearer ${accessToken}` },
         });
 
+        console.log("네이버 API 응답:", naverUser.data);
+
         const email = naverUser.data.response?.email;
         if (!email) throw new Error("이메일이 없습니다.");
 
@@ -244,7 +247,8 @@ export const handleNaverTokenLogin = async (req, res, next) => {
 
         res.success({ accessToken: newAccessToken, refreshToken });
     } catch (error) {
-        throw new Error("OAuth 검증 실패", error.message);
+        console.error("네이버 로그인 오류:", error.response?.data || error.message);
+        throw new Error(`OAuth 검증 실패 ${error.message} `);
     }
 }
 

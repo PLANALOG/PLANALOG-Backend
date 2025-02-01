@@ -25,6 +25,7 @@ const port = process.env.PORT;
 
 
 
+
 /**
  * 공통 응답을 사용할 수 있는 헬퍼 함수 등록 -> 모든 요청에서 실행되는 미들웨어 함수 
  */
@@ -73,7 +74,7 @@ app.get("/openapi.json", async (req, res, next) => {
       title: "PLANALOG",
       description: "PLANALOG 테스트 문서입니다.",
     },
-    host: "localhost:3000",
+    host: "15.164.83.14:3000",
     components: {
       securitySchemes: {
         bearerAuth: {
