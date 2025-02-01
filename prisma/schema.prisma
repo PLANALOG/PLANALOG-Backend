@@ -14,7 +14,7 @@ enum platform_type {
 }
 
 enum notice_type {  
-  post
+  moment
   comment
   friend
 }
@@ -177,7 +177,7 @@ model Notice {
   userId     BigInt      @map("user_id")
   isRead     Boolean     @map("is_read")
   message    String      @db.VarChar(100)
-  entityType notice_type @map("entity_type") // ENUM (post, comment, friend)
+  entityType notice_type @map("entity_type") // ENUM (moment, comment, friend)
   entityId   Int         @map("entity_id")
   createdAt  DateTime    @default(now()) @map("created_at")
 
