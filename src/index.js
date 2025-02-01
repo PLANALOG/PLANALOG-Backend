@@ -15,12 +15,12 @@ import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
 import { handleNaverTokenLogin, handleKakaoTokenLogin, handleGoogleTokenLogin, handleRefreshToken } from "./auth.config.js";
 import { testUserMiddleware } from "./test.js";
-import{handleAddComment,handleEditComment,handleDeleteComment,handleListComment} from './controllers/comment.controller.js';
 
 dotenv.config();
 
 const app = express()
 const port = process.env.PORT;
+
 
 
 
@@ -73,7 +73,7 @@ app.get("/openapi.json", async (req, res, next) => {
       title: "PLANALOG",
       description: "PLANALOG 테스트 문서입니다.",
     },
-    host: "localhost:3000",
+    host: "15.164.83.14:3000",
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -174,6 +174,8 @@ import { createNotice } from "./controllers/notice.controller.js";
 import { deleteNotice } from "./controllers/notice.controller.js";
 import { getNotices } from "./controllers/notice.controller.js";
 import { addFriend, acceptFriend, getFollowing, getFollowers,deleteFriend, getFriendCount } from "./controllers/friend.controller.js";
+import{handleLikeMoment,handleDeleteLikeMoment} from './controllers/like.controller.js';
+import{handleAddComment,handleEditComment,handleDeleteComment,handleListComment} from './controllers/comment.controller.js';
 
 
 
@@ -192,19 +194,12 @@ app.patch("/friends/:friendId", authenticateJWT ,acceptFriend); // 친구 요청
 app.delete("/notices/:noticeId", authenticateJWT,deleteNotice);
 app.delete("/searches/records/:recordId", authenticateJWT,deleteSearchRecord);
 app.delete('/friends/:friendId', authenticateJWT ,deleteFriend); //친구 삭제 기능
-
-
-
-
-
-//댓글 추가
-app.post("/moments/:momentId/comments", authenticateJWT, handleAddComment);
-//댓글 수정
-app.patch("/moments/:momentId/comments/:commentId", authenticateJWT, handleEditComment);
-//댓글 삭제
-app.delete("/comments/:commentId", authenticateJWT, handleDeleteComment);
-//댓글 목록
-app.get("/moments/:momentId/comments", handleListComment);
+app.post("/moments/:momentId/likes", authenticateJWT ,handleLikeMoment);//좋아요 추가
+app.delete("/moments/:momentId/likes", authenticateJWT ,handleDeleteLikeMoment);//좋아요 삭제
+app.post("/moments/:momentId/comments", authenticateJWT, handleAddComment);//댓글 추가
+app.patch("/moments/:momentId/comments/:commentId", authenticateJWT, handleEditComment);//댓글 수정
+app.delete("/comments/:commentId", authenticateJWT, handleDeleteComment);//댓글 삭제
+app.get("/moments/:momentId/comments", handleListComment);//댓글 목록
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어 : 반드시 라우팅 마지막에 정의

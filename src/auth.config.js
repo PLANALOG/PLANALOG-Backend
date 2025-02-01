@@ -16,6 +16,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // JWT 생성 함수
 const generateToken = (user) => {
+    console.log("Generating JWT for user:", user);
     return jwt.sign(
         { id: user.id, email: user.email },
         JWT_SECRET,
@@ -280,8 +281,9 @@ export const naverDisconnect = async (userId, refreshToken) => {
 // 네이버 액세스 토큰 받아서 로그인 구현
 export const handleNaverTokenLogin = async (req, res, next) => {
     /*
-        #swagger.summary = '토큰 발급 API'
+        #swagger.summary = '네이버 액세스 토큰을 이용한 로그인'
         #swagger.description = '로그인 또는 인증 과정에서 액세스 토큰과 리프레시 토큰을 발급받습니다.'
+        #swagger.tags = ["Users"]
         #swagger.requestBody = {
         required: true,
         content: {
@@ -350,6 +352,8 @@ export const handleNaverTokenLogin = async (req, res, next) => {
             headers: { Authorization: `Bearer ${accessToken}` },
         });
 
+        console.log("네이버 API 응답:", naverUser.data);
+
         const email = naverUser.data.response?.email;
         if (!email) throw new Error("이메일이 없습니다.");
 
@@ -382,7 +386,8 @@ export const handleNaverTokenLogin = async (req, res, next) => {
 
         res.success({ accessToken: newAccessToken, refreshToken });
     } catch (error) {
-        throw new Error("OAuth 검증 실패", error.message);
+        console.error("네이버 로그인 오류:", error.response?.data || error.message);
+        throw new Error(`OAuth 검증 실패 ${error.message} `);
     }
 }
 
@@ -391,6 +396,7 @@ export const handleKakaoTokenLogin = async (req, res, next) => {
     /*
         #swagger.summary = '카카오 액세스 토큰을 이용한 로그인'
         #swagger.description = '네이티브 앱에서 카카오 액세스 토큰을 받아와 JWT를 발급하는 API입니다.'
+        #swagger.tags = ["Users"]
         #swagger.requestBody = {
         required: true,
         content: {
@@ -507,6 +513,7 @@ export const handleGoogleTokenLogin = async (req, res, next) => {
     /*
         #swagger.summary = '구글 액세스 토큰을 이용한 로그인'
         #swagger.description = '네이티브 앱에서 구글 액세스 토큰을 받아와 JWT를 발급하는 API입니다.'
+        #swagger.tags = ["Users"]
         #swagger.requestBody = {
         required: true,
         content: {
@@ -621,8 +628,9 @@ export const handleGoogleTokenLogin = async (req, res, next) => {
 
 export const handleRefreshToken = async (req, res, next) => {
     /*
-        #swagger.summary = '액세스 토큰 재발급 API'
+        #swagger.summary = '액세스 토큰 재발급 및 리프레시 토큰 갱신 API'
         #swagger.description = '리프레시 토큰을 이용해 액세스 토큰을 재발급 받습니다. 만약 리프레시토큰의 만료일이 2일 이하라면 리프레시토큰도 재발급합니다다'
+        #swagger.tags = ["Users"]
         #swagger.requestBody = {
         required: true,
         content: {
