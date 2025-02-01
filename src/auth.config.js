@@ -1,136 +1,53 @@
 import dotenv from "dotenv";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Strategy as KakaoStrategy } from "passport-kakao";
-import { Strategy as NaverStrategy } from "passport-naver";
 import { prisma } from "./db.config.js";
-import { UserWithOtherPlatformError } from "./errors.js";
 import axios from "axios";
-import { isDeletedUser } from "./repositories/user.repository.js";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 dotenv.config();
 
-const verify = async (profile, email, platform, refreshToken) => {
+// JWT 비밀 키
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
-    console.log(refreshToken)
-
-    const user = await prisma.user.findFirst({ where: { email } });
-    if (user !== null) {
-        await isDeletedUser(user.id);
-        // 해당 이메일을 가진 유저가 있을 떄 
-        // 그 유저의 플랫폼이 파라미터의 플랫폼과 같으면 => 로그인 (return)
-        if (user.platform === platform) return { id: user.id, email: user.email, name: user.name, refreshToken: refreshToken };
-        // 그 유저의 플랫폼이 파라미터의 플랫폼과 다르면 => 에러반환 (with 플랫폼) 
-        else throw new UserWithOtherPlatformError({ name: user.name, platform: user.platform })
-    }
-
-    const created = await prisma.user.create({
-        data: {
-            email,
-            platform,
-            name: profile.displayName,
-            nickname: "추후 수정",
-            type: "null",
-            introduction: "추후 수정",
-            link: "추후 수정",
-        },
-    });
-
-    return { id: created.id, email: created.email, name: created.name, refreshToken: refreshToken };
+// JWT 생성 함수
+const generateToken = (user) => {
+    return jwt.sign(
+        { id: user.id, email: user.email },
+        JWT_SECRET,
+        { expiresIn: "1h" } // 토큰 만료 시간 설정 (1시간)
+    );
 };
 
-//구글 로그인 
-export const googleStrategy = new GoogleStrategy(
-    {
-        clientID: process.env.PASSPORT_GOOGLE_CLIENT_ID,
-        clientSecret: process.env.PASSPORT_GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/oauth2/callback/google",
-        scope: ["email", "profile"],
-        state: true,
-    },
-    (accessToken, refreshToken, profile, cb) => {
-        console.log(refreshToken);
-        console.log(accessToken);
+//액세스 토큰과 리프레시 토큰 발급 함수 
+export const generateTokens = (user) => {
+    const accessToken = jwt.sign(
+        { id: user.id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" } // 액세스 토큰 만료 시간 1시간 
+    );
 
-        return googleVerify(profile, accessToken)
-            .then((user) => cb(null, user))
-            .catch((err) => cb(err));
-    }
-);
+    const refreshToken = crypto.randomBytes(64).toString("hex"); // 랜덤 리프레시 토큰 생성
 
-
-const googleVerify = async (profile, accessToken) => {
-
-    const email = profile.emails?.[0]?.value;
-    if (!email) {
-        throw new Error(`profile.email was not found: ${profile}`);
-    }
-
-    const user = await prisma.user.findFirst({ where: { email } });
-
-    if (user !== null) {
-        await isDeletedUser(user.id);
-        // 해당 이메일을 가진 유저가 있을 떄 
-        // 그 유저의 플랫폼이 파라미터의 플랫폼과 같으면 => 로그인 (return)
-        if (user.platform === "google") return { id: user.id, email: user.email, name: user.name, accessToken: accessToken };
-        // 그 유저의 플랫폼이 파라미터의 플랫폼과 다르면 => 에러반환 (with 플랫폼) 
-        else throw new UserWithOtherPlatformError({ name: user.name, platform: user.platform })
-    }
-
-    const created = await prisma.user.create({
-        data: {
-            email,
-            platform: "google",
-            name: profile.displayName,
-            nickname: "추후 수정",
-            type: "null",
-            introduction: "추후 수정",
-            link: "추후 수정",
-        },
-    });
-
-    return { id: created.id, email: created.email, name: created.name, accessToken: accessToken };
+    return { accessToken, refreshToken };
 };
 
-
-// 카카오 로그인 
-export const kakaoStrategy = new KakaoStrategy(
-    {
-        clientID: process.env.PASSPORT_KAKAO_CLIENT_ID,
-        clientSecret: process.env.PASSPORT_KAKAO_CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/oauth2/callback/kakao",
-    },
-    (accessToken, refreshToken, profile, cb) => {
-        const email = profile._json.kakao_account?.email;
-        if (!email) {
-            throw new Error(`profile._jaon.kakao_account?.email was not found: ${profile}`);
-        }
-
-        return verify(profile, email, "kakao", refreshToken)
-            .then((user) => cb(null, user))
-            .catch((err) => cb(err));
+// JWT 인증 미들웨어
+export const authenticateJWT = (req, res, next) => {
+    console.log("JWT 토큰 인증 미들웨어 실행")
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+        const token = authHeader.split(" ")[1]; // 'Bearer <token>'에서 <token> 추출
+        jwt.verify(token, JWT_SECRET, (err, user) => {
+            if (err) {
+                return res.status(403).json({ message: "Invalid or expired token" });
+            }
+            req.user = user; // 사용자 정보 추가
+            next();
+        });
+    } else {
+        res.status(401).json({ message: "Authorization header missing" });
     }
-);
-
-// 네이버 로그인 
-export const naverStrategy = new NaverStrategy(
-    {
-        clientID: process.env.PASSPORT_NAVER_CLIENT_ID,
-        clientSecret: process.env.PASSPORT_NAVER_CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/oauth2/callback/naver",
-    },
-    (accessToken, refreshToken, profile, cb) => {
-        const email = profile.emails?.[0]?.value;
-        if (!email) {
-            throw new Error(`profile.email was not found: ${profile}`);
-        }
-
-        console.log('refreshToken', refreshToken);
-
-        return verify(profile, email, "naver", refreshToken)
-            .then((user) => cb(null, user))
-            .catch((err) => cb(err));
-    }
-);
+};
 
 
 //카카오 연결끊기
@@ -218,4 +135,442 @@ export const naverDisconnect = async (userId, refreshToken) => {
 
     console.log('네이버 연결 끊기 성공', userIdInNaver.data.result);
 
+}
+
+
+// 네이버 액세스 토큰 받아서 로그인 구현
+export const handleNaverTokenLogin = async (req, res, next) => {
+    /*
+        #swagger.summary = '토큰 발급 API'
+        #swagger.description = '로그인 또는 인증 과정에서 액세스 토큰과 리프레시 토큰을 발급받습니다.'
+        #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        accessToken: { 
+                            type: "string", 
+                            example: "abc123.jwt.token" 
+                        }
+                    },
+                    required: ["accessToken"]
+                }
+            }
+        }
+    }
+        #swagger.responses[200] = {
+            description: "토큰 발급 성공 응답",
+            content: {
+                "application/json": {
+                    schema: {
+                        type: "object",
+                        properties: {
+                            resultType: { type: "string", example: "SUCCESS" },
+                            error: { type: "object", nullable: true, example: null },
+                            success: {
+                                type: "object",
+                                properties: {
+                                    accessToken: { type: "string", example: "abc123.jwt.token" },
+                                    refreshToken: { type: "string", example: "xyz456.refresh.token" }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #swagger.responses[400] = {
+        description: "잘못된 요청 - 다른 플랫폼으로 가입한 계정이 존재함",
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: { 
+                            type: "string", 
+                            example: "다른 플랫폼으로 가입한 계정이 존재합니다." 
+                        }
+                    }
+                }
+            }
+        }
+    }
+    */
+
+    const { accessToken } = req.body;
+
+    if (!accessToken) {
+        return res.status(400).json({ message: "accessToken is required" });
+    }
+
+    try {
+        // 네이버 API를 사용하여 유저 정보 요청
+        const naverUser = await axios.get("https://openapi.naver.com/v1/nid/me", {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        const email = naverUser.data.response?.email;
+        if (!email) throw new Error("이메일이 없습니다.");
+
+        // DB에서 사용자 조회 또는 새로 생성
+        let user = await prisma.user.findFirst({ where: { email } });
+        if (user && user.platform !== "naver") {
+            return res.status(400).json({ message: "다른 플랫폼으로 가입한 계정이 존재합니다." })
+        }
+        if (!user) {
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    platform: "naver",
+                    name: naverUser.data.response?.name,
+                    nickname: "추후 수정",
+                    type: "null",
+                    introduction: "추후 수정",
+                    link: "추후 수정",
+                },
+            });
+        }
+
+        // 새로운 JWT 및 리프레시 토큰 발급
+        const { accessToken: newAccessToken, refreshToken } = generateTokens(user);
+
+        // 리프레시 토큰을 DB에 저장
+        await prisma.refreshToken.create({
+            data: { userId: user.id, token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }, // 7일 유지
+        });
+
+        res.success({ accessToken: newAccessToken, refreshToken });
+    } catch (error) {
+        throw new Error("OAuth 검증 실패", error.message);
+    }
+}
+
+// 카카오 액세스 토큰 받아서 로그인 구현
+export const handleKakaoTokenLogin = async (req, res, next) => {
+    /*
+        #swagger.summary = '카카오 액세스 토큰을 이용한 로그인'
+        #swagger.description = '네이티브 앱에서 카카오 액세스 토큰을 받아와 JWT를 발급하는 API입니다.'
+        #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        accessToken: { 
+                            type: "string", 
+                            example: "abc123.jwt.token" 
+                        }
+                    },
+                    required: ["accessToken"]
+                }
+            }
+        }
+    }
+        #swagger.responses[200] = {
+            description: "카카오 로그인 성공 응답",
+            content: {
+                "application/json": {
+                    schema: {
+                        type: "object",
+                        properties: {
+                            resultType: { type: "string", example: "SUCCESS" },
+                            error: { type: "object", nullable: true, example: null },
+                            success: {
+                                type: "object",
+                                properties: {
+                                    accessToken: { type: "string", example: "abc123.jwt.token" },
+                                    refreshToken: { type: "string", example: "xyz456.refresh.token" }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #swagger.responses[400] = {
+        description: "잘못된 요청 - 다른 플랫폼으로 가입한 계정이 존재함",
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: { 
+                            type: "string", 
+                            example: "다른 플랫폼으로 가입한 계정이 존재합니다." 
+                        }
+                    }
+                }
+            }
+        }
+    }
+    */
+
+    const { accessToken } = req.body;
+
+    if (!accessToken) {
+        return res.status(401).json({ message: "accessToken이 필요합니다." });
+    }
+
+    try {
+        // 카카오 API를 사용하여 유저 정보 요청
+        const kakaoUser = await axios.get("https://kapi.kakao.com/v2/user/me", {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        // 카카오에서 받은 유저 정보 확인
+        const email = kakaoUser.data.kakao_account?.email;
+        if (!email) {
+            return res.status(400).json({ message: "카카오 계정에서 이메일 정보를 가져올 수 없습니다." });
+        }
+
+        // DB에서 사용자 조회
+        let user = await prisma.user.findFirst({ where: { email } });
+
+        // 만약 유저가 존재하지만, 카카오가 아닌 다른 플랫폼으로 가입했으면 에러 반환
+        if (user && user.platform !== "kakao") {
+            return res.status(400).json({ message: "다른 플랫폼으로 가입한 계정이 존재합니다." });
+        }
+
+        // 유저가 없으면 새로 생성
+        if (!user) {
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    platform: "kakao",
+                    name: kakaoUser.data.properties?.nickname || "Unknown",
+                    nickname: "추후 수정",
+                    type: "null",
+                    introduction: "추후 수정",
+                    link: "추후 수정",
+                },
+            });
+        }
+        // 새로운 JWT 및 리프레시 토큰 발급
+        const { accessToken: newAccessToken, refreshToken } = generateTokens(user);
+
+        // 리프레시 토큰을 DB에 저장
+        await prisma.refreshToken.create({
+            data: { userId: user.id, token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }, // 7일 유지
+        });
+
+        res.success({ accessToken: newAccessToken, refreshToken });
+
+    } catch (error) {
+        return res.status(500).json({ message: "OAuth 검증 실패", error: error.message });
+    }
+};
+
+
+export const handleGoogleTokenLogin = async (req, res, next) => {
+    /*
+        #swagger.summary = '구글 액세스 토큰을 이용한 로그인'
+        #swagger.description = '네이티브 앱에서 구글 액세스 토큰을 받아와 JWT를 발급하는 API입니다.'
+        #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        accessToken: { 
+                            type: "string", 
+                            example: "abc123.jwt.token" 
+                        }
+                    },
+                    required: ["accessToken"]
+                }
+            }
+        }
+    }
+        #swagger.responses[200] = {
+            description: "구글 로그인 성공 응답",
+            content: {
+                "application/json": {
+                    schema: {
+                        type: "object",
+                        properties: {
+                            resultType: { type: "string", example: "SUCCESS" },
+                            error: { type: "object", nullable: true, example: null },
+                            success: {
+                                type: "object",
+                                properties: {
+                                    accessToken: { type: "string", example: "abc123.jwt.token" },
+                                    refreshToken: { type: "string", example: "xyz456.refresh.token" }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #swagger.responses[400] = {
+        description: "잘못된 요청 - 다른 플랫폼으로 가입한 계정이 존재함",
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: { 
+                            type: "string", 
+                            example: "다른 플랫폼으로 가입한 계정이 존재합니다." 
+                        }
+                    }
+                }
+            }
+        }
+    }
+    */
+    const { accessToken } = req.body;
+
+    if (!accessToken) {
+        return res.status(401).json({ message: "accessToken이 필요합니다." });
+    }
+
+    try {
+        // 구글 API를 사용하여 유저 정보 요청
+        const googleUser = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        // 구글에서 받은 유저 정보 확인
+        const email = googleUser.data.email;
+        if (!email) {
+            return res.status(400).json({ message: "구글 계정에서 이메일 정보를 가져올 수 없습니다." });
+        }
+
+        // DB에서 사용자 조회
+        let user = await prisma.user.findFirst({ where: { email } });
+
+        // 만약 유저가 존재하지만, 구글이 아닌 다른 플랫폼으로 가입했으면 에러 반환
+        if (user && user.platform !== "google") {
+            return res.status(400).json({ message: "다른 플랫폼으로 가입한 계정이 존재합니다." });
+        }
+
+        // 유저가 없으면 새로 생성
+        if (!user) {
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    platform: "google",
+                    name: googleUser.data.name || "Unknown",
+                    nickname: "추후 수정",
+                    type: "null",
+                    introduction: "추후 수정",
+                    link: "추후 수정",
+                },
+            });
+        }
+
+        // 새로운 JWT 및 리프레시 토큰 발급
+        const { accessToken: newAccessToken, refreshToken } = generateTokens(user);
+
+        // 리프레시 토큰을 DB에 저장
+        await prisma.refreshToken.create({
+            data: { userId: user.id, token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }, // 7일 유지
+        });
+
+        res.success({ accessToken: newAccessToken, refreshToken });
+
+    } catch (error) {
+        return res.status(500).json({ message: "OAuth 검증 실패", error: error.message });
+    }
+};
+
+
+export const handleRefreshToken = async (req, res, next) => {
+    /*
+        #swagger.summary = '액세스 토큰 재발급 API'
+        #swagger.description = '리프레시 토큰을 이용해 액세스 토큰을 재발급 받습니다. 만약 리프레시토큰의 만료일이 2일 이하라면 리프레시토큰도 재발급합니다다'
+        #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        refreshToken: { 
+                            type: "string", 
+                            example: "abc123.jwt.token" 
+                        }
+                    },
+                    required: ["refreshToken"]
+                }
+            }
+        }
+    }
+        #swagger.responses[200] = {
+            description: "액세스 토큰 재발급 성공 응답",
+            content: {
+                "application/json": {
+                    schema: {
+                        type: "object",
+                        properties: {
+                            resultType: { type: "string", example: "SUCCESS" },
+                            error: { type: "object", nullable: true, example: null },
+                            success: {
+                                type: "object",
+                                properties: {
+                                    accessToken: { type: "string", example: "abc123.jwt.token" },
+                                    refreshToken: { type: "string", example: "xyz456.refresh.token" }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    */
+
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        return res.status(401).json({ message: "리프레시 토큰이 필요합니다." });
+    }
+
+    try {
+        // DB에서 리프레시 토큰 확인
+        const storedToken = await prisma.refreshToken.findFirst({ where: { token: refreshToken } });
+
+        if (!storedToken || new Date(storedToken.expiresAt) < new Date()) {
+            //만료된 리프레시 토큰 삭제 
+            if (storedToken) {
+                await prisma.refreshToken.delete({ where: { token: refreshToken } });
+            }
+            return res.status(403).json({ message: "유효하지 않거나 만료된 리프레시 토큰입니다." });
+        };
+
+        // 유저 정보 가져오기
+        const user = await prisma.user.findFirst({ where: { id: storedToken.userId } });
+
+        // 새로운 액세스 토큰 발급
+        const newAccessToken = jwt.sign(
+            { id: user.id, email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+
+        // 리프레시 토큰 만료까지 남은 시간이 2일 이하라면 새로 발급
+        let newRefreshToken = refreshToken;
+        const timeLeft = (new Date(storedToken.expiresAt) - new Date()) / (1000 * 60 * 60 * 24); // 남은 시간(일)
+
+        if (timeLeft <= 2) {
+            newRefreshToken = crypto.randomBytes(64).toString("hex"); // 새 리프레시 토큰 발급
+
+            // 기존 리프레시 토큰을 새 토큰으로 업데이트
+            await prisma.refreshToken.update({
+                where: { token: refreshToken },
+                data: {
+                    token: newRefreshToken,
+                    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 새 만료 기한 설정 (7일 후)
+                },
+            });
+        }
+
+        return res.success({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+    } catch (error) {
+        return res.status(500).json({ message: "토큰 갱신 실패", error: error.message });
+    }
 }

@@ -32,7 +32,7 @@ import { prisma } from "../db.config.js";
       };
     };
 
-    export const deleteMomentLike = async (data, user) => {
+    export const deleteMomentLike = async (data, userId) => {
     // 요청 데이터 유효성 검사
     if (!data?.likeId) {
         throw new LikeIdMissingError("likeId가 요청 데이터에 없습니다.", data);
@@ -46,7 +46,7 @@ import { prisma } from "../db.config.js";
           throw new LikeIdNotExistError("존재하지 않는 좋아요입니다.", data);
         }
       
-        if (like.fromUserId !== user.id) {
+        if (like.fromUserId !== userId) {
           throw new LikeNotOwnedByUserError("본인이 추가한 좋아요만 삭제할 수 있습니다.", data);
         }
       

@@ -6,9 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="aa057fb3-95e3-4ca5-9656-3792bd70e880" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/category.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/category.controller.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/controllers/task.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/task.controller.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/dtos/task.dto.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dtos/task.dto.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/repositories/task.repository.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/repositories/task.repository.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/repositories/category.repository.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/repositories/category.repository.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,23 +19,23 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 2
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="2s87Xn9BcQ1X4UYsJeoFAYSexfN" />
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenDatabaseViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feature/task-api-create",
-    "last_opened_file_path": "C:/Users/ylee1"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenDatabaseViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/task-api-create&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/ylee1&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="애플리케이션 수준" UseSingleDictionary="true" transferred="true" />
 </project>
