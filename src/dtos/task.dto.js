@@ -27,7 +27,7 @@ export const updateTaskDto = (task_id, body) => {
         throw new Error("Task title is required");
     }
     return {
-        task_id: BigInt(task_id, 10),
+        task_id: BigInt(task_id),
         title: body.title
     }
 }
@@ -37,7 +37,7 @@ export const getTaskDto = (task_id) => {
         throw new Error("Task_id is not a number"); 
     }
     return {
-        task_id: BigInt(task_id,10)
+        task_id: BigInt(task_id)
     }
 
 }
