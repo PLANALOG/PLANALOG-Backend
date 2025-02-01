@@ -1,11 +1,12 @@
 import { addTask, changeTask, getTaskFromRepository, deleteTaskFromRepository, taskCompletionChange } from "../repositories/task.repository.js";
-
+import { prisma } from "../db.config.js";
 export const createTask= async (taskData) => {
         console.log("request received to Service:", taskData);
         // Task 생성 로직
         const task = {
             "title": taskData.title,
-            "planner_date": taskData.planner_date
+            "planner_date": taskData.planner_date,
+            "userId": taskData.userId
         }
     
          // 2. Repository 계층에 저장 요청
@@ -38,15 +39,33 @@ export const createTask= async (taskData) => {
       }
       
     }
-    export const deleteTask= async (taskData) => {
-      // Task 삭제 로직
+    export const deleteTask = async (ids, userId) => {
       try {
-        const deletedTask = await deleteTaskFromRepository (taskData);
-        return deletedTask;
-      }catch (error) {
-        throw error; 
+          // 권한 확인 및 삭제 대상 조회
+          const tasksToDelete = await prisma.task.findMany({
+              where: { id: { in: ids } },
+              include: { planner: true },
+          });
+  
+          if (tasksToDelete.length === 0) {
+              throw new Error("No tasks found for the given IDs.");
+          }
+  
+          // 사용자 권한 확인
+          const unauthorizedTasks = tasksToDelete.filter(
+              (task) => task.planner.userId !== BigInt(userId)
+          );
+          if (unauthorizedTasks.length > 0) {
+              throw new Error("Unauthorized: You cannot delete tasks that you don't own.");
+          }
+  
+          // 삭제 실행 및 반환
+          const deletedTasks = await deleteTaskFromRepository(ids);
+          return deletedTasks; // 삭제된 항목 반환
+      } catch (error) {
+          throw error;
       }
-    }
+  };
     export const getTask = async (taskData) => {
       // Task 조회 로직
       try {

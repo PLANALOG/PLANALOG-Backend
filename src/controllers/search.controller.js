@@ -5,16 +5,17 @@ export const searchUsers = async (req, res) => {
   /*
   #swagger.tags = ['Search']
   #swagger.summary = '사용자 검색 API'
+  #swagger.security = [{ "bearerAuth": [] }]
   */
 
   try {
     const { query } = req.query;
-    const userId = req.query.userId;
+    const userId = req.user?.id;
 
     if (!userId) {
       return res.error({
         errorCode: "USER001",
-        reason: "userId 쿼리 파라미터가 필요합니다.",
+        reason: "사용자 인증 정보가 필요합니다.",
         data: null,
       });
     }
@@ -48,16 +49,17 @@ export const saveSearchRecord = async (req, res) => {
   /*
   #swagger.tags = ['Search']
   #swagger.summary = '검색 기록 저장 API'
+  #swagger.security = [{ "bearerAuth": [] }]
   */
 
   try {
-    const userId = req.query.userId;
+    const userId = req.user?.id;
     const { content } = req.body;
 
     if (!userId) {
       return res.error({
         errorCode: "USER001",
-        reason: "userId 쿼리 파라미터가 필요합니다.",
+        reason: "사용자 인증 정보가 필요합니다.",
         data: null,
       });
     }
@@ -81,15 +83,16 @@ export const getSearchRecords = async (req, res) => {
   /*
   #swagger.tags = ['Search']
   #swagger.summary = '검색 기록 조회 API'
+  #swagger.security = [{ "bearerAuth": [] }]
   */
 
   try {
-    const userId = req.query.userId;
+    const userId = req.user?.id;
 
     if (!userId) {
       return res.error({
         errorCode: "USER001",
-        reason: "userId 쿼리 파라미터가 필요합니다.",
+        reason: "사용자 인증 정보가 필요합니다.",
         data: null,
       });
     }
@@ -113,16 +116,17 @@ export const deleteSearchRecord = async (req, res) => {
   /*
   #swagger.tags = ['Search']
   #swagger.summary = '검색 기록 삭제 API'
+  #swagger.security = [{ "bearerAuth": [] }]
   */
 
   try {
-    const userId = req.query.userId;
+    const userId = req.user?.id;
     const { recordId } = req.params;
 
     if (!userId) {
       return res.error({
         errorCode: "USER001",
-        reason: "userId 쿼리 파라미터가 필요합니다.",
+        reason: "사용자 인증 정보가 필요합니다.",
         data: null,
       });
     }
