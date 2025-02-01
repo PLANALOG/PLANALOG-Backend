@@ -278,3 +278,12 @@ model Session {
 
   @@map("session")
 }
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    BigInt   @unique
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+
+  @@map("refresh_token")
+}

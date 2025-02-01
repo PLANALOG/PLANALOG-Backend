@@ -8,6 +8,10 @@ export const handleAddComment = async (req, res, next) => {
   #swagger.summary = '댓글 추가 API'
   #swagger.description = '지정된 Moment에 댓글을 추가합니다.'
 
+  #swagger.security = [{
+    "bearerAuth": []
+  }]
+
   #swagger.parameters['momentId'] = {
     in: 'path',
     required: true,
@@ -139,7 +143,7 @@ export const handleAddComment = async (req, res, next) => {
 
     try{ 
       console.log("댓글 추가를 요청했습니다!");  
-      const commentData = bodyToComment(req.body, req.user.id,parseInt(req.params.momentId));         
+      const commentData = bodyToComment(req.body, req.user.id ,parseInt(req.params.momentId));         
       const newComment = await addUserComment(commentData);
       res.status(StatusCodes.OK).success(newComment); 
     } catch (error) {
@@ -152,6 +156,11 @@ export const handleAddComment = async (req, res, next) => {
   #swagger.tags = ['Comments']
   #swagger.summary = '댓글 수정 API'
   #swagger.description = '지정된 게시글의 특정 댓글 내용을 수정합니다.'
+
+  #swagger.security = [{
+    "bearerAuth": []
+  }]  
+
   #swagger.parameters['momentId'] = {
     in: 'path',
     required: true,
@@ -334,6 +343,10 @@ export const handleAddComment = async (req, res, next) => {
   #swagger.tags = ['Comments']        
   #swagger.summary = '댓글 삭제 API'
   #swagger.description = '지정된 댓글을 삭제합니다.'
+
+  #swagger.security = [{
+    "bearerAuth": []
+  }]   
   
   #swagger.parameters['commentId'] = {
     in: 'path',
