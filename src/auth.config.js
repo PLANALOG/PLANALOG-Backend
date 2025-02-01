@@ -141,8 +141,9 @@ export const naverDisconnect = async (userId, refreshToken) => {
 // 네이버 액세스 토큰 받아서 로그인 구현
 export const handleNaverTokenLogin = async (req, res, next) => {
     /*
-        #swagger.summary = '토큰 발급 API'
+        #swagger.summary = '네이버 액세스 토큰을 이용한 로그인'
         #swagger.description = '로그인 또는 인증 과정에서 액세스 토큰과 리프레시 토큰을 발급받습니다.'
+        #swagger.tags = ["Users"]
         #swagger.requestBody = {
         required: true,
         content: {
@@ -252,6 +253,7 @@ export const handleKakaoTokenLogin = async (req, res, next) => {
     /*
         #swagger.summary = '카카오 액세스 토큰을 이용한 로그인'
         #swagger.description = '네이티브 앱에서 카카오 액세스 토큰을 받아와 JWT를 발급하는 API입니다.'
+        #swagger.tags = ["Users"]
         #swagger.requestBody = {
         required: true,
         content: {
@@ -368,6 +370,7 @@ export const handleGoogleTokenLogin = async (req, res, next) => {
     /*
         #swagger.summary = '구글 액세스 토큰을 이용한 로그인'
         #swagger.description = '네이티브 앱에서 구글 액세스 토큰을 받아와 JWT를 발급하는 API입니다.'
+        #swagger.tags = ["Users"]
         #swagger.requestBody = {
         required: true,
         content: {
@@ -482,8 +485,9 @@ export const handleGoogleTokenLogin = async (req, res, next) => {
 
 export const handleRefreshToken = async (req, res, next) => {
     /*
-        #swagger.summary = '액세스 토큰 재발급 API'
+        #swagger.summary = '액세스 토큰 재발급 및 리프레시 토큰 갱신 API'
         #swagger.description = '리프레시 토큰을 이용해 액세스 토큰을 재발급 받습니다. 만약 리프레시토큰의 만료일이 2일 이하라면 리프레시토큰도 재발급합니다다'
+        #swagger.tags = ["Users"]
         #swagger.requestBody = {
         required: true,
         content: {
