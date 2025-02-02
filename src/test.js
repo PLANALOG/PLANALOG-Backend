@@ -66,12 +66,17 @@ export const testUserMiddleware = async (req, res, next) => {
         // JWT 토큰 생성
         const { accessToken, refreshToken } = generateTokens(user);
 
-        // 리프레시 토큰 저장
-        await prisma.refreshToken.create({
-            data: {
+        // 리프레시 토큰을 DB에 저장 (기존 데이터가 있으면 업데이트)
+        await prisma.refreshToken.upsert({
+            where: { userId: user.id }, // userId가 존재하면 업데이트
+            update: {
+                token: refreshToken,
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            },
+            create: {
                 userId: user.id,
                 token: refreshToken,
-                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7일 후 만료
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             },
         });
 
