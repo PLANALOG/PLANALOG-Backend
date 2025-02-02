@@ -1,4 +1,4 @@
-import {momentIdNotFoundError,ContentNotFoundError,CommentIdNotFoundError,ContentTooLongError} from "../errors.js";
+import {momentIdNotFoundError,ContentNotFoundError,CommentIdNotFoundError,ContentTooLongError,PermissionDeniedError} from "../errors.js";
 import {addComment,editComment,deleteComment,getAllmomentComments} from "../repositories/comment.repository.js";
 import { prisma } from "../db.config.js";
 import { responseFromComments } from "../dtos/comment.dto.js";
@@ -49,7 +49,8 @@ export const editUserComment = async(data) =>{
     if (!data.content || data.content.trim() === "") {
         throw new ContentNotFoundError("댓글 내용이 비어 있습니다.", data);
     }
-    if (data.userId !== commentExists.userId) {
+
+    if (BigInt(data.userId) !== commentExists.userId) {
         throw new PermissionDeniedError("수정 권한이 없습니다.", data);
     }
     if (data.content.length > 500) {
