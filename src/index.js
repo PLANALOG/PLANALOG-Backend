@@ -15,7 +15,7 @@ import { handleCreateMoment, handleUpdateMoment, handleDeleteMoment, handleGetMy
 import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
 import { handleNaverTokenLogin, handleKakaoTokenLogin, handleGoogleTokenLogin, handleRefreshToken } from "./auth.config.js";
-import { testUserMiddleware } from "./test.js";
+import { testUserMiddleware, testUser2Middleware } from "./test.js";
 
 dotenv.config();
 
@@ -116,6 +116,8 @@ app.post("/refresh_token", handleRefreshToken);
 
 //테스트용 (로컬 DB에 유저 추가 및 토큰 발급)
 app.post("/test/create_user", testUserMiddleware);
+app.post("/test/create_user2", testUser2Middleware);
+
 
 
 //task 관련 작업 
