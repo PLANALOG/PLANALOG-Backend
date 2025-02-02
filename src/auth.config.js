@@ -200,16 +200,16 @@ export const handleNaverTokenLogin = async (req, res, next) => {
     }
     */
 
-    const { accessToken } = req.body;
+    const { accessToken: socialAccessToken, refreshToken: socialRefreshToken } = req.body;
 
-    if (!accessToken) {
-        return res.status(400).json({ message: "accessToken is required" });
+    if (!socialAccessToken || !socialRefreshToken) {
+        return res.status(400).json({ message: "accessToken과 refreshToken이 필요합니다." });
     }
 
     try {
         // 네이버 API를 사용하여 유저 정보 요청
         const naverUser = await axios.get("https://openapi.naver.com/v1/nid/me", {
-            headers: { Authorization: `Bearer ${accessToken}` },
+            headers: { Authorization: `Bearer ${socialAccessToken}` },
         });
 
         const email = naverUser.data.response?.email;
@@ -218,8 +218,9 @@ export const handleNaverTokenLogin = async (req, res, next) => {
         // DB에서 사용자 조회 또는 새로 생성
         let user = await prisma.user.findFirst({ where: { email } });
         if (user && user.platform !== "naver") {
-            return res.status(400).json({ message: "다른 플랫폼으로 가입한 계정이 존재합니다." })
+            return res.status(400).json({ message: "다른 플랫폼으로 가입한 계정이 존재합니다." });
         }
+
         if (!user) {
             user = await prisma.user.create({
                 data: {
@@ -230,16 +231,22 @@ export const handleNaverTokenLogin = async (req, res, next) => {
                     type: "null",
                     introduction: "추후 수정",
                     link: "추후 수정",
+                    socialRefreshToken, // 소셜 리프레시 토큰 저장
                 },
+            });
+        } else {
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { socialRefreshToken }, // 기존 유저의 소셜 리프레시 토큰 업데이트
             });
         }
 
-        // 새로운 JWT 및 리프레시 토큰 발급
-        const { accessToken: newAccessToken, refreshToken } = generateTokens(user);
+        // JWT 발급
+        const { accessToken, refreshToken } = generateTokens(user);
 
-        // 리프레시 토큰을 DB에 저장 (기존 데이터가 있으면 업데이트)
+        // JWT 리프레시 토큰 저장
         await prisma.refreshToken.upsert({
-            where: { userId: user.id }, // userId가 존재하면 업데이트
+            where: { userId: user.id },
             update: {
                 token: refreshToken,
                 expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -251,9 +258,10 @@ export const handleNaverTokenLogin = async (req, res, next) => {
             },
         });
 
-        res.success({ accessToken: newAccessToken, refreshToken });
+        res.success({ accessToken, refreshToken });
+
     } catch (error) {
-        throw new Error("OAuth 검증 실패", error.message);
+        return res.status(500).json({ message: "OAuth 검증 실패", error: error.message });
     }
 }
 
@@ -319,16 +327,16 @@ export const handleKakaoTokenLogin = async (req, res, next) => {
     }
     */
 
-    const { accessToken } = req.body;
+    const { accessToken: socialAccessToken, refreshToken: socialRefreshToken } = req.body;
 
-    if (!accessToken) {
-        return res.status(401).json({ message: "accessToken이 필요합니다." });
+    if (!socialAccessToken || !socialRefreshToken) {
+        return res.status(401).json({ message: "accessToken, refreshToken이 필요합니다." });
     }
 
     try {
         // 카카오 API를 사용하여 유저 정보 요청
         const kakaoUser = await axios.get("https://kapi.kakao.com/v2/user/me", {
-            headers: { Authorization: `Bearer ${accessToken}` },
+            headers: { Authorization: `Bearer ${socialAccessToken}` },
         });
 
         // 카카오에서 받은 유저 정보 확인
@@ -356,11 +364,18 @@ export const handleKakaoTokenLogin = async (req, res, next) => {
                     type: "null",
                     introduction: "추후 수정",
                     link: "추후 수정",
+                    socialRefreshToken
                 },
             });
+        } else {
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { socialRefreshToken }, // 기존 유저라면 업데이트
+            });
         }
+
         // 새로운 JWT 및 리프레시 토큰 발급
-        const { accessToken: newAccessToken, refreshToken } = generateTokens(user);
+        const { accessToken, refreshToken } = generateTokens(user);
 
         // 리프레시 토큰을 DB에 저장 (기존 데이터가 있으면 업데이트)
         await prisma.refreshToken.upsert({
@@ -376,7 +391,7 @@ export const handleKakaoTokenLogin = async (req, res, next) => {
             },
         });
 
-        res.success({ accessToken: newAccessToken, refreshToken });
+        res.success({ accessToken, refreshToken });
 
     } catch (error) {
         return res.status(500).json({ message: "OAuth 검증 실패", error: error.message });
@@ -444,16 +459,16 @@ export const handleGoogleTokenLogin = async (req, res, next) => {
         }
     }
     */
-    const { accessToken } = req.body;
+    const { accessToken: socialAccessToken, refreshToken: socialRefreshToken } = req.body;
 
-    if (!accessToken) {
-        return res.status(401).json({ message: "accessToken이 필요합니다." });
+    if (!socialAccessToken || !socialRefreshToken) {
+        return res.status(401).json({ message: "accessToken과 refreshToken이 필요합니다." });
     }
 
     try {
         // 구글 API를 사용하여 유저 정보 요청
         const googleUser = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
-            headers: { Authorization: `Bearer ${accessToken}` },
+            headers: { Authorization: `Bearer ${socialAccessToken}` },
         });
 
         // 구글에서 받은 유저 정보 확인
@@ -470,7 +485,7 @@ export const handleGoogleTokenLogin = async (req, res, next) => {
             return res.status(400).json({ message: "다른 플랫폼으로 가입한 계정이 존재합니다." });
         }
 
-        // 유저가 없으면 새로 생성
+        // 유저가 없으면 새로 생성, 있으면 소셜 리프레시 토큰 업데이트
         if (!user) {
             user = await prisma.user.create({
                 data: {
@@ -481,16 +496,22 @@ export const handleGoogleTokenLogin = async (req, res, next) => {
                     type: "null",
                     introduction: "추후 수정",
                     link: "추후 수정",
+                    socialRefreshToken, // 소셜 리프레시 토큰 저장
                 },
+            });
+        } else {
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { socialRefreshToken }, // 기존 유저의 소셜 리프레시 토큰 업데이트
             });
         }
 
-        // 새로운 JWT 및 리프레시 토큰 발급
-        const { accessToken: newAccessToken, refreshToken } = generateTokens(user);
+        // JWT 발급
+        const { accessToken, refreshToken } = generateTokens(user);
 
-        // 리프레시 토큰을 DB에 저장 (기존 데이터가 있으면 업데이트)
+        // JWT 리프레시 토큰 저장
         await prisma.refreshToken.upsert({
-            where: { userId: user.id }, // userId가 존재하면 업데이트
+            where: { userId: user.id },
             update: {
                 token: refreshToken,
                 expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -502,7 +523,7 @@ export const handleGoogleTokenLogin = async (req, res, next) => {
             },
         });
 
-        res.success({ accessToken: newAccessToken, refreshToken });
+        res.success({ accessToken, refreshToken });
 
     } catch (error) {
         return res.status(500).json({ message: "OAuth 검증 실패", error: error.message });
