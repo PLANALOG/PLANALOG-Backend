@@ -33,11 +33,9 @@ export const updateTaskDto = (task_id, body) => {
 }
 export const getTaskDto = (task_id) => {
     //task_id 숫자인지 확인
-    if (isNaN(task_id)) {
-        throw new Error("Task_id is not a number"); 
+    if (!task_id || typeof task_id !== "string" || !/^\d+$/.test(task_id)) {
+        throw new Error("Task_id must be a valid number string");
     }
-    return {
-        task_id: BigInt(task_id)
-    }
+    return { task_id: BigInt(task_id) }; 
 
 }
