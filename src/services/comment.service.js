@@ -85,7 +85,7 @@ export const deleteUserComment = async(data) =>{
     return removeComment;
 }
 
-export const listComments = async (momentId) => {
+export const listComments = async (momentId,cursor) => { //cursor 전달 X해서 에러?
   // 게시글 존재 여부 확인
   const momentExists = await prisma.moment.findUnique({
     where: { id: momentId },
