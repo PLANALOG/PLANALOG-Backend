@@ -8,3 +8,6 @@ node_modules/
 # prisma migration files
 prisma/migrations
 src/uploads
+
+# Ignore Prisma seed file
+prisma/seed.js
