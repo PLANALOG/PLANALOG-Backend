@@ -1,11 +1,6 @@
 import dotenv from "dotenv";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Strategy as KakaoStrategy } from "passport-kakao";
-import { Strategy as NaverStrategy } from "passport-naver";
 import { prisma } from "./db.config.js";
-import { UserWithOtherPlatformError } from "./errors.js";
 import axios from "axios";
-import { isDeletedUser } from "./repositories/user.repository.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
@@ -16,7 +11,6 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // JWT 생성 함수
 const generateToken = (user) => {
-    console.log("Generating JWT for user:", user);
     return jwt.sign(
         { id: user.id, email: user.email },
         JWT_SECRET,
@@ -37,143 +31,9 @@ export const generateTokens = (user) => {
     return { accessToken, refreshToken };
 };
 
-const verify = async (profile, email, platform, refreshToken) => {
-
-    console.log(refreshToken)
-
-    const user = await prisma.user.findFirst({ where: { email } });
-    if (user !== null) {
-        await isDeletedUser(user.id);
-        // 해당 이메일을 가진 유저가 있을 떄 
-        // 그 유저의 플랫폼이 파라미터의 플랫폼과 같으면 => 로그인 (return)
-        if (user.platform === platform) return { id: user.id, email: user.email, name: user.name, refreshToken: refreshToken };
-        // 그 유저의 플랫폼이 파라미터의 플랫폼과 다르면 => 에러반환 (with 플랫폼) 
-        else throw new UserWithOtherPlatformError({ name: user.name, platform: user.platform })
-    }
-
-    const created = await prisma.user.create({
-        data: {
-            email,
-            platform,
-            name: profile.displayName,
-            nickname: "추후 수정",
-            type: "null",
-            introduction: "추후 수정",
-            link: "추후 수정",
-        },
-    });
-
-    return { id: created.id, email: created.email, name: created.name, refreshToken: refreshToken };
-};
-
-//구글 로그인 
-export const googleStrategy = new GoogleStrategy(
-    {
-        clientID: process.env.PASSPORT_GOOGLE_CLIENT_ID,
-        clientSecret: process.env.PASSPORT_GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://15.164.83.14:3000/oauth2/callback/google",
-        scope: ["email", "profile"],
-        state: true,
-    },
-    (accessToken, refreshToken, profile, cb) => {
-        console.log(refreshToken);
-        console.log(accessToken);
-
-        return googleVerify(profile, accessToken)
-            .then((user) => {
-                const token = generateToken(user);
-                cb(null, { user, token });
-            })
-            .catch((err) => cb(err));
-    }
-);
-
-
-const googleVerify = async (profile, accessToken) => {
-
-    const email = profile.emails?.[0]?.value;
-    if (!email) {
-        throw new Error(`profile.email was not found: ${profile}`);
-    }
-
-    const user = await prisma.user.findFirst({ where: { email } });
-
-    if (user !== null) {
-        await isDeletedUser(user.id);
-        // 해당 이메일을 가진 유저가 있을 떄 
-        // 그 유저의 플랫폼이 파라미터의 플랫폼과 같으면 => 로그인 (return)
-        if (user.platform === "google") return { id: user.id, email: user.email, name: user.name, accessToken: accessToken };
-        // 그 유저의 플랫폼이 파라미터의 플랫폼과 다르면 => 에러반환 (with 플랫폼) 
-        else throw new UserWithOtherPlatformError({ name: user.name, platform: user.platform })
-    }
-
-    const created = await prisma.user.create({
-        data: {
-            email,
-            platform: "google",
-            name: profile.displayName,
-            nickname: "추후 수정",
-            type: "null",
-            introduction: "추후 수정",
-            link: "추후 수정",
-        },
-    });
-
-    return { id: created.id, email: created.email, name: created.name, accessToken: accessToken };
-};
-
-
-// 카카오 로그인 
-export const kakaoStrategy = new KakaoStrategy(
-    {
-        clientID: process.env.PASSPORT_KAKAO_CLIENT_ID,
-        clientSecret: process.env.PASSPORT_KAKAO_CLIENT_SECRET,
-        callbackURL: "http://15.164.83.14:3000/oauth2/callback/kakao",
-    },
-    (accessToken, refreshToken, profile, cb) => {
-        const email = profile._json.kakao_account?.email;
-        if (!email) {
-            throw new Error(`profile._jaon.kakao_account?.email was not found: ${profile}`);
-        }
-
-        return verify(profile, email, "kakao", refreshToken)
-            .then((user) => {
-                // JWT 생성 후 반환
-                const token = generateToken(user);
-                cb(null, { user, token }); // JWT와 함께 사용자 정보 반환
-            })
-            .catch((err) => cb(err));
-    }
-);
-
-// 네이버 로그인 
-export const naverStrategy = new NaverStrategy(
-    {
-        clientID: process.env.PASSPORT_NAVER_CLIENT_ID,
-        clientSecret: process.env.PASSPORT_NAVER_CLIENT_SECRET,
-        callbackURL: "http://15.164.83.14:3000/oauth2/callback/naver",
-    },
-    (accessToken, refreshToken, profile, cb) => {
-        const email = profile.emails?.[0]?.value;
-        if (!email) {
-            throw new Error(`profile.email was not found: ${profile}`);
-        }
-
-        console.log('refreshToken', refreshToken);
-
-        return verify(profile, email, "naver", refreshToken)
-            .then((user) => {
-                // JWT 생성 후 반환
-                const token = generateToken(user);
-                cb(null, { user, token }); // JWT와 함께 사용자 정보 반환
-            })
-            .catch((err) => cb(err));
-    }
-);
-
-
 // JWT 인증 미들웨어
 export const authenticateJWT = (req, res, next) => {
+    console.log("JWT 토큰 인증 미들웨어 실행")
     const authHeader = req.headers.authorization;
     if (authHeader) {
         const token = authHeader.split(" ")[1]; // 'Bearer <token>'에서 <token> 추출
@@ -352,8 +212,6 @@ export const handleNaverTokenLogin = async (req, res, next) => {
             headers: { Authorization: `Bearer ${accessToken}` },
         });
 
-        console.log("네이버 API 응답:", naverUser.data);
-
         const email = naverUser.data.response?.email;
         if (!email) throw new Error("이메일이 없습니다.");
 
@@ -379,24 +237,14 @@ export const handleNaverTokenLogin = async (req, res, next) => {
         // 새로운 JWT 및 리프레시 토큰 발급
         const { accessToken: newAccessToken, refreshToken } = generateTokens(user);
 
-        // 리프레시 토큰을 DB에 저장 (기존 데이터가 있으면 업데이트)
-        await prisma.refreshToken.upsert({
-            where: { userId: user.id }, // userId가 존재하면 업데이트
-            update: {
-                token: refreshToken,
-                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            },
-            create: {
-                userId: user.id,
-                token: refreshToken,
-                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            },
+        // 리프레시 토큰을 DB에 저장
+        await prisma.refreshToken.create({
+            data: { userId: user.id, token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }, // 7일 유지
         });
 
         res.success({ accessToken: newAccessToken, refreshToken });
     } catch (error) {
-        console.error("네이버 로그인 오류:", error.response?.data || error.message);
-        throw new Error(`OAuth 검증 실패 ${error.message} `);
+        throw new Error("OAuth 검증 실패", error.message);
     }
 }
 
@@ -505,18 +353,9 @@ export const handleKakaoTokenLogin = async (req, res, next) => {
         // 새로운 JWT 및 리프레시 토큰 발급
         const { accessToken: newAccessToken, refreshToken } = generateTokens(user);
 
-        // 리프레시 토큰을 DB에 저장 (기존 데이터가 있으면 업데이트)
-        await prisma.refreshToken.upsert({
-            where: { userId: user.id }, // userId가 존재하면 업데이트
-            update: {
-                token: refreshToken,
-                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            },
-            create: {
-                userId: user.id,
-                token: refreshToken,
-                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            },
+        // 리프레시 토큰을 DB에 저장
+        await prisma.refreshToken.create({
+            data: { userId: user.id, token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }, // 7일 유지
         });
 
         res.success({ accessToken: newAccessToken, refreshToken });
@@ -631,18 +470,9 @@ export const handleGoogleTokenLogin = async (req, res, next) => {
         // 새로운 JWT 및 리프레시 토큰 발급
         const { accessToken: newAccessToken, refreshToken } = generateTokens(user);
 
-        // 리프레시 토큰을 DB에 저장 (기존 데이터가 있으면 업데이트)
-        await prisma.refreshToken.upsert({
-            where: { userId: user.id }, // userId가 존재하면 업데이트
-            update: {
-                token: refreshToken,
-                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            },
-            create: {
-                userId: user.id,
-                token: refreshToken,
-                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            },
+        // 리프레시 토큰을 DB에 저장
+        await prisma.refreshToken.create({
+            data: { userId: user.id, token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }, // 7일 유지
         });
 
         res.success({ accessToken: newAccessToken, refreshToken });
