@@ -528,7 +528,7 @@ swagger.responses[404] = {
   */
         try {
             const momentId = parseInt(req.params.momentId);
-            const cursor = req.query.cursor ? parseInt(req.query.cursor) : null;
+            const cursor = req.query.cursor ? parseInt(req.query.cursor) : undefined; //undefined처리
             const comments = await listComments(momentId, cursor);
             res.status(StatusCodes.OK).success(comments);
         } catch (error) {

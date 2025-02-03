@@ -91,13 +91,21 @@ export const profileImageEdit = async (imagePaths, userId) => {
     const deleteImageUrl = user.profileImage;
     console.log('deleteImageUrl', deleteImageUrl);
 
-    //url에서 경로만 추출 (폴더 확인을 위해)
-    const parsedUrl = new URL(deleteImageUrl);
-    const imagePath = parsedUrl.pathname.startsWith('/') ? parsedUrl.pathname.substring(1) : parsedUrl.pathname;
-    console.log('Extracted imagePath:', imagePath);
+    if (deleteImageUrl) {
+        // URL에서 경로만 추출 (폴더 확인을 위해)
+        const parsedUrl = new URL(deleteImageUrl);
+        const imagePath = parsedUrl.pathname.startsWith('/') ? parsedUrl.pathname.substring(1) : parsedUrl.pathname;
+        console.log('Extracted imagePath:', imagePath);
 
-    //기존 프로필 이미지 삭제하기  (기본이미지가 아닐 때만만)
-    if (!imagePath.startsWith('basic_images/')) deleteFile(deleteImageUrl).catch((err) => console.error("Error deleting file:", err))
+        // 기존 프로필 이미지 삭제 (기본 이미지가 아닐 때만)
+        if (!imagePath.startsWith('basic_images/')) {
+            try {
+                await deleteFile(deleteImageUrl);
+            } catch (err) {
+                console.error("Error deleting file:", err);
+            }
+        }
+    }
 
     //프로필 이미지 경로 업데이트 
     const updatedUser = await updateUserProfile({ profileImage: imagePaths }, userId);

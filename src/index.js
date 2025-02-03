@@ -15,7 +15,7 @@ import { handleCreateMoment, handleUpdateMoment, handleDeleteMoment, handleGetMy
 import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
 import { handleNaverTokenLogin, handleKakaoTokenLogin, handleGoogleTokenLogin, handleRefreshToken } from "./auth.config.js";
-import { testUserMiddleware } from "./test.js";
+import { testUserMiddleware, testUser2Middleware } from "./test.js";
 
 dotenv.config();
 
@@ -74,7 +74,7 @@ app.get("/openapi.json", async (req, res, next) => {
       title: "PLANALOG",
       description: "PLANALOG 테스트 문서입니다.",
     },
-    host: "localhost:3000",
+    host: process.env.SWAGGER_HOST,
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -116,6 +116,8 @@ app.post("/refresh_token", handleRefreshToken);
 
 //테스트용 (로컬 DB에 유저 추가 및 토큰 발급)
 app.post("/test/create_user", testUserMiddleware);
+app.post("/test/create_user2", testUser2Middleware);
+
 
 
 //task 관련 작업 
@@ -164,8 +166,8 @@ app.delete("/planners/:plannerId", [
 app.post("/moments", authenticateJWT, handleCreateMoment); //모먼트 생성
 app.patch("/moments/:momentId", authenticateJWT, handleUpdateMoment); //모먼트 수정
 app.delete("/moments/:momentId", authenticateJWT, handleDeleteMoment); //모먼트 삭제
-app.get("mypage/moments/mine", authenticateJWT, handleGetMyMoments); //마이페이지에서 나의 moment게시글 목록 조회
-app.get("mypage/moments/:momentId", authenticateJWT, handleGetMyMomentDetail); //마이페이지에서 나의  특정 moment게시물 조회 
+app.get("/mypage/moments/mine", authenticateJWT, handleGetMyMoments); //마이페이지에서 나의 moment게시글 목록 조회
+app.get("/mypage/moments/:momentId", authenticateJWT, handleGetMyMomentDetail); //마이페이지에서 나의  특정 moment게시물 조회 
 app.get("/friends/:friendId/moments", authenticateJWT, handleGetFriendsMoments) //친구페이지 moment게시물 목록 조회
 app.get("/friends/:friendId/moments/momentId", authenticateJWT, handleGetFriendMomentDetail) //친구페이지 특정 moment게시물 조회
 
