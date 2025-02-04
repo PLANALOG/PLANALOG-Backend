@@ -52,7 +52,7 @@ export const userDelete = async (userId, user) => {
     const isUserExist = await getMyProfile(userId);
     if (!isUserExist) throw new NoExistsUserError(userId);
 
-    // 유저의 리프레시 토큰 삭제 
+    // 유저의 서버 자체 리프레시 토큰 삭제 
     await prisma.refreshToken.deleteMany({
         where: { userId: userId }
     });
@@ -63,23 +63,27 @@ export const userDelete = async (userId, user) => {
     const deletedUser = await deleteUser(userId);
     console.log('DB에서 유저 삭제 성공');
 
+    //탈퇴하는 유저의 socialRefreshToken 가져오기 (연결끊기 요청을 위해)
+    const socialRefreshToken = deletedUser.socialRefreshToken;
+    console.log('탈퇴하는 유저의 소셜리프레시토큰 : ', socialRefreshToken)
+    if (!socialRefreshToken) {
+        console.error('유저의 소셜리프레시토큰이 존재하지 않습니다');
+    };
 
-    if (deletedUser.platform === "kakao") {
+    try {
+        if (deletedUser.platform === "kakao") {
+            await kakaoDisconnect(userId, socialRefreshToken);
+        }
+        else if (deletedUser.platform === "google") {
+            await googleDisconnect(userId, socialRefreshToken);
+        }
+        else if (deletedUser.platform === "naver") {
+            await naverDisconnect(userId, socialRefreshToken);
+        }
 
-        const refreshToken = user.refreshToken;
-        await kakaoDisconnect(userId, refreshToken);
+    } catch (error) {
+        throw new Error(`소셜 연결 끊기 실패 : (${error})`);
     }
-    else if (deletedUser.platform === "google") {
-
-        const accessToken = user.accessToken
-        console.log('accessToken', accessToken)
-        await googleDisconnect(userId, accessToken);
-    }
-    else if (deletedUser.platform === "naver") {
-        const refreshToken = user.refreshToken;
-        await naverDisconnect(userId, refreshToken);
-    }
-
     return deletedUser;
 }
 
