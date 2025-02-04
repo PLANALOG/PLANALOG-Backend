@@ -55,52 +55,61 @@ export const kakaoDisconnect = async (userId, refreshToken) => {
     // 유저의 refreshToken으로 소셜서버에 accessToken 요청 
     const newToken = await axios.post('https://kauth.kakao.com/oauth/token', {
         grant_type: 'refresh_token',
-        client_id: process.env.PASSPORT_KAKAO_CLIENT_ID,
+        client_id: process.env.KAKAO_CLIENT_ID,
         refresh_token: refreshToken,
-        client_secret: process.env.PASSPORT_KAKAO_CLIENT_SECRET
+        client_secret: process.env.KAKAO_CLIENT_SECRET
     },
         {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
             }
         }
-    )
-    if (!newToken) throw new Error('토큰 갱신에 실패했습니다.');
-    console.log('토큰 갱신 성공', newToken.data);
+    ).catch((err) => { throw new Error(`카카오 토큰 갱신 실패 ${err.response?.data || err.message}`) });
 
-    // 만약 리프레시 토큰도 갱신되었다면, session 테이블의 리프레시 토큰도 갱신해준다.
-    if (newToken.data.refresh_token) {
-        await prisma.session.update({
-            where: { data: { id: userId } },
-            data: { refreshToken: newToken.data.refresh_token }
-        })
-    }
+    console.log("토큰 갱신 성공", newToken.data);
 
     const accessToken = newToken.data.access_token;
-
 
     // 액세스토큰으로 연결 끊기 요청 
     const userIdInKakao = await axios.post('https://kapi.kakao.com/v1/user/unlink', {}, {
         headers: {
             Authorization: `Bearer ${accessToken}`
         }
-    });
+    }).catch((err) => { throw new Error(`카카오 연결 끊기 실패 ${err.response?.data || err.message}`) });
 
-    console.log('카카오 연결 끊기 성공', userIdInKakao.data.id);
+    console.log("카카오 연결 끊기 성공", userIdInKakao.data.id);
 }
 
 
 //구글 연결끊기
-export const googleDisconnect = async (userId, accessToken) => {
+export const googleDisconnect = async (userId, refreshToken) => {
 
-    console.log('구글 연결 끊기를 요청했습니다.');
+    console.log("구글 연결 끊기를 요청했습니다.");
+
+    // 유저의 refreshToken으로 소셜서버에 accessToken 요청 
+    const newToken = await axios.post('https://oauth2.googleapis.com/token', {
+        grant_type: "refresh_token",
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        refresh_token: refreshToken,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET
+    },
+        {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+            }
+        }
+    ).catch((err) => { throw new Error(`구글 토큰 갱신 실패 ${err.response?.data || err.message}`) });
+
+    console.log('토큰 갱신 성공', newToken.data);
+
+    const accessToken = newToken.data.access_token;
 
 
     // 액세스토큰으로 연결 끊기 요청
     const result = await axios.post(
         `https://oauth2.googleapis.com/revoke?token=${accessToken}`
 
-    ).catch((err) => { throw new Error(`구글 연결 끊기 실패 ${err.code}`) });
+    ).catch((err) => { throw new Error(`구글 연결 끊기 실패 ${err.response?.data || err.message}`) });
 
     console.log('구글 연결 끊기 성공', result.status);
 
@@ -113,11 +122,11 @@ export const naverDisconnect = async (userId, refreshToken) => {
     const newToken = await axios.post(`https://nid.naver.com/oauth2.0/token`, null, {
         params: {
             grant_type: 'refresh_token',
-            client_id: process.env.PASSPORT_NAVER_CLIENT_ID,
-            client_secret: process.env.PASSPORT_NAVER_CLIENT_SECRET,
+            client_id: process.env.NAVER_CLIENT_ID,
+            client_secret: process.env.NAVER_CLIENT_SECRET,
             refresh_token: refreshToken
         }
-    }).catch((err) => { throw new Error(`네이버 토큰 갱신 실패 ${err.code}`) });
+    }).catch((err) => { throw new Error(`네이버 토큰 갱신 실패 ${err.response?.data || err.message}`) });
 
     console.log('토큰 갱신 성공', newToken.data);
 
@@ -127,11 +136,11 @@ export const naverDisconnect = async (userId, refreshToken) => {
     const userIdInNaver = await axios.post(`https://nid.naver.com/oauth2.0/token`, null, {
         params: {
             grant_type: 'delete',
-            client_id: process.env.PASSPORT_NAVER_CLIENT_ID,
-            client_secret: process.env.PASSPORT_NAVER_CLIENT_SECRET,
+            client_id: process.env.NAVER_CLIENT_ID,
+            client_secret: process.env.NAVER_CLIENT_SECRET,
             access_token: accessToken
         }
-    }).catch((err) => { throw new Error(`네이버 연결 끊기 실패 ${err.code}`) });
+    }).catch((err) => { throw new Error(`네이버 연결 끊기 실패 ${err.response?.data || err.message}`) });
 
     console.log('네이버 연결 끊기 성공', userIdInNaver.data.result);
 
