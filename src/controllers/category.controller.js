@@ -25,19 +25,13 @@ export const handleCreateCategory = async (req, res, next) => {
                                 type: "string", 
                                 example: "Work", 
                                 description: "카테고리 이름" 
-                            },
-                            planner_date: {
-                                type: "string",
-                                example: "2022-12-25",
-                                description: "플래너 날짜"
                             }
                         },
-                        required: ["name", "planner_date"]
+                        required: ["name"]
                     }
                 }
             }
         }   
-        
         */
     try {
         //세션에서 userId 가져오기 
