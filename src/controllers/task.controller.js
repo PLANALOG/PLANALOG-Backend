@@ -195,19 +195,22 @@ export const handleGetTask = async (req, res, next) => {
     */
     //Task 조회. 
 
-    const task_id = req.params;
+    
+    const task_id = req.params.task_id;
 
 
-    const validTaskId = getTaskDto(task_id.task_id);
-    console.log(validTaskId);
+    
 
 
     try {
+        const validTaskId = getTaskDto(task_id); 
+        
         const task = await getTask(validTaskId);
 
         res.success(task)
     }
     catch (error) {
+        console.log(error);
         next(error);
     }
 }

@@ -98,7 +98,7 @@ model Task {
   updatedAt      DateTime      @updatedAt @map("updated_at")
   // Relationships
   planner        Planner       @relation(fields: [plannerId], references: [id], onDelete: Cascade)
-  taskCategory   TaskCategory? @relation(fields: [taskCategoryId], references: [id])
+  taskCategory   TaskCategory? @relation(fields: [taskCategoryId], references: [id] ,onDelete: Cascade)
 
   @@index([plannerId], map: "plannerId")
   @@index([taskCategoryId], map: "taskCategoryId")

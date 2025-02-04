@@ -1,10 +1,11 @@
 import {createCategory,
         updateCategory,
         getCategoriesByUser,
-        deleteCategory,
+        deleteCategoryService,
         createTaskCategory
 } from '../services/category.service.js'
 import { createTaskDto } from '../dtos/task.dto.js';
+import { deleteCategoryRepository } from '../repositories/category.repository.js';
 // 카테고리 생성
 export const handleCreateCategory = async (req, res, next) => {
     /*
@@ -174,65 +175,53 @@ export const handleDeleteCategory = async (req, res, next) => {
    /*
     #swagger.tags = ['Categories']
     #swagger.summary = '카테고리 삭제 API'
+    #swagger.description = '배열 형태의 카테고리 ID 목록을 입력받아 한 번에 여러 개의 카테고리를 삭제합니다.'
     #swagger.security = [{
         "bearerAuth": []
-        }]
-    #swagger.responses[200] = {
-    description: "카테고리 삭제 성공",
-    content: {
-        "application/json": {
-            schema: {
-                type: "object",
-                properties: {
-                    resultType: { 
-                        type: "string", 
-                        example: "SUCCESS", 
-                        description: "결과 상태 (SUCCESS: 성공)"
-                    },
-                    error: { 
-                        type: "object", 
-                        nullable: true, 
-                        example: null, 
-                        description: "에러 정보 (없을 경우 null)"
-                    },
-                    success: { 
-                        type: "object", 
-                        properties: {
-                            id: { 
-                                type: "integer", 
-                                description: "삭제된 카테고리 ID", 
-                                example: 1 
-                            },
-                            name: { 
-                                type: "string", 
-                                description: "삭제된 카테고리 이름", 
-                                example: "Work" 
-                            }
+    }]
+    #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        categoryIds: { 
+                            type: "array", 
+                            items: { type: "integer" },
+                            description: "삭제할 카테고리 ID 목록",
+                            example: [1, 2, 3]
                         }
-                    }
+                    },
+                    required: ["categoryIds"]
                 }
             }
         }
     }
-}
     */
-    try {
-        const { task_category_id } = req.params; // Extract ID from URL
-        console.log("task_category_id", task_category_id);
-        if (!task_category_id) {
-            return res.error({
-                errorCode: "INVALID_INPUT",
-                reason: "Task category ID is required",
-            });
-        }
+try {
+    // 삭제할 카테고리 배열 전달받기 
+    const { categoryIds } = req.body; 
 
-        await deleteCategory(task_category_id); // Call service to delete category
-
-        res.success({ message: "Task category deleted successfully" }); // Respond with success
-    } catch (error) {
-        next(error); // Pass error to global error handler
+    if (!Array.isArray(categoryIds) || categoryIds.length === 0) {
+        return res.error({
+            errorCode: "INVALID_INPUT",
+            reason: "Category IDs must be a non-empty array",
+        });
     }
-};
+
+    
+    const result = await deleteCategoryService(categoryIds, req.user.id); // 서비스 호출
+
+    // 성공 응답
+    res.success({ 
+        message: "Task categories deleted successfully",
+        count: result.count, // 삭제된 레코드 수
+    });
+} catch (error) {
+    next(error);
+}
+}
 
 export const handleCreateTaskCategory = async (req, res, next) => { 
     /*
