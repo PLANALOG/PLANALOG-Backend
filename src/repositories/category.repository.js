@@ -52,11 +52,15 @@ export const getAllCategoriesRepository = async (userId) => {
     }
 };
 
-export const deleteCategoryRepository = async (id) => {
+export const deleteCategoryRepository = async (ids) => {
     try {
-        const deletedCategory = await prisma.taskCategory.delete({
+        // 1️⃣ 배열의 모든 ID를 BigInt로 변환
+        const bigIntIds = ids.map((id) => BigInt(id));
+
+        // 2️⃣ Prisma deleteMany 사용
+        const deletedCategory = await prisma.taskCategory.deleteMany({
             where: {
-                id: BigInt(id), // Convert ID to integer
+                id: { in: bigIntIds },
             },
         });
 
