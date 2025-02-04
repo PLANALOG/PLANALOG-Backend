@@ -194,8 +194,14 @@ export const handleGetTask = async (req, res, next) => {
     }
     */
     //Task 조회. 
+
     
     const task_id = req.params.task_id;
+
+
+    
+
+
     try {
         const validTaskId = getTaskDto(task_id); 
         
