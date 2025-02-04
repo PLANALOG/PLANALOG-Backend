@@ -1,5 +1,6 @@
 import { addTask, changeTask, getTaskFromRepository, deleteTaskFromRepository, taskCompletionChange, deletePlannerWithNoTasks } from "../repositories/task.repository.js";
 import { prisma } from "../db.config.js";
+import { updatePlannerIsCompleted } from "../repositories/planner.repository.js";
 
 export const createTask = async (taskData) => {
   console.log("request received to Service:", taskData);
@@ -86,7 +87,13 @@ export const toggleTaskCompletion = async (taskData) => {
   // Task 완료상태 수정 로직
   try {
     const toggledTask = await taskCompletionChange(taskData);
-    return toggledTask;
+
+    //만약 해당 플래너의 모든 task가 완료되었으면 플래너의 isCompleted값 변경
+    const plannerId = toggledTask.plannerId;
+    const newPlannerIsCompleted = await updatePlannerIsCompleted(plannerId);
+    //newIsCompleted는 플래너의 isCompleted 값이 변경되었으면 변경된 boolean값, 변경되지 않았다면 null값 
+
+    return { toggledTask, newPlannerIsCompleted };
   } catch (error) {
     throw error;
   }
