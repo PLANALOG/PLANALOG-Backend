@@ -84,6 +84,22 @@ export const deletePlanner = async (plannerId, userId) => {
     return deletedPlanner;
 }
 
+export const deletePlannerWithNoTasks = async (plannerId) => {
+    const isExistTasks = await prisma.task.findFirst({ where: { plannerId } });
+
+    var isDeletedPlanner = false;
+
+    if (!isExistTasks) {
+        await prisma.planner.delete({
+            where: { id: plannerId }
+        });
+        isDeletedPlanner = true;
+    };
+
+    return isDeletedPlanner;
+}
+
+
 //플래너의 할 일이 모두 완료됐는지 여부에 따라, 플래너의 isCompleted 값 변경
 export const updatePlannerIsCompleted = async (plannerId) => {
 

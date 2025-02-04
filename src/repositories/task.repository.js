@@ -163,18 +163,4 @@ export const findTaskWithPlanner = async (data) => {
     });
 };
 
-export const deletePlannerWithNoTasks = async (plannerId) => {
-    const isExistTasks = await prisma.task.findFirst({ where: { plannerId } });
-
-    var isDeletedPlanner = false;
-
-    if (!isExistTasks) {
-        await prisma.planner.delete({
-            where: { id: plannerId }
-        });
-        isDeletedPlanner = true;
-    };
-
-    return isDeletedPlanner;
-}
 

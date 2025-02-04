@@ -1,6 +1,6 @@
-import { addTask, changeTask, getTaskFromRepository, deleteTaskFromRepository, taskCompletionChange, deletePlannerWithNoTasks } from "../repositories/task.repository.js";
+import { addTask, changeTask, getTaskFromRepository, deleteTaskFromRepository, taskCompletionChange } from "../repositories/task.repository.js";
 import { prisma } from "../db.config.js";
-import { updatePlannerIsCompleted } from "../repositories/planner.repository.js";
+import { updatePlannerIsCompleted, deletePlannerWithNoTasks } from "../repositories/planner.repository.js";
 
 export const createTask = async (taskData) => {
   console.log("request received to Service:", taskData);
