@@ -1,34 +1,38 @@
 export const bodyToCreateMoment = (body) => {
     if (!body) {
-        throw new Error("요청 본문이 비어 있습니다."); // ✅ body 자체가 없는 경우
+        throw new Error("요청 body값이 없습니다."); // body값이 없는 경우
     }
 
-    if (!body.status) {
-        throw new Error("저장할 상태를 지정해주세요."); // ✅ status가 없는 경우
+    if (!Array.isArray(body.momentContents)) {
+        throw new Error("momentContents는 배열이어야 합니다.");
     }
 
-    const momentContents = Array.isArray(body.momentContents) ? body.momentContents : [];
+    const momentContents = body.momentContents;
 
-    if (body.status === "public") {
-        if (!body.title) {
-            throw new Error("공개 상태에서는 제목이 필수입니다.");
-        }
-        if (momentContents.length === 0) {
-            throw new Error("공개 상태에서는 최소 하나 이상의 페이지가 필요합니다.");
-        }
-        if (momentContents.some(content => !content.content)) {
-            throw new Error("공개 상태에서는 모든 페이지에 content 값이 포함되어야 합니다.");
-        }
+
+    if (!body.title) {
+        throw new Error("제목을 작성해주세요.");
     }
+    if (momentContents.length === 0) {
+        throw new Error("최소 하나의 페이지가 존재해야합니다.");
+    }
+    if (momentContents.some(content => content.content === undefined || content.content === null || content.content.trim() === '')) {
+        throw new Error("모든 페이지에 빈 내용이 포함될 수 없습니다.");
+    }
+
+    const sortOrders = momentContents.map(content => content.sortOrder);
+    if (new Set(sortOrders).size !== sortOrders.length) {
+        throw new Error("sortOrder 값은 중복될 수 없습니다.");
+    }
+    
 
     return {
-        title: body.title || null,
-        status: body.status,
-        plannerId: body.plannerId || null, // ✅ plannerId가 없으면 null 처리
+        title: body.title,
+        plannerId: body.plannerId ?? null, // plannerId가 없으면 null 처리
         momentContents: momentContents.map(content => ({
             sortOrder: content.sortOrder,
-            content: content.content ?? null,
-            url: content.url || null
+            content: content.content,
+            url: content.url ?? null
         }))
     };
 };
@@ -40,14 +44,13 @@ export const responseFromCreateMoment = (moment) => {
         id: moment.id,
         userId: moment.userId,
         title: moment.title,
-        status: moment.status,
-        plannerId: moment.plannerId || null,
+        plannerId: moment.plannerId ?? null,
         createdAt: moment.createdAt,
         updatedAt: moment.updatedAt,
         momentContents: moment.momentContents.map(content => ({
             sortOrder: content.sortOrder,
             content: content.content,
-            url: content.url,
+            url: content.url ?? null,
         }))
     };
 };
