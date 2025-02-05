@@ -24,11 +24,12 @@ enum like_type {
   moment
 }
 
-enum share_status {
-  public
-  friend
-  draft
-}
+/**
+ * enum share_status {
+ * public
+ * draft
+ * }
+ */
 
 enum user_type {
   category_user
@@ -221,16 +222,15 @@ model Avatar {
 }
 
 model Moment {
-  id           BigInt       @id @default(autoincrement())
-  userId       BigInt       @map("user_id")
-  title        String       @db.VarChar(100)
-  status       share_status @map("status") // ENUM (public, friend, draft)
-  plannerId    BigInt?      @map("planner_id")
-  likingCount  BigInt       @default(0) @map("liking_count")
-  commentCount BigInt       @default(0) @map("comment_count")
-  publishedAt  DateTime?    @map("published_at")
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
+  id           BigInt   @id @default(autoincrement())
+  userId       BigInt   @map("user_id")
+  title        String   @db.VarChar(100)
+  //status       share_status @map("status") // ENUM (public, draft)
+  plannerId    BigInt?  @map("planner_id")
+  likingCount  BigInt   @default(0) @map("liking_count")
+  commentCount BigInt   @default(0) @map("comment_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   // Relationships
   user           User            @relation(fields: [userId], references: [id])
@@ -245,7 +245,7 @@ model Moment {
 model MomentContent {
   id        BigInt  @id @default(autoincrement())
   momentId  BigInt  @map("moment_id")
-  sortOrder Int     @map("sort_order") // 페이지 순서 
+  sortOrder BigInt  @map("sort_order") // 페이지 순서 
   content   String  @db.Text
   url       String? @db.VarChar(300)
 
