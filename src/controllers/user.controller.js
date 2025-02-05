@@ -4,7 +4,7 @@ import { userEdit, nicknameCheck, myProfile, userProfile, userDelete, profileIma
 import { prisma } from "../db.config.js"
 import { validationError } from "../validator.js";
 import { validationResult } from "express-validator";
-import { authError } from "../errors.js";
+import { authError, CustomValidationError } from "../errors.js";
 
 
 
@@ -70,14 +70,8 @@ export const handleEditUser = async (req, res, next) => {
 
     console.log('회원정보 수정을 요청했습니다.')
 
-    validationError(req);
-
     //유효성 검사 에러 반환
-    if (!validationResult(req).isEmpty()) {
-        const errorsMessages = validationResult(req).array().map((error) => error.msg);
-        //자바스크립트에서 배열을 문자열로 변환하려고 하면 암묵적으로 Array.prototype.toString 메서드가 호출
-        throw new Error(`입력정보가 유효하지않습니다. ${errorsMessages}`)
-    }
+    validationError(req);
 
     if (!req.user || !req.user.id) {
         throw new authError();
@@ -172,9 +166,6 @@ export const handleMyProfile = async (req, res, next) => {
     }
     */
     console.log('사용자 본인의 회원 정보 조회를 요청했습니다.');
-
-    //유효성 검사 에러 반환
-    validationError(req);
 
     if (!req.user || !req.user.id) {
         throw new authError();
@@ -277,9 +268,7 @@ export const handleDeleteUser = async (req, res, next) => {
 
     const userId = parseInt(req.user.id);
 
-    console.log(req.user)
-
-    const deletedUser = await userDelete(userId, req.user);
+    const deletedUser = await userDelete(userId);
 
     res.status(StatusCodes.OK).success({ deletedUser });
 }

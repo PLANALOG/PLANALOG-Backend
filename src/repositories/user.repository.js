@@ -1,5 +1,6 @@
 
 import { prisma } from '../db.config.js'
+import { DeletedUserError } from '../errors.js';
 
 export const getUserByNickname = async (nickname) => {
 
@@ -77,6 +78,6 @@ export const isDeletedUser = async (userId) => {
     const leftDays = 14 - (now.getDate() - deletedDate.getDate());
     // 14 - (오늘 - 탈퇴일 )
 
-    if (user.isDeleted) throw new Error(`탈퇴한 회원입니다. ${leftDays}일 후에 재가입할 수 있습니다.`);
+    if (user.isDeleted) throw new DeletedUserError({ leftDays });
 
 }

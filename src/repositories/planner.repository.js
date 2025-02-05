@@ -1,4 +1,5 @@
 import { prisma } from '../db.config.js';
+import { UnauthorizedPlannerDeletionError } from '../errors.js';
 import { isDeletedUser } from './user.repository.js';
 
 export const getPlannerWithTasks = async (userId, plannerDate) => {
@@ -73,7 +74,7 @@ export const deletePlanner = async (plannerId, userId) => {
     const plannerToObject = JSON.parse(plannerToJson);
 
     // planner의 userId가 요청한 유저와 다르면 에러 반환 
-    if (plannerToObject.userId !== userId) throw new Error('플래너를 삭제할 권한이 없습니다. 본인의 플래너만 삭제할 수 있습니다.');
+    if (plannerToObject.userId !== userId) throw new UnauthorizedPlannerDeletionError();
 
     //리팩토링가능? 
 
