@@ -48,7 +48,7 @@ export const getAllmomentComments =  async({ momentId, cursor }) => {
         },
         where: {
             momentId: momentId,
-            ...(cursor && { id: { gt: cursor } }), // Cursor 조건 추가
+            ...(cursor !== undefined ? { id: { gt: cursor } } : {}), // undefined 처리
         },
         orderBy:{id:"asc"},  //정렬 기준
         take: 5, // 페이지 크기
