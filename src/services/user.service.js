@@ -52,7 +52,7 @@ export const userDelete = async (userId, user) => {
     const isUserExist = await getMyProfile(userId);
     if (!isUserExist) throw new NoExistsUserError(userId);
 
-    // 유저의 리프레시 토큰 삭제 
+    // 유저의 서버 자체 리프레시 토큰 삭제 
     await prisma.refreshToken.deleteMany({
         where: { userId: userId }
     });
@@ -63,23 +63,27 @@ export const userDelete = async (userId, user) => {
     const deletedUser = await deleteUser(userId);
     console.log('DB에서 유저 삭제 성공');
 
+    //탈퇴하는 유저의 socialRefreshToken 가져오기 (연결끊기 요청을 위해)
+    const socialRefreshToken = deletedUser.socialRefreshToken;
+    console.log('탈퇴하는 유저의 소셜리프레시토큰 : ', socialRefreshToken)
+    if (!socialRefreshToken) {
+        console.error('유저의 소셜리프레시토큰이 존재하지 않습니다');
+    };
 
-    if (deletedUser.platform === "kakao") {
+    try {
+        if (deletedUser.platform === "kakao") {
+            await kakaoDisconnect(userId, socialRefreshToken);
+        }
+        else if (deletedUser.platform === "google") {
+            await googleDisconnect(userId, socialRefreshToken);
+        }
+        else if (deletedUser.platform === "naver") {
+            await naverDisconnect(userId, socialRefreshToken);
+        }
 
-        const refreshToken = user.refreshToken;
-        await kakaoDisconnect(userId, refreshToken);
+    } catch (error) {
+        throw new Error(`소셜 연결 끊기 실패 : (${error})`);
     }
-    else if (deletedUser.platform === "google") {
-
-        const accessToken = user.accessToken
-        console.log('accessToken', accessToken)
-        await googleDisconnect(userId, accessToken);
-    }
-    else if (deletedUser.platform === "naver") {
-        const refreshToken = user.refreshToken;
-        await naverDisconnect(userId, refreshToken);
-    }
-
     return deletedUser;
 }
 
@@ -91,13 +95,21 @@ export const profileImageEdit = async (imagePaths, userId) => {
     const deleteImageUrl = user.profileImage;
     console.log('deleteImageUrl', deleteImageUrl);
 
-    //url에서 경로만 추출 (폴더 확인을 위해)
-    const parsedUrl = new URL(deleteImageUrl);
-    const imagePath = parsedUrl.pathname.startsWith('/') ? parsedUrl.pathname.substring(1) : parsedUrl.pathname;
-    console.log('Extracted imagePath:', imagePath);
+    if (deleteImageUrl) {
+        // URL에서 경로만 추출 (폴더 확인을 위해)
+        const parsedUrl = new URL(deleteImageUrl);
+        const imagePath = parsedUrl.pathname.startsWith('/') ? parsedUrl.pathname.substring(1) : parsedUrl.pathname;
+        console.log('Extracted imagePath:', imagePath);
 
-    //기존 프로필 이미지 삭제하기  (기본이미지가 아닐 때만만)
-    if (!imagePath.startsWith('basic_images/')) deleteFile(deleteImageUrl).catch((err) => console.error("Error deleting file:", err))
+        // 기존 프로필 이미지 삭제 (기본 이미지가 아닐 때만)
+        if (!imagePath.startsWith('basic_images/')) {
+            try {
+                await deleteFile(deleteImageUrl);
+            } catch (err) {
+                console.error("Error deleting file:", err);
+            }
+        }
+    }
 
     //프로필 이미지 경로 업데이트 
     const updatedUser = await updateUserProfile({ profileImage: imagePaths }, userId);

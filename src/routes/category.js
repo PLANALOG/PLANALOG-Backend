@@ -18,6 +18,6 @@ router.patch("/:task_category_id/", handleUpdateCategory);
 router.get("/", handleViewCategory);
 
  
-router.delete("/:task_category_id", handleDeleteCategory);
+router.delete("/", handleDeleteCategory);
 
 export default router;

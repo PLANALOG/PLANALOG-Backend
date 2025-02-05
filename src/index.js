@@ -14,7 +14,7 @@ import { userDeleteScheduler } from "./scheduler.js";
 import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
 import { handleNaverTokenLogin, handleKakaoTokenLogin, handleGoogleTokenLogin, handleRefreshToken } from "./auth.config.js";
-import { testUserMiddleware } from "./test.js";
+import { testUserMiddleware, testUser2Middleware } from "./test.js";
 
 dotenv.config();
 
@@ -73,8 +73,7 @@ app.get("/openapi.json", async (req, res, next) => {
       title: "PLANALOG",
       description: "PLANALOG 테스트 문서입니다.",
     },
-    host: "15.164.83.14:3000",
-
+    host: process.env.SWAGGER_HOST,
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -116,6 +115,8 @@ app.post("/refresh_token", handleRefreshToken);
 
 //테스트용 (로컬 DB에 유저 추가 및 토큰 발급)
 app.post("/test/create_user", testUserMiddleware);
+app.post("/test/create_user2", testUser2Middleware);
+
 
 
 //task 관련 작업 
@@ -194,29 +195,29 @@ import { updateNoticeReadStatus } from "./controllers/notice.controller.js";
 import { createNotice } from "./controllers/notice.controller.js";
 import { deleteNotice } from "./controllers/notice.controller.js";
 import { getNotices } from "./controllers/notice.controller.js";
-import { addFriend, acceptFriend, getFollowing, getFollowers,deleteFriend, getFriendCount } from "./controllers/friend.controller.js";
-import{handleLikeMoment,handleDeleteLikeMoment} from './controllers/like.controller.js';
-import{handleAddComment,handleEditComment,handleDeleteComment,handleListComment} from './controllers/comment.controller.js';
+import { addFriend, acceptFriend, getFollowing, getFollowers, deleteFriend, getFriendCount } from "./controllers/friend.controller.js";
+import { handleLikeMoment, handleDeleteLikeMoment } from './controllers/like.controller.js';
+import { handleAddComment, handleEditComment, handleDeleteComment, handleListComment } from './controllers/comment.controller.js';
 
 
 
-app.get("/searches/users",authenticateJWT ,searchUsers);
-app.post("/searches",authenticateJWT ,saveSearchRecord);
-app.get("/searches/records",authenticateJWT, getSearchRecords);
-app.post("/notices",authenticateJWT, createNotice);
-app.patch("/notices/:noticeId/read",authenticateJWT ,updateNoticeReadStatus);
-app.get("/notices",authenticateJWT ,getNotices);
-app.post('/friends', authenticateJWT ,addFriend);            // 친구 추가 기능
-app.get('/friends/following', authenticateJWT ,getFollowing); // 내가 팔로우하는 사람 목록
-app.get('/friends/followers',authenticateJWT , getFollowers); // 나를 팔로우하는 사람 목록
-app.get('/friends/count',authenticateJWT , getFriendCount);  // count 엔드포인트를 위로 이동
+app.get("/searches/users", authenticateJWT, searchUsers);
+app.post("/searches", authenticateJWT, saveSearchRecord);
+app.get("/searches/records", authenticateJWT, getSearchRecords);
+app.post("/notices", authenticateJWT, createNotice);
+app.patch("/notices/:noticeId/read", authenticateJWT, updateNoticeReadStatus);
+app.get("/notices", authenticateJWT, getNotices);
+app.post('/friends', authenticateJWT, addFriend);            // 친구 추가 기능
+app.get('/friends/following', authenticateJWT, getFollowing); // 내가 팔로우하는 사람 목록
+app.get('/friends/followers', authenticateJWT, getFollowers); // 나를 팔로우하는 사람 목록
+app.get('/friends/count', authenticateJWT, getFriendCount);  // count 엔드포인트를 위로 이동
 //app.get('/friends/list', getFriends);       // 친구 목록 조회, 친구 검색 기능
-app.patch("/friends/:friendId", authenticateJWT ,acceptFriend); // 친구 요청 수락
-app.delete("/notices/:noticeId", authenticateJWT,deleteNotice);
-app.delete("/searches/records/:recordId", authenticateJWT,deleteSearchRecord);
-app.delete('/friends/:friendId', authenticateJWT ,deleteFriend); //친구 삭제 기능
-app.post("/moments/:momentId/likes", authenticateJWT ,handleLikeMoment);//좋아요 추가
-app.delete("/moments/:momentId/likes", authenticateJWT ,handleDeleteLikeMoment);//좋아요 삭제
+app.patch("/friends/:friendId", authenticateJWT, acceptFriend); // 친구 요청 수락
+app.delete("/notices/:noticeId", authenticateJWT, deleteNotice);
+app.delete("/searches/records/:recordId", authenticateJWT, deleteSearchRecord);
+app.delete('/friends/:friendId', authenticateJWT, deleteFriend); //친구 삭제 기능
+app.post("/moments/:momentId/likes", authenticateJWT, handleLikeMoment);//좋아요 추가
+app.delete("/moments/:momentId/likes", authenticateJWT, handleDeleteLikeMoment);//좋아요 삭제
 app.post("/moments/:momentId/comments", authenticateJWT, handleAddComment);//댓글 추가
 app.patch("/moments/:momentId/comments/:commentId", authenticateJWT, handleEditComment);//댓글 수정
 app.delete("/comments/:commentId", authenticateJWT, handleDeleteComment);//댓글 삭제

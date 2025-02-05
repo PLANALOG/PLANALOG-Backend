@@ -1,4 +1,4 @@
-import {DuplicateLikeMomentError, momentIdNotFoundError, LikeIdNotExistError,LikeIdMissingError} from "../errors.js";
+import {DuplicateLikeMomentError, momentIdNotFoundError, LikeIdNotExistError,LikeIdMissingError,LikeNotOwnedByUserError} from "../errors.js";
 import {addMomentLike, removeMomentLike} from "../repositories/like.repository.js";
 import { prisma } from "../db.config.js"; 
 
@@ -46,9 +46,9 @@ import { prisma } from "../db.config.js";
           throw new LikeIdNotExistError("존재하지 않는 좋아요입니다.", data);
         }
       
-        if (like.fromUserId !== userId) {
+        if (BigInt(like.fromUserId) !== BigInt(userId)) {
           throw new LikeNotOwnedByUserError("본인이 추가한 좋아요만 삭제할 수 있습니다.", data);
-        }
+      }
       
         await removeMomentLike({ likeId: data.likeId });
       };

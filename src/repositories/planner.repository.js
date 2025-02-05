@@ -83,3 +83,66 @@ export const deletePlanner = async (plannerId, userId) => {
 
     return deletedPlanner;
 }
+
+export const deletePlannerWithNoTasks = async (plannerId) => {
+    const isExistTasks = await prisma.task.findFirst({ where: { plannerId } });
+
+    var isDeletedPlanner = false;
+
+    if (!isExistTasks) {
+        await prisma.planner.delete({
+            where: { id: plannerId }
+        });
+        isDeletedPlanner = true;
+    };
+
+    return isDeletedPlanner;
+}
+
+
+//플래너의 할 일이 모두 완료됐는지 여부에 따라, 플래너의 isCompleted 값 변경
+export const updatePlannerIsCompleted = async (plannerId) => {
+
+    // 해당 plannerId를 가진 task 중 isCompleted = false인 task가 존재하는 지 확인 
+    const notCompleteTask = await prisma.task.findFirst({
+        where: {
+            plannerId,
+            isCompleted: false
+        }
+    });
+
+    // planner의 기존 isCompleted 값 가져오기기
+    var plannerIsCompleted = await prisma.planner.findFirst({
+        where: { id: plannerId },
+        select: { isCompleted: true }
+    });
+
+    plannerIsCompleted = plannerIsCompleted.isCompleted;
+
+    if (!plannerIsCompleted && !notCompleteTask) { //모든 할 일이 완료되고 플래너의 isCompleted가 false였다면 
+        await prisma.planner.update({
+            where: {
+                id: plannerId
+            },
+            data: {
+                isCompleted: true //isCompleted를 ture로로 변경 
+            }
+        });
+
+        plannerIsCompleted = true;
+        return plannerIsCompleted;
+
+    } else if (plannerIsCompleted && notCompleteTask) { //완료되지 않은 할일이 존재하는데 isCompleted가 true였다면 
+        await prisma.planner.update({
+            where: { id: plannerId },
+            data: {
+                isCompleted: false //isCompleted를 false로 변경 
+            }
+        });
+
+        plannerIsCompleted = false;
+        return plannerIsCompleted;
+    };
+
+    return null;
+}

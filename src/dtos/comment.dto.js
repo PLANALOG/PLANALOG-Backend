@@ -26,7 +26,7 @@
         return{
             data: comments,
             pagination:{
-                cursor: comments.length ? comments(comments.length - 1).id : null,
+                cursor: comments.length > 0 ? comments[comments.length - 1].id : null,
             },
         };
     };
