@@ -48,70 +48,22 @@ export const handleLikeMoment = async (req, res, next) => {
   }
 
   #swagger.responses[200] = {
-    description: "좋아요 추가 성공 응답",
-    content: {
-      "application/json": {
-        schema: {
-          type: "object",
-          properties: {
-            resultType: { type: "string", example: "SUCCESS" },
-            error: { type: "object", nullable: true, example: null },
-            success: {
-              type: "object",
-              properties: {
-                likeId: { type: "integer", description: "생성된 좋아요 ID" },
-                message: { type: "string", example: "좋아요가 성공적으로 추가되었습니다." }
-              }
-            }
-          }
-        }
-      }
-    }
+    description: "좋아요 추가 성공",
   }
+
 
   #swagger.responses[404] = {
     description: "존재하지 않는 Moment",
-    content: {
-      "application/json": {
-        schema: {
-          type: "object",
-          properties: {
-            resultType: { type: "string", example: "FAIL" },
-            error: {
-              type: "object",
-              properties: {
-                errorCode: { type: "C001" },
-                reason: { type: "string", example: "존재하지 않는 Moment입니다." }
-              }
-            },
-            success: { type: "object", nullable: true, example: null }
-          }
-        }
-      }
-    }
   }
 
-  #swagger.responses[409] = {
+   #swagger.responses[409] = {
     description: "중복된 좋아요 요청",
-    content: {
-      "application/json": {
-        schema: {
-          type: "object",
-          properties: {
-            resultType: { type: "string", example: "FAIL" },
-            error: {
-              type: "object",
-              properties: {
-                errorCode: { type: "L001" },
-                reason: { type: "string", example: "이미 존재하는 좋아요입니다." }
-              }
-            },
-            success: { type: "object", nullable: true, example: null }
-          }
-        }
-      }
-    }
   }
+
+  #swagger.responses[500] = {
+    description: "서버 내부 오류 또는 데이터베이스 오류",
+  }
+
 */
 
    try{ 
@@ -153,88 +105,19 @@ export const handleDeleteLikeMoment =  async (req, res, next) =>{
   }
 
   #swagger.responses[200] = {
-    description: "좋아요 삭제 성공 응답",
-    content: {
-      "application/json": {
-        schema: {
-          type: "object",
-          properties: {
-            resultType: { type: "string", example: "SUCCESS" },
-            error: { type: "object", nullable: true, example: null },
-            success: { 
-              type: "object", 
-              properties: { message: { type: "string", example: "좋아요가 성공적으로 삭제되었습니다." } }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  #swagger.responses[400] = {
-    description: "요청 데이터가 잘못됨 (likeId 누락)",
-    content: {
-      "application/json": {
-        schema: {
-          type: "object",
-          properties: {
-            resultType: { type: "string", example: "FAIL" },
-            error: {
-              type: "object",
-              properties: {
-                errorCode: { type: "L004" },
-                reason: { type: "string", example: "likeId가 요청 데이터에 없습니다." }
-              }
-            },
-            success: { type: "object", nullable: true, example: null }
-          }
-        }
-      }
-    }
-  }
-
-  #swagger.responses[404] = {
-    description: "존재하지 않는 좋아요",
-    content: {
-      "application/json": {
-        schema: {
-          type: "object",
-          properties: {
-            resultType: { type: "string", example: "FAIL" },
-            error: {
-              type: "object",
-              properties: {
-                errorCode: { type: "L002" },
-                reason: { type: "string", example: "존재하지 않는 좋아요입니다." }
-              }
-            },
-            success: { type: "object", nullable: true, example: null }
-          }
-        }
-      }
-    }
+    description: "좋아요 삭제 성공",
   }
 
   #swagger.responses[403] = {
     description: "권한 없는 좋아요 삭제 시도",
-    content: {
-      "application/json": {
-        schema: {
-          type: "object",
-          properties: {
-            resultType: { type: "string", example: "FAIL" },
-            error: {
-              type: "object",
-              properties: {
-                errorCode: { type: "L003" },
-                reason: { type: "string", example: "본인이 추가한 좋아요만 삭제할 수 있습니다." }
-              }
-            },
-            success: { type: "object", nullable: true, example: null }
-          }
-        }
-      }
-    }
+  }
+
+  #swagger.responses[404] = {
+    description: "존재하지 않는 좋아요",
+  }
+
+  #swagger.responses[500] = {
+    description: "서버 내부 오류 또는 데이터베이스 오류",
   }
 */
 
