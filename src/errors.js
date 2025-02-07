@@ -81,7 +81,7 @@ export class MissingAuthorizationHeaderError extends Error {
   }
 }
 
-export class authError extends Error {
+export class AuthError extends Error {
   errorCode = "A003";
   statusCode = 401;
 

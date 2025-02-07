@@ -4,7 +4,7 @@ import { userEdit, nicknameCheck, myProfile, userProfile, userDelete, profileIma
 import { prisma } from "../db.config.js"
 import { validationError } from "../validator.js";
 import { validationResult } from "express-validator";
-import { authError, CustomValidationError } from "../errors.js";
+import { AuthError, CustomValidationError } from "../errors.js";
 
 
 
@@ -74,7 +74,7 @@ export const handleEditUser = async (req, res, next) => {
     validationError(req);
 
     if (!req.user || !req.user.id) {
-        throw new authError();
+        throw new AuthError();
     }
 
     const userId = req.user.id
@@ -168,7 +168,7 @@ export const handleMyProfile = async (req, res, next) => {
     console.log('사용자 본인의 회원 정보 조회를 요청했습니다.');
 
     if (!req.user || !req.user.id) {
-        throw new authError();
+        throw new AuthError();
     }
 
     const userId = req.user.id
@@ -236,7 +236,7 @@ export const handleLogOut = async (req, res, next) => {
     console.log("로그아웃 요청")
 
     if (!req.user || !req.user.id) {
-        throw new authError();
+        throw new AuthError();
     }
 
     const userId = parseInt(req.user.id);
@@ -263,7 +263,7 @@ export const handleDeleteUser = async (req, res, next) => {
 
 
     if (!req.user || !req.user.id) {
-        throw new authError();
+        throw new AuthError();
     }
 
     const userId = parseInt(req.user.id);
@@ -345,7 +345,7 @@ export const handleEditUserImage = async (req, res, next) => {
 
 
     if (!req.user || !req.user.id) {
-        throw new authError();
+        throw new AuthError();
     }
     const userId = parseInt(req.user.id);
 

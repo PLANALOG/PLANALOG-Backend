@@ -25,7 +25,7 @@ export const handleDisplayPlanner = async (req, res, next) => {
         userId = parseInt(req.query.userId);
     } else { // query에 userId가 없을 때 : req.user를 userId로 사용, req.user 없으면 에러 반환 
         if (!req.user || !req.user.id) {
-            throw new authError();
+            throw new AuthError();
         }
         userId = req.user.id;
     };
@@ -71,7 +71,7 @@ export const handleDeletePlanner = async (req, res, next) => {
     validationError(req);
 
     if (!req.user || !req.user.id) {
-        throw new authError();
+        throw new AuthError();
     }
 
     const userId = parseInt(req.user.id)
