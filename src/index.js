@@ -104,14 +104,28 @@ app.get('/', (req, res) => {
 //로그아웃
 app.get("/logout", authenticateJWT, handleLogOut);
 
-app.post("/oauth2/naver/token", handleNaverTokenLogin);
+//네이버 로그인/회원가입
+app.post("/oauth2/naver/token", [
+  body("accessToken").exists().withMessage("accessToken을 입력하세요."),
+  body("refreshToken").exists().withMessage("refreshToken을 입력하세요.")
+], handleNaverTokenLogin);
 
-app.post("/oauth2/kakao/token", handleKakaoTokenLogin);
+//카카오 로그인/회원가입
+app.post("/oauth2/kakao/token", [
+  body("accessToken").exists().withMessage("accessToken을 입력하세요."),
+  body("refreshToken").exists().withMessage("refreshToken을 입력하세요.")
+], handleKakaoTokenLogin);
 
-app.post("/oauth2/google/token", handleGoogleTokenLogin);
+//구글 로그인/회원가입
+app.post("/oauth2/google/token", [
+  body("accessToken").exists().withMessage("accessToken을 입력하세요."),
+  body("refreshToken").exists().withMessage("refreshToken을 입력하세요.")
+], handleGoogleTokenLogin);
 
 //리프레시 토큰 이용해 액세스 토큰 재발급 
-app.post("/refresh_token", handleRefreshToken);
+app.post("/refresh_token", [
+  body("refreshToken").exists().withMessage("refreshToken을 입력하세요.")
+], handleRefreshToken);
 
 //테스트용 (로컬 DB에 유저 추가 및 토큰 발급)
 app.post("/test/create_user", testUserMiddleware);
