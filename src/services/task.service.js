@@ -26,6 +26,22 @@ export const createTask = async (taskData) => {
 
 
 }
+export const createTaskBulk = async (taskData, user_id) => {
+  console.log("request received to Service and userId", taskData, user_id);
+  console.log("type of taskData", typeof taskData);
+  const addedTaskData = [];
+  
+  try {
+    //반복문으로 taskData의 각 요소를 하나씩 받아서 task 생성
+    for (const task of taskData) {
+      const newTask = await addTask({...task, user_id});
+      addedTaskData.push(newTask);
+    }
+    return addedTaskData;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export const updateTask = async (taskData) => {
   // Task 수정 로직 
@@ -40,7 +56,7 @@ export const updateTask = async (taskData) => {
     throw error;
   }
 
-}
+};
 export const deleteTask = async (ids, userId) => {
   try {
     // 권한 확인 및 삭제 대상 조회

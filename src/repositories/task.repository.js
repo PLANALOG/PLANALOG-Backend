@@ -5,14 +5,16 @@ import { getPlannerWithTasks } from "./planner.repository.js"; // 기존 코드 
 export const addTask = async (data) => {
     // Prisma를 사용하여 DB에 새로운 Task 생성
     // task_category_id가 있으면 BigInt 변환, 없으면 null
+    console.log("data 확인", data);
     const category_id = data.task_category_id ? BigInt(data.task_category_id) : null;
 
     if (data.category_id) {
         category_id = data.category_id;
     }
+    
     // 해당 날짜에 플래너가 있는지 조회
     // 해당 날짜의 플래너 확인 (기존 코드 활용)
-    let planner = await getPlannerWithTasks(data.userId, data.planner_date);
+    let planner = await getPlannerWithTasks(data.user_id, data.planner_date);
     console.log("planner 날짜로 확인", planner);
 
     // 플래너가 있는지 확인하고 없으면 플래너 생성. 
@@ -23,8 +25,8 @@ export const addTask = async (data) => {
         console.log("Planner not found. Creating a new planner...");
         planner = await prisma.planner.create({
             data: {
-                plannerDate: new Date(data.planner_date),
-                userId: data.userId,
+                plannerDate: data.planner_date,
+                userId: data.user_id,
                 isCompleted: false,
             },
         });
