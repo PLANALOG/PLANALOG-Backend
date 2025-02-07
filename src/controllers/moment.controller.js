@@ -14,53 +14,69 @@ import {
     getMyMomentDetail, 
     getFriendsMoments, 
     getFriendMomentDetail  } from "../services/moment.service.js";
+
+
 export const handleCreateMoment = async (req, res, next) => {
-/*
-    #swagger.tags = ['Moments']
-    #swagger.summary = 'Moment 생성 API'
-    #swagger.description = '새로운 Moment를 생성합니다.'
-    #swagger.security = [{ "bearerAuth": [] }]
-    #swagger.requestBody = {
-        required: true,
-        content: {
-            "application/json": {
-                schema: {
-                    type: "object",
-                    properties: {
-                        title: { type: "string", example: "25년 1월7일" },
-                        status: { type: "string", enum: ["draft", "public"], example: "draft" },
-                        momentContents: {
-                            type: "array",
-                            items: {
-                                oneOf: [
-                                    {
-                                        type: "object",
-                                        properties: {
-                                            sortOrder: { type: "integer", example: 1 },
-                                            content: { type: "string", example: "오늘 하루 열심히 공부했어요!" },
-                                            url: { type: "string", nullable: true, example: "https://image1.com/image1.jpg" }
+    /*
+        #swagger.tags = ['Moments']
+        #swagger.summary = 'Moment 생성 API'
+        #swagger.description = '새로운 Moment를 생성합니다.'
+        #swagger.security = [{ "bearerAuth": [] }]
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: "object",
+                        properties: {
+                            title: { type: "string", example: "25년 1월7일" },
+                            plannerId: { type: "integer", nullable: true, example: 123 },
+                            momentContents: {
+                                type: "array",
+                                items: {
+                                    oneOf: [
+                                        {
+                                            type: "object",
+                                            properties: {
+                                                sortOrder: { type: "integer", example: 1 },
+                                                content: { type: "string", example: "오늘 하루 열심히 공부했어요!" },
+                                                url: { type: "string", nullable: true, example: "https://image1.com/image1.jpg" }
+                                            }
+                                        },
+                                        {
+                                            type: "object",
+                                            properties: {
+                                                sortOrder: { type: "integer", example: 2 },
+                                                content: { type: "string", example: "카페에서 공부 중" },
+                                                url: { type: "string", nullable: true, example: "https://image2.com/image2.jpg" }
+                                            }
+                                        },
+                                        {
+                                            type: "object",
+                                            properties: {
+                                                sortOrder: { type: "integer", example: 3 },
+                                                content: { type: "string", example: "독서실에서 마지막 정리!" },
+                                                url: { type: "string", nullable: true, example: "https://image3.com/image3.jpg" }
+                                            }
                                         }
-                                    }
-                                ]
+                                    ]
+                                }
                             }
-                        }
-                    },
-                    required: ["title", "status", "momentContents"]
+                        },
+                        required: ["title", "momentContents"]
+                    }
                 }
             }
         }
-    }
-*/
+    */
 
     try {
-        console.log("moment 생성 요청");
         const momentData = await momentCreate({
             ...bodyToCreateMoment(req.body),
-            userId: req.user.id,
-            plannerId: req.body.plannerId || null
+            userId: req.user.id
         });
 
-        res.status(200).json({
+        res.status(StatusCodes.CREATED).json({
             resultType: "SUCCESS",
             error: null,
             success: {
@@ -147,33 +163,6 @@ export const handleDeleteMoment = async (req, res, next) => {
             required: true,
             description: "삭제할 Moment의 ID",
             schema: { type: "integer", example: 123 }
-        }
-
-        #swagger.responses[200] = {
-            description: 'Moment 삭제 성공',
-            content: {
-                "application/json": {
-                    schema: {
-                        type: "object",
-                        properties: {
-                            resultType: { type: "string", example: "SUCCESS", description: "결과 타입" },
-                            error: { type: "object", nullable: true, example: null, description: "에러 정보 (없을 경우 null)" },
-                            success: {
-                                type: "object",
-                                properties: {
-                                    message: { type: "string", example: "Moment가 성공적으로 삭제되었습니다.", description: "성공 메시지" },
-                                    data: {
-                                        type: "object",
-                                        properties: {
-                                            deletedMomentId: { type: "integer", example: 123, description: "삭제된 Moment ID" }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     */
 
@@ -506,5 +495,3 @@ export const handleGetFriendMomentDetail = async (req, res, next) => {
         next(error);
     }
 };
-
-

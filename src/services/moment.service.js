@@ -18,24 +18,63 @@ import {
     responseFromFriendMomentDetail 
 } from "../dtos/moment.dto.js";
 
+
+import {
+  InvalidPlannerIdError,
+  MissingTitleError,
+  MissingMomentContentError,
+  MissingContentInPageError,
+  DuplicateSortOrderError,
+  MomentServerError
+} from "../errors.js";
+
 export const momentCreate = async (data) => {
-    try {
-        if (data.status === "draft" && !data.title) {
-            console.info("임시저장하시겠습니까? 필요한 경우 제목을 나중에 추가할 수 있습니다.");
-        }
-
-        const createdMoment = await createMoment(data);
-
-        if (!createdMoment) {
-            throw new Error("Moment 생성에 실패했습니다.");
-        }
-
-        return responseFromCreateMoment(createdMoment, data.plannerId || null);
-    } catch (error) {
-        console.error("Moment 생성 중 오류 발생:", error.message);
-        throw new Error(error.message || "Moment 생성에 실패했습니다. 다시 시도해주세요.");
+  try {
+    // 유효성 검사
+    if (!data.title) {
+      throw new MissingTitleError();
     }
+
+    if (!Array.isArray(data.momentContents) || data.momentContents.length === 0) {
+      throw new MissingMomentContentError();
+    }
+
+    if (data.momentContents.some(content => !content.content || content.content.trim() === '')) {
+      throw new MissingContentInPageError();
+    }
+
+    const sortOrders = data.momentContents.map(content => content.sortOrder);
+    if (new Set(sortOrders).size !== sortOrders.length) {
+      throw new DuplicateSortOrderError();
+    }
+
+    // Moment 생성 
+    const createdMoment = await createMoment(data);
+
+    // 추가 처리 
+    console.log(`Moment 생성 완료: ID = ${createdMoment.id}`);
+
+    // 클라이언트에 반환할 데이터 변환
+    return responseFromCreateMoment(createdMoment);
+
+  } catch (error) {
+    console.error("Moment 생성 중 오류 발생:", error);
+
+    // 에러 처리 (예상치 못한 에러를 서버 오류로 래핑)
+    if (error instanceof MissingTitleError ||
+        error instanceof MissingMomentContentError ||
+        error instanceof MissingContentInPageError ||
+        error instanceof DuplicateSortOrderError ||
+        error instanceof InvalidPlannerIdError) {
+      throw error;  // 유효성 오류는 그대로 전달
+    }
+
+    // 예상치 못한 오류를 서버 에러로 처리
+    throw new MomentServerError();
+  }
 };
+
+
 
 
 

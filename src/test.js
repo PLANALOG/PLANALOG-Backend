@@ -188,3 +188,5 @@ export const testUser2Middleware = async (req, res, next) => {
         return res.status(500).json({ message: "테스트 유저 생성 실패", error: error.message });
     }
 }
+
+

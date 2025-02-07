@@ -225,6 +225,7 @@ export class ContentTooLongError extends Error {
   }
 }
 
+
 export class NoExistsPlannerError extends Error {
   errorCode = "P001";
   statusCode = 404; // Not Found: 존재하지 않는 플래너
@@ -242,6 +243,37 @@ export class UnauthorizedPlannerDeletionError extends Error {
 
   constructor() {
     const reason = `플래너를 삭제할 권한이 없습니다. 본인의 플래너만 삭제할 수 있습니다.`
+// moment생성 에러처리
+
+// 서버 오류
+export class MomentServerError extends Error {
+  errorCode = "M001";
+
+  constructor(reason = "서버 오류가 발생했습니다.", data = {}) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+
+// 유효하지 않은 plannerId
+export class InvalidPlannerIdError extends Error {
+  errorCode = "M002";
+
+  constructor(data) {
+    const reason = "유효하지 않은 plannerId입니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+
+// 제목 누락
+export class MissingTitleError extends Error {
+  errorCode = "M003";
+
+  constructor() {
+    const reason = "제목을 작성해주세요.";
     super(reason);
     this.reason = reason;
   }
@@ -255,5 +287,38 @@ export class MissingDateInfoError extends Error {
     const reason = `날짜정보가 누락되었습니다. date 혹은 month 정보를 입력해주세요. :  ?date=2025-01-15, ?month=2025-01`
     super(reason);
     this.reason = reason;
+
+// 페이지 누락
+export class MissingMomentContentError extends Error {
+  errorCode = "M004";
+
+  constructor() {
+    const reason = "최소 하나의 페이지가 존재해야 합니다.";
+    super(reason);
+    this.reason = reason;
+  }
+}
+
+// 페이지 내용 누락
+export class MissingContentInPageError extends Error {
+  errorCode = "M005";
+
+  constructor(data) {
+    const reason = "모든 페이지에 빈 내용이 포함될 수 없습니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+
+// 중복된 sortOrder
+export class DuplicateSortOrderError extends Error {
+  errorCode = "M006";
+
+  constructor(data) {
+    const reason = "sortOrder 값은 중복될 수 없습니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data;
   }
 }

@@ -11,7 +11,6 @@ import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile
 import { body, query, param } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 import { userDeleteScheduler } from "./scheduler.js";
-import { handleCreateMoment, handleUpdateMoment, handleDeleteMoment, handleGetMyMoments, handleGetMyMomentDetail, handleGetFriendsMoments, handleGetFriendMomentDetail } from "./controllers/moment.controller.js";
 import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
 import { handleNaverTokenLogin, handleKakaoTokenLogin, handleGoogleTokenLogin, handleRefreshToken } from "./auth.config.js";
@@ -177,13 +176,24 @@ app.delete("/planners/:plannerId", [
 ], authenticateJWT, handleDeletePlanner);
 
 
+import { 
+  handleCreateMoment, 
+  handleUpdateMoment, 
+  handleDeleteMoment, 
+  handleGetMyMoments, 
+  handleGetMyMomentDetail, 
+  handleGetFriendsMoments, 
+  handleGetFriendMomentDetail} from "./controllers/moment.controller.js";
+
 app.post("/moments", authenticateJWT, handleCreateMoment); //모먼트 생성
 app.patch("/moments/:momentId", authenticateJWT, handleUpdateMoment); //모먼트 수정
 app.delete("/moments/:momentId", authenticateJWT, handleDeleteMoment); //모먼트 삭제
-app.get("/mypage/moments/mine", authenticateJWT, handleGetMyMoments); //마이페이지에서 나의 moment게시글 목록 조회
+app.get("/mypage/moments", authenticateJWT, handleGetMyMoments); //마이페이지에서 나의 moment게시글 목록 조회
 app.get("/mypage/moments/:momentId", authenticateJWT, handleGetMyMomentDetail); //마이페이지에서 나의  특정 moment게시물 조회 
 app.get("/friends/:friendId/moments", authenticateJWT, handleGetFriendsMoments) //친구페이지 moment게시물 목록 조회
-app.get("/friends/:friendId/moments/momentId", authenticateJWT, handleGetFriendMomentDetail) //친구페이지 특정 moment게시물 조회
+app.get("/friends/:friendId/moments/momentId", authenticateJWT, handleGetFriendMomentDetail); //친구페이지 특정 moment게시물 조회
+
+
 
 //회원 탈퇴 
 app.delete("/users", authenticateJWT, handleDeleteUser)
