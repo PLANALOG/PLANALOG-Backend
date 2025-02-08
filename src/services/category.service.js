@@ -5,7 +5,7 @@ import {
     deleteCategoryRepository,
     createTaskCategoryRepository
 } from "../repositories/category.repository.js";
-
+import {prisma} from "../db.config.js";
 import { addTask } from "../repositories/task.repository.js";
 
 
@@ -46,17 +46,33 @@ export const getCategoriesByUser = async (userId) => {
     }
 };
 
-export const deleteCategory = async (id) => {
+export const deleteCategoryService = async (categoryIds, userId) => {
     try {
-        const deletedCategory = await deleteCategoryRepository(id);
+        // 1️⃣ 삭제 대상 카테고리 조회
+        const categoriesToDelete = await prisma.taskCategory.findMany({
+            where: { id: { in: categoryIds} }, 
+            select: {id: true, userId: true}
+        });
 
-        if (!deletedCategory) {
-            throw new Error("Task category not found or could not be deleted");
+        if (categoriesToDelete.length === 0) {
+            throw new Error("No task categories found for the given IDs.");
         }
 
-        return deletedCategory;
+        // 2️⃣ 사용자 권한 검증
+        const unauthorizedCategories = categoriesToDelete.filter(
+            (category) => category.userId !== BigInt(userId)
+        );
+
+        if (unauthorizedCategories.length > 0) {
+            throw new Error("Unauthorized: You cannot delete categories that you don't own.");
+        }
+
+        // 3️⃣ 삭제 실행
+        const deletedCategories = await deleteCategoryRepository(categoryIds);
+        
+        return deletedCategories; // 삭제된 항목 반환
     } catch (error) {
-        throw new Error("Failed to delete task category");
+        throw new Error(`Failed to delete task categories: ${error.message}`);
     }
 };
 export const createTaskCategory = async ({ task_category_id, title, planner_date, userId }) => {

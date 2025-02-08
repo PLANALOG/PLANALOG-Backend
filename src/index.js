@@ -11,7 +11,6 @@ import { handleEditUser, handleCheckNickname, handleMyProfile, handleUserProfile
 import { body, query, param } from "express-validator";
 import { handleDisplayPlanner, handleDeletePlanner } from "./controllers/planner.controller.js";
 import { userDeleteScheduler } from "./scheduler.js";
-import { handleCreateMoment, handleUpdateMoment, handleDeleteMoment, handleGetMyMoments, handleGetMyMomentDetail, handleGetFriendsMoments, handleGetFriendMomentDetail } from "./controllers/moment.controller.js";
 import { upload } from "./multer.js";
 import { authenticateJWT } from "./auth.config.js";
 import { handleNaverTokenLogin, handleKakaoTokenLogin, handleGoogleTokenLogin, handleRefreshToken } from "./auth.config.js";
@@ -105,14 +104,28 @@ app.get('/', (req, res) => {
 //로그아웃
 app.get("/logout", authenticateJWT, handleLogOut);
 
-app.post("/oauth2/naver/token", handleNaverTokenLogin);
+//네이버 로그인/회원가입
+app.post("/oauth2/naver/token", [
+  body("accessToken").exists().withMessage("accessToken을 입력하세요."),
+  body("refreshToken").exists().withMessage("refreshToken을 입력하세요.")
+], handleNaverTokenLogin);
 
-app.post("/oauth2/kakao/token", handleKakaoTokenLogin);
+//카카오 로그인/회원가입
+app.post("/oauth2/kakao/token", [
+  body("accessToken").exists().withMessage("accessToken을 입력하세요."),
+  body("refreshToken").exists().withMessage("refreshToken을 입력하세요.")
+], handleKakaoTokenLogin);
 
-app.post("/oauth2/google/token", handleGoogleTokenLogin);
+//구글 로그인/회원가입
+app.post("/oauth2/google/token", [
+  body("accessToken").exists().withMessage("accessToken을 입력하세요."),
+  body("refreshToken").exists().withMessage("refreshToken을 입력하세요.")
+], handleGoogleTokenLogin);
 
 //리프레시 토큰 이용해 액세스 토큰 재발급 
-app.post("/refresh_token", handleRefreshToken);
+app.post("/refresh_token", [
+  body("refreshToken").exists().withMessage("refreshToken을 입력하세요.")
+], handleRefreshToken);
 
 //테스트용 (로컬 DB에 유저 추가 및 토큰 발급)
 app.post("/test/create_user", testUserMiddleware);
@@ -163,13 +176,24 @@ app.delete("/planners/:plannerId", [
 ], authenticateJWT, handleDeletePlanner);
 
 
+import { 
+  handleCreateMoment, 
+  handleUpdateMoment, 
+  handleDeleteMoment, 
+  handleGetMyMoments, 
+  handleGetMyMomentDetail, 
+  handleGetFriendsMoments, 
+  handleGetFriendMomentDetail} from "./controllers/moment.controller.js";
+
 app.post("/moments", authenticateJWT, handleCreateMoment); //모먼트 생성
 app.patch("/moments/:momentId", authenticateJWT, handleUpdateMoment); //모먼트 수정
 app.delete("/moments/:momentId", authenticateJWT, handleDeleteMoment); //모먼트 삭제
-app.get("/mypage/moments/mine", authenticateJWT, handleGetMyMoments); //마이페이지에서 나의 moment게시글 목록 조회
+app.get("/mypage/moments", authenticateJWT, handleGetMyMoments); //마이페이지에서 나의 moment게시글 목록 조회
 app.get("/mypage/moments/:momentId", authenticateJWT, handleGetMyMomentDetail); //마이페이지에서 나의  특정 moment게시물 조회 
 app.get("/friends/:friendId/moments", authenticateJWT, handleGetFriendsMoments) //친구페이지 moment게시물 목록 조회
-app.get("/friends/:friendId/moments/momentId", authenticateJWT, handleGetFriendMomentDetail) //친구페이지 특정 moment게시물 조회
+app.get("/friends/:friendId/moments/momentId", authenticateJWT, handleGetFriendMomentDetail); //친구페이지 특정 moment게시물 조회
+
+
 
 //회원 탈퇴 
 app.delete("/users", authenticateJWT, handleDeleteUser)
@@ -185,7 +209,7 @@ import { updateNoticeReadStatus } from "./controllers/notice.controller.js";
 import { createNotice } from "./controllers/notice.controller.js";
 import { deleteNotice } from "./controllers/notice.controller.js";
 import { getNotices } from "./controllers/notice.controller.js";
-import { addFriend, acceptFriend, getFollowing, getFollowers, deleteFriend, getFriendCount } from "./controllers/friend.controller.js";
+import { addFriend, acceptFriend, getFollowing, getFollowers, deleteFriend, getFriendCount,getFriendCountByUserId } from "./controllers/friend.controller.js";
 import { handleLikeMoment, handleDeleteLikeMoment } from './controllers/like.controller.js';
 import { handleAddComment, handleEditComment, handleDeleteComment, handleListComment } from './controllers/comment.controller.js';
 
@@ -201,7 +225,7 @@ app.post('/friends', authenticateJWT, addFriend);            // 친구 추가 �
 app.get('/friends/following', authenticateJWT, getFollowing); // 내가 팔로우하는 사람 목록
 app.get('/friends/followers', authenticateJWT, getFollowers); // 나를 팔로우하는 사람 목록
 app.get('/friends/count', authenticateJWT, getFriendCount);  // count 엔드포인트를 위로 이동
-//app.get('/friends/list', getFriends);       // 친구 목록 조회, 친구 검색 기능
+app.get('/friends/count/:userId',authenticateJWT,getFriendCountByUserId);
 app.patch("/friends/:friendId", authenticateJWT, acceptFriend); // 친구 요청 수락
 app.delete("/notices/:noticeId", authenticateJWT, deleteNotice);
 app.delete("/searches/records/:recordId", authenticateJWT, deleteSearchRecord);
