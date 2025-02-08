@@ -5,13 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aa057fb3-95e3-4ca5-9656-3792bd70e880" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/controllers/task.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/task.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dtos/task.dto.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dtos/task.dto.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/repositories/task.repository.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/repositories/task.repository.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/routes/task.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/task.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/task.service.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/task.service.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/category.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/category.controller.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/repositories/category.repository.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/repositories/category.repository.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/category.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/category.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/category.service.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/category.service.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

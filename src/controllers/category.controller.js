@@ -2,7 +2,8 @@ import {createCategory,
         updateCategory,
         getCategoriesByUser,
         deleteCategoryService,
-        createTaskCategory
+        createTaskCategory,
+        createCategoryBulk
 } from '../services/category.service.js'
 import { createTaskDto } from '../dtos/task.dto.js';
 import { deleteCategoryRepository } from '../repositories/category.repository.js';
@@ -23,7 +24,7 @@ export const handleCreateCategory = async (req, res, next) => {
                         properties: {
                             name: { 
                                 type: "string", 
-                                example: "Work", 
+                                example: "Personal", 
                                 description: "카테고리 이름" 
                             }
                         },
@@ -35,7 +36,7 @@ export const handleCreateCategory = async (req, res, next) => {
         */
     try {
         //세션에서 userId 가져오기 
-        const userId = req.user.id;
+        const user_id = req.user.id;
         const name = req.body.name;
         console.log("Data received to controller(userId, name):", userId, name);
 
@@ -44,17 +45,60 @@ export const handleCreateCategory = async (req, res, next) => {
             throw new Error("사용자 인증 정보가 누락되었습니다.");
         }
 
-        const createdTaskCategory = await createCategory({ userId, name }); // 서비스 호출
+        const createdTaskCategory = await createCategory({ user_id, name }); // 서비스 호출
         res.success(createdTaskCategory); // 성공 응답
     } catch (error) {
         next(error); // 전역 오류 처리 미들웨어로 전달
     }
 };
 
-
+// 카테고리 한번에 여러개 생성
+export const handleCreateCategoryBulk = async (req, res, next) => {
+    /*
+    #swagger.tags = ['Categories']
+    #swagger.summary = '카테고리 다중 생성 API'
+    #swagger.description = '여러 카테고리를를 한 번에 생성하는 API입니다.'
+    #swagger.security = [{
+        "bearerAuth": []
+    }]
+    #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        name: {
+                            type: "array",
+                            description: "카테고리 리스트",
+                            example: ["운동", "공부", "알바"]
+                        }
+                    }
+                }
+            }
+        }
+    }
+    */
+   try {
+        // 인증 미들웨어에서 설정된 사용자 ID
+        const userId = req.user.id; 
+        // req.body에서 카테고리 이름 배열 추출 
+        
+        const name = req.body;
+        // userId 있는지 확인 
+        if (!req.user || !req.user.id) {
+            throw new Error("사용자 인증 정보가 누락되었습니다.");
+        }
+        const createdCategories = await createCategoryBulk({ userId, name }); // 서비스 호출
+        // 성공 응답
+        res.success(createdCategories); 
+   } catch (error) {
+       next(error); 
+   }
+}
 // 카테고리 수정
 export const handleUpdateCategory = async (req, res, next) => {
-/*
+    /*
     #swagger.tags = ['Categories']
     #swagger.summary = '카테고리 수정 API'
     #swagger.security = [{

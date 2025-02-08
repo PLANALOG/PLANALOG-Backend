@@ -20,6 +20,27 @@ export const createCategory = async ({ userId, name }) => {
         throw new Error("Failed to create task category");
     }
 };
+// 카테고리 여러개 생성
+export const createCategoryBulk = async ({userId, name}) => {
+    console.log(
+        "request received to Service and userId",
+        userId,
+        name
+    );
+    console.log("type of name", typeof name);
+    const addedCategories = [];
+    try {
+        // 반복문으로 categories의 각 요소를 하나씩 받아서 카테고리 생성
+        for (const category of name.name) {
+            const newCategory = await createCategoryRepository({ userId, name: category });
+            addedCategories.push(newCategory);
+        }
+
+        return addedCategories;
+    } catch (error) {
+        throw error;
+    }
+};
 // 카테고리 수정
 export const updateCategory = async (id, name) => {
     try {
