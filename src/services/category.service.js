@@ -36,17 +36,29 @@ export const createCategoryBulk = async ({userId, names}) => {
                 failed.push({ name, reason: "중복된 카테고리" });
             }
         }
+        
+        if (success.length === 0) {
+            // 모든 요청이 실패한 경우 → `error` 형식에 맞춰 전역 미들웨어에 전달
+            const error = new Error("모든 카테고리 생성이 실패했습니다.");
+            error.statusCode = 400;
+            error.errorCode = "CATEGORY_CREATION_FAILED";
+            error.reason = failed.map((item) => `${item.name}: ${item.reason}`).join(", ");
+            error.data = failed;
+            throw error; // 전역 에러 미들웨어에서 처리됨
+        }
 
         return {
-            resultType: success.length === 0 ? "FAIL" : failed.length > 0 ? "PARTIAL_SUCCESS" : "SUCCESS",
+            resultType: failed.length > 0 ? "PARTIAL_SUCCESS" : "SUCCESS",
             error: null,
-            success,
-            failed
+            data: {
+                success,
+                failed
+            }
         };
-    } catch (error) {
-        throw error;
+    } catch (error) {   
+        throw new Error(`${error.message}`);
     }
-};
+}
 // 카테고리 수정
 export const updateCategory = async (id, name) => {
     try {
