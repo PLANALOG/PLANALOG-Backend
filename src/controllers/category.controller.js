@@ -68,7 +68,7 @@ export const handleCreateCategoryBulk = async (req, res, next) => {
                 schema: {
                     type: "object",
                     properties: {
-                        name: {
+                        names: {
                             type: "array",
                             description: "카테고리 리스트",
                             example: ["운동", "공부", "알바"]
@@ -82,14 +82,14 @@ export const handleCreateCategoryBulk = async (req, res, next) => {
    try {
         // 인증 미들웨어에서 설정된 사용자 ID
         const userId = req.user.id; 
-        // req.body에서 카테고리 이름 배열 추출 
+        const names = req.body.names;
         
-        const name = req.body;
+        
         // userId 있는지 확인 
         if (!req.user || !req.user.id) {
             throw new Error("사용자 인증 정보가 누락되었습니다.");
         }
-        const createdCategories = await createCategoryBulk({ userId, name }); // 서비스 호출
+        const createdCategories = await createCategoryBulk({ userId, names }); // 서비스 호출
         // 성공 응답
         res.success(createdCategories); 
    } catch (error) {

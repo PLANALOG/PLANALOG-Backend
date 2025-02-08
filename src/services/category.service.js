@@ -21,18 +21,13 @@ export const createCategory = async ({ userId, name }) => {
     }
 };
 // 카테고리 여러개 생성
-export const createCategoryBulk = async ({userId, name}) => {
-    console.log(
-        "request received to Service and userId",
-        userId,
-        name
-    );
-    console.log("type of name", typeof name);
+export const createCategoryBulk = async ({userId, names}) => {
+    // 배열 생성 (추가된 카테고리) 
     const addedCategories = [];
     try {
         // 반복문으로 categories의 각 요소를 하나씩 받아서 카테고리 생성
-        for (const category of name.name) {
-            const newCategory = await createCategoryRepository({ userId, name: category });
+        for (const name of names) {
+            const newCategory = await createCategoryRepository({ userId, name: name });
             addedCategories.push(newCategory);
         }
 
