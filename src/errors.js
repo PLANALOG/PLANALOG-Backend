@@ -242,7 +242,11 @@ export class UnauthorizedPlannerDeletionError extends Error {
   statusCode = 403; // Forbidden: 플래너 삭제 권한 없음
 
   constructor() {
-    const reason = `플래너를 삭제할 권한이 없습니다. 본인의 플래너만 삭제할 수 있습니다.`
+    const reason = `플래너를 삭제할 권한이 없습니다. 본인의 플래너만 삭제할 수 있습니다.`;
+    super(reason);
+    this.reason = reason;
+  }
+}
 // moment생성 에러처리
 
 // 서버 오류
@@ -284,9 +288,11 @@ export class MissingDateInfoError extends Error {
   statusCode = 400; // Bad Request: 날짜 정보 누락
 
   constructor() {
-    const reason = `날짜정보가 누락되었습니다. date 혹은 month 정보를 입력해주세요. :  ?date=2025-01-15, ?month=2025-01`
+    const reason = `날짜정보가 누락되었습니다. date 혹은 month 정보를 입력해주세요. :  ?date=2025-01-15, ?month=2025-01`;
     super(reason);
     this.reason = reason;
+  }
+}
 
 // 페이지 누락
 export class MissingMomentContentError extends Error {
@@ -320,5 +326,124 @@ export class DuplicateSortOrderError extends Error {
     super(reason);
     this.reason = reason;
     this.data = data;
+  }
+}
+// 사용자 인증 정보가 없을 때 발생
+export class UserAuthenticationError extends Error {
+  errorCode = "USER001";
+  statusCode = 401;
+
+  constructor() {
+    const reason = "사용자 인증 정보가 필요합니다.";
+    super(reason);
+    this.reason = reason;
+  }
+}
+
+// 사용자 검색 시 검색어가 없을 때 발생
+export class MissingSearchQueryError extends Error {
+  errorCode = "SEARCH001";
+  statusCode = 400;
+
+  constructor() {
+    const reason = "검색어를 입력해야 합니다.";
+    super(reason);
+    this.reason = reason;
+  }
+}
+
+// 사용자 검색 중 서버 오류 발생
+export class SearchUsersError extends Error {
+  errorCode = "SEARCH002";
+  statusCode = 500;
+
+  constructor(errorMessage) {
+    const reason = `사용자 검색 중 서버 오류가 발생했습니다. ${errorMessage}`;
+    super(reason);
+    this.reason = reason;
+  }
+}
+
+// 검색 기록 저장 중 서버 오류 발생
+export class SaveSearchRecordError extends Error {
+  errorCode = "SEARCH003";
+  statusCode = 500;
+
+  constructor(errorMessage) {
+    const reason = `검색 기록 저장 중 서버 오류가 발생했습니다. ${errorMessage}`;
+    super(reason);
+    this.reason = reason;
+  }
+}
+
+// 검색 기록 조회 중 서버 오류 발생
+export class FetchSearchRecordsError extends Error {
+  errorCode = "SEARCH004";
+  statusCode = 500;
+
+  constructor(errorMessage) {
+    const reason = `검색 기록 조회 중 서버 오류가 발생했습니다. ${errorMessage}`;
+    super(reason);
+    this.reason = reason;
+  }
+}
+
+// 검색 기록 삭제 중 오류 발생
+export class DeleteSearchRecordError extends Error {
+  errorCode = "SEARCH005";
+  statusCode = 400;
+
+  constructor(errorMessage) {
+    const reason = `검색 기록 삭제 중 오류가 발생했습니다. ${errorMessage}`;
+    super(reason);
+    this.reason = reason;
+  }
+}
+
+// 알림 생성 중 오류 발생
+export class NoticeCreationError extends Error {
+  errorCode = "NOTICE001";
+  statusCode = 400;
+
+  constructor(errorMessage) {
+    const reason = `알림 생성 중 오류가 발생했습니다. ${errorMessage}`;
+    super(reason);
+    this.reason = reason;
+  }
+}
+
+// 알림 읽음 상태 수정 중 오류 발생
+export class NoticeUpdateReadStatusError extends Error {
+  errorCode = "NOTICE002";
+  statusCode = 400;
+
+  constructor(errorMessage) {
+    const reason = `알림 읽음 상태 수정 중 오류가 발생했습니다. ${errorMessage}`;
+    super(reason);
+    this.reason = reason;
+  }
+}
+
+// 알림 삭제 중 오류 발생
+export class NoticeDeletionError extends Error {
+  errorCode = "NOTICE003";
+  statusCode = 400;
+
+  constructor(errorMessage) {
+    const reason = `알림 삭제 중 오류가 발생했습니다. ${errorMessage}`;
+    super(reason);
+    this.reason = reason;
+  }
+}
+
+// 알림 조회 중 서버 오류 발생
+export class NoticeFetchError extends Error {
+  errorCode = "NOTICE004";
+  statusCode = 400;
+
+  constructor(errorMessage) {
+    const reason = `알림 조회 중 서버 오류가 발생했습니다. ${errorMessage}`;
+    super(reason);
+    this.reason = reason;
   }
 }

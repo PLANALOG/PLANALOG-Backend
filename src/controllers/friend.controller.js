@@ -171,6 +171,39 @@ export const getFriendCount = async (req, res) => {
   }
 };
 
+export const getFriendCountByUserId = async (req, res) => {
+  /*
+  #swagger.tags = ['Friends']
+  #swagger.summary = '특정 유저의 친구 수 조회 API'
+  #swagger.security = [{ "bearerAuth": [] }]
+  */
+  try {
+    const { userId } = req.params; // 요청에서 userId를 받아옴
+    if (!userId) {
+      return res.json({
+        errorCode: "USER002",
+        reason: "유저 ID가 필요합니다.",
+        data: null,
+      });
+    }
+
+    const dto = createFriendCountDTO(userId);
+    const friendCount = await getFriendCountService(dto.userId);
+
+    return res.json({
+      message: "특정 유저의 친구 수 조회 성공",
+      data: { friendCount },
+    });
+  } catch (error) {
+    return res.json({
+      errorCode: "FRIEND002",
+      reason: error.message,
+      data: null,
+    });
+  }
+};
+
+
 
 export const acceptFriend = async (req, res) => {
   /*

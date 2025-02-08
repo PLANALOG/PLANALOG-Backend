@@ -209,7 +209,7 @@ import { updateNoticeReadStatus } from "./controllers/notice.controller.js";
 import { createNotice } from "./controllers/notice.controller.js";
 import { deleteNotice } from "./controllers/notice.controller.js";
 import { getNotices } from "./controllers/notice.controller.js";
-import { addFriend, acceptFriend, getFollowing, getFollowers, deleteFriend, getFriendCount } from "./controllers/friend.controller.js";
+import { addFriend, acceptFriend, getFollowing, getFollowers, deleteFriend, getFriendCount,getFriendCountByUserId } from "./controllers/friend.controller.js";
 import { handleLikeMoment, handleDeleteLikeMoment } from './controllers/like.controller.js';
 import { handleAddComment, handleEditComment, handleDeleteComment, handleListComment } from './controllers/comment.controller.js';
 
@@ -225,7 +225,7 @@ app.post('/friends', authenticateJWT, addFriend);            // 친구 추가 �
 app.get('/friends/following', authenticateJWT, getFollowing); // 내가 팔로우하는 사람 목록
 app.get('/friends/followers', authenticateJWT, getFollowers); // 나를 팔로우하는 사람 목록
 app.get('/friends/count', authenticateJWT, getFriendCount);  // count 엔드포인트를 위로 이동
-//app.get('/friends/list', getFriends);       // 친구 목록 조회, 친구 검색 기능
+app.get('/friends/count/:userId',authenticateJWT,getFriendCountByUserId);
 app.patch("/friends/:friendId", authenticateJWT, acceptFriend); // 친구 요청 수락
 app.delete("/notices/:noticeId", authenticateJWT, deleteNotice);
 app.delete("/searches/records/:recordId", authenticateJWT, deleteSearchRecord);
