@@ -89,6 +89,7 @@ export const handleCreateCategoryBulk = async (req, res, next) => {
         if (!req.user || !req.user.id) {
             throw new Error("사용자 인증 정보가 누락되었습니다.");
         }
+        // id BigInt 로 변환후 
         const createdCategories = await createCategoryBulk({ userId, names }); // 서비스 호출
         // 성공 응답
         res.success(createdCategories); 

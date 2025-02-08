@@ -23,15 +23,26 @@ export const createCategory = async ({ userId, name }) => {
 // 카테고리 여러개 생성
 export const createCategoryBulk = async ({userId, names}) => {
     // 배열 생성 (추가된 카테고리) 
-    const addedCategories = [];
+    const success = [];
+    const failed = [];
     try {
         // 반복문으로 categories의 각 요소를 하나씩 받아서 카테고리 생성
         for (const name of names) {
             const newCategory = await createCategoryRepository({ userId, name: name });
-            addedCategories.push(newCategory);
+            // 중복 카테고리가 아니면 추가
+            if (newCategory) {
+                success.push(newCategory);
+            } else {
+                failed.push({ name, reason: "중복된 카테고리" });
+            }
         }
 
-        return addedCategories;
+        return {
+            resultType: success.length === 0 ? "FAIL" : failed.length > 0 ? "PARTIAL_SUCCESS" : "SUCCESS",
+            error: null,
+            success,
+            failed
+        };
     } catch (error) {
         throw error;
     }

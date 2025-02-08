@@ -1,7 +1,17 @@
 import { prisma } from '../db.config.js';
 
 export const createCategoryRepository = async ({ userId, name }) => {
+    
     try {
+        //중복 값 확인 
+
+        const existingCategory = await prisma.taskCategory.findFirst({
+            where: {name: name, userId: BigInt(userId)}
+        })
+        if (existingCategory) {
+            // 중복된 카테고리가 이미 존재하면 null 반환환
+            return null;
+        }
         // 카테고리 생성
         const createdCategory = await prisma.taskCategory.create({
             data: {
