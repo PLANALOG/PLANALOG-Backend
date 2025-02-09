@@ -20,6 +20,45 @@ export const createCategory = async ({ userId, name }) => {
         throw new Error("Failed to create task category");
     }
 };
+// 카테고리 여러개 생성
+export const createCategoryBulk = async ({userId, names}) => {
+    // 배열 생성 (추가된 카테고리) 
+    const success = [];
+    const failed = [];
+    try {
+        // 반복문으로 categories의 각 요소를 하나씩 받아서 카테고리 생성
+        for (const name of names) {
+            const newCategory = await createCategoryRepository({ userId, name: name });
+            // 중복 카테고리가 아니면 추가
+            if (newCategory) {
+                success.push(newCategory);
+            } else {
+                failed.push({ name, reason: "중복된 카테고리" });
+            }
+        }
+        
+        if (success.length === 0) {
+            // 모든 요청이 실패한 경우 → `error` 형식에 맞춰 전역 미들웨어에 전달
+            const error = new Error("모든 카테고리 생성이 실패했습니다.");
+            error.statusCode = 400;
+            error.errorCode = "CATEGORY_CREATION_FAILED";
+            error.reason = failed.map((item) => `${item.name}: ${item.reason}`).join(", ");
+            error.data = failed;
+            throw error; // 전역 에러 미들웨어에서 처리됨
+        }
+
+        return {
+            resultType: failed.length > 0 ? "PARTIAL_SUCCESS" : "SUCCESS",
+            error: null,
+            data: {
+                success,
+                failed
+            }
+        };
+    } catch (error) {   
+        throw new Error(`${error.message}`);
+    }
+}
 // 카테고리 수정
 export const updateCategory = async (id, name) => {
     try {

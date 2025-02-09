@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { createTask } from "../services/task.service.js";
-import { createTaskDto, getTaskDto, responseFromToggledTask, updateTaskDto } from "../dtos/task.dto.js";
+import { createTask,createTaskBulk} from "../services/task.service.js";
+import { createTaskBulkDto, createTaskDto, getTaskDto, responseFromToggledTask, updateTaskDto } from "../dtos/task.dto.js";
 import { updateTask, getTask, deleteTask } from "../services/task.service.js";
 import { toggleTaskCompletion } from "../services/task.service.js";
 import { findTaskWithPlanner } from "../repositories/task.repository.js";
@@ -66,6 +66,56 @@ export const handleCreateTask = async (req, res, next) => {
     }
 }
 
+export const handleCreateTaskBulk = async (req, res, next) => {
+    /*
+    #swagger.tags = ['Tasks']
+    #swagger.summary = '할일 다중 생성 API'
+    #swagger.description = '여러 할일을 한 번에 생성하는 API입니다.'
+    #swagger.security = [{
+        "bearerAuth": []
+    }]
+    #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        title: {
+                            type: "array",
+                            description: "할일 제목 리스트",
+                            example: ["오늘 할일 1", "오늘 할일 2", "오늘 할일 3"]
+                        },
+                        planner_date: {
+                            type: "string",
+                            format: "date",
+                            description: "할일 일정 날짜 (YYYY-MM-DD)",
+                            example: "2025-01-10"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    */
+   try {
+        const user_id = req.user.id;
+        if (!user_id) {
+            throw new Error("사용자 인증이 필요합니다.");
+        }
+        //dto로 검증 
+        const validTaskData = await createTaskBulkDto(req.body);
+        
+        console.log(validTaskData);
+        //여러개 생성 
+        const newTasks= await createTaskBulk (validTaskData, user_id);
+
+        res.success(newTasks);
+   } catch (error) {
+        next(error);
+   }
+
+}
 export const handleUpdateTask = async (req, res, next) => {
     /*
         #swagger.tags = ['Tasks']

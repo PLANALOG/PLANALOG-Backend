@@ -1,7 +1,17 @@
 import { prisma } from '../db.config.js';
 
 export const createCategoryRepository = async ({ userId, name }) => {
+    
     try {
+        //중복 값 확인 
+
+        const existingCategory = await prisma.taskCategory.findFirst({
+            where: {name: name, userId: BigInt(userId)}
+        })
+        if (existingCategory) {
+            // 중복된 카테고리가 이미 존재하면 null 반환환
+            return null;
+        }
         // 카테고리 생성
         const createdCategory = await prisma.taskCategory.create({
             data: {
@@ -11,7 +21,6 @@ export const createCategoryRepository = async ({ userId, name }) => {
         });
         return createdCategory;
     } catch (error) {
-        console.error("Error creating task category:", error);
         throw new Error("Database error: Failed to create task category");
     }
 };
@@ -29,7 +38,6 @@ export const updateCategoryRepository = async (id, name) => {
         });
         return updatedCategory;
     } catch (error) {
-        console.error("Error updating task category:", error);
         throw new Error("Database error: Failed to update task category");
     }
 };
@@ -47,7 +55,6 @@ export const getAllCategoriesRepository = async (userId) => {
         });
         return categories;
     } catch (error) {
-        console.error("Error fetching task categories:", error);
         throw new Error("Database error: Failed to fetch task categories");
     }
 };
@@ -66,7 +73,6 @@ export const deleteCategoryRepository = async (ids) => {
 
         return deletedCategory;
     } catch (error) {
-        console.error("Error deleting task category:", error);
         throw new Error("Database error: Failed to delete task category");
     }
 };
@@ -84,7 +90,6 @@ export const createTaskCategoryRepository = async ({ task_category_id, title, pl
 
         return newTaskCategory;
     } catch (error) {
-        console.error("Error creating task category:", error);
         throw new Error("Database error occurred while creating task category.");
     }
 };
