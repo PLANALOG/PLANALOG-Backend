@@ -141,3 +141,20 @@ export const createTaskCategory = async ({ task_category_id, title, planner_date
         isCompleted: newTask.isCompleted
     };
 };
+
+export const createTaskCategoryBulk = async ({taskData, task_category_id, userId }) => {
+    console.log("request received to Service and userId", taskData, task_category_id, userId);  
+    const addedTaskData = [];
+    try {
+        for (const task of taskData) {
+            const newTask = await addTask({...task, task_category_id, userId});
+            if (!newTask) {
+                throw new Error("Failed to create task category.");
+            }
+            addedTaskData.push(newTask);    
+        }
+        return addedTaskData;
+    } catch (error) {
+        throw error;
+    }
+} 

@@ -81,7 +81,7 @@ export const handleCreateTaskBulk = async (req, res, next) => {
                 schema: {
                     type: "object",
                     properties: {
-                        title: {
+                        titles: {
                             type: "array",
                             description: "할일 제목 리스트",
                             example: ["오늘 할일 1", "오늘 할일 2", "오늘 할일 3"]
@@ -103,6 +103,7 @@ export const handleCreateTaskBulk = async (req, res, next) => {
         if (!user_id) {
             throw new Error("사용자 인증이 필요합니다.");
         }
+        console.log("request body", req.body);
         //dto로 검증 
         const validTaskData = await createTaskBulkDto(req.body);
         

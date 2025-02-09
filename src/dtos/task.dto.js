@@ -19,10 +19,11 @@ export const createTaskDto = (body) => {
 
 }
 export const createTaskBulkDto = (body) => {
+    console.log("dto titles",body.titles);
     // body 는 배열 형태의 제목들(String)과 String 형태의 날짜
     // 1. 배열 검증 (title이 배열인지 확인)
-    if (!body.title || !Array.isArray(body.title) || body.title.length === 0) {
-        throw new Error("할일(title)은 배열 형태로 전달되어야 합니다.");
+    if (!body.titles || !Array.isArray(body.titles) || body.titles.length === 0) {
+        throw new Error("할일들들(titles)은 배열 형태로 전달되어야 합니다.");
     }
 
     // 2. planner_date가 문자열인지 확인
@@ -31,10 +32,10 @@ export const createTaskBulkDto = (body) => {
     }
 
     // 3. DTO 변환 (각각 개별의 할 일 객체로 변환 할일 => {할일, 날짜})
-    return body.title.map(title => ({
+    return body.titles.map(title => ({
         title: title,
-        planner_date: new Date(body.planner_date + "T00:00:00.000Z") // ✅ 초 단위까지 동일하게 변환
-        // 공통된 날짜 적용
+        planner_date: new Date(body.planner_date) 
+        
     }));
 };
 export const updateTaskDto = (task_id, body) => {

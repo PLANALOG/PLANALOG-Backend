@@ -3,9 +3,10 @@ import {createCategory,
         getCategoriesByUser,
         deleteCategoryService,
         createTaskCategory,
+        createTaskCategoryBulk,
         createCategoryBulk
 } from '../services/category.service.js'
-import { createTaskDto } from '../dtos/task.dto.js';
+import { createTaskBulkDto, createTaskDto } from '../dtos/task.dto.js';
 import { deleteCategoryRepository } from '../repositories/category.repository.js';
 // 카테고리 생성
 export const handleCreateCategory = async (req, res, next) => {
@@ -102,6 +103,7 @@ export const handleUpdateCategory = async (req, res, next) => {
     /*
     #swagger.tags = ['Categories']
     #swagger.summary = '카테고리 수정 API'
+    #swagger.description = '카테고리를 수정하는 API입니다.'
     #swagger.security = [{
         "bearerAuth": []
         }]
@@ -266,6 +268,7 @@ export const handleCreateTaskCategory = async (req, res, next) => {
     /*
         #swagger.tags = ['Categories']
         #swagger.summary = '카테고리형 유저 할일 생성 API'
+        #swagger.description = '해당 카테고리에 해당하는 할일을 생성하는 API입니다.'
         #swagger.security = [{
         "bearerAuth": []
         }]
@@ -324,3 +327,72 @@ export const handleCreateTaskCategory = async (req, res, next) => {
             next(error); // 전역 오류 처리 미들웨어로 전달
         }
     } 
+
+// 카테고리형 유저 할일 다중생성 
+export const handleCreateTaskCategoryBulk = async (req, res, next) => {
+    /*
+    #swagger.tags = ['Categories']
+    #swagger.summary = '해당카테고리에 해당하는 할일 다중 생성 api'
+    #swagger.description = '해당 카테고리에 해당하는 할일들을 한 번에 여러 개 생성하는 API입니다.'
+    #swagger.security = [{
+        "bearerAuth": []
+    }]          
+    #swagger.requestBody = {
+    required: true,
+    content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        titles: { 
+                            type: "array", 
+                            example: ["해야할일 1","해야할일 2","해야할일 3"],
+                            items: {type:"string"}, 
+                            description: "할일 제목들 배열" 
+                        },
+                        planner_date: { 
+                            type: "string", 
+                            format: "date",
+                            example: "2022-12-25", 
+                            description: "할일 계획 날짜" 
+                        }
+                    },
+                    required: ["titles", "planner_date"]
+                }
+            }
+        }
+    }
+    
+    */
+    try {
+        // URL에서 ID 추출
+        const { task_category_id } = req.params; 
+        // 요청 본문에서 할일 데이터 추출
+        const taskData = createTaskBulkDto(req.body);
+        console.log("taskData", taskData);  
+        // ✅ 사용자 ID 가져오기
+        const userId = req.user.id; 
+        if (!userId) {
+            return res.status(400).json({
+                resultType: "FAIL",
+                error: {
+                    errorCode: "USER_NOT_FOUND",
+                    reason: "사용자 인증이 필요합니다.",
+                },
+                success: null,
+            });
+        }
+        const createdTaskCategory = await createTaskCategoryBulk({
+            taskData,
+            task_category_id,
+            userId
+        });
+        return res.status(200).json({
+            resultType: "SUCCESS",
+            error: null,
+            success: createdTaskCategory,
+        });
+    } catch (error) {
+        next(error); // 전역 오류 처리 미들웨어로 전달
+    }
+}
