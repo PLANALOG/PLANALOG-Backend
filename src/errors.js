@@ -138,8 +138,10 @@ export class CustomValidationError extends Error {
 //중복 좋아요
 export class DuplicateLikeMomentError extends Error {
   errorCode = "L001";
+  statusCode = 409; //Conflict
 
-  constructor(reason, data) {
+  constructor(data) {
+    const reason = '이미 존재하는 좋아요입니다다.';
     super(reason);
     this.reason = reason;
     this.data = data;
@@ -148,8 +150,10 @@ export class DuplicateLikeMomentError extends Error {
 //좋아요 존재 X
 export class LikeIdNotExistError extends Error {
   errorCode = "L002";
+  statusCode = 404;
 
-  constructor(reason, data) {
+  constructor(data) {
+    const reason = '존재하지 않는 좋아요입니다';
     super(reason);
     this.reason = reason;
     this.data = data;
@@ -158,8 +162,10 @@ export class LikeIdNotExistError extends Error {
 //권한 없는 좋아요(본인이 누른 좋아요 X)
 export class LikeNotOwnedByUserError extends Error {
   errorCode = "L003";
+  statusCode = 403; // Forbidden
 
-  constructor(reason, data) {
+  constructor(data) {
+    const reason = '본인이 추가한 좋아요만 삭제할 수 있습니다.';
     super(reason);
     this.reason = reason;
     this.data = data;
@@ -168,8 +174,40 @@ export class LikeNotOwnedByUserError extends Error {
 //좋아요id 누락
 export class LikeIdMissingError extends Error {
   errorCode = "L004";
+  statusCode = 400;  // Bad Request
 
-  constructor(reason, data) {
+  constructor(data) {
+    const reason = 'likeId가 요청 데이터에 없습니다';
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+
+//entityId, entityType 또는 userId가 누락 
+export class ValidationError extends Error{
+  errorCode = "L005";
+  statusCode = 400; // Bad Request
+
+  constructor(data) {
+    const reason = 'entityId, entityType 또는 userId가 누락되었습니다.';
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+
+//클래스가 아닌 함수로 동작
+export const handleServerError = (error) => {
+  return new Error("서버 내부 오류가 발생했습니다.");
+};
+
+export class DatabaseError extends Error{
+  errorCode = "DB001";
+  statusCode = 500; // Internal Server Error
+  
+  constructor(data) {
+    const reason = '데이터베이스 연결에 실패했습니다';
     super(reason);
     this.reason = reason;
     this.data = data;
@@ -177,8 +215,10 @@ export class LikeIdMissingError extends Error {
 }
 export class momentIdNotFoundError extends Error {
   errorCode = "C001";
+  statusCode = 404; // Not Found
 
-  constructor(reason, data) {
+  constructor(data) {
+    const reason = '존재하지 않는 게시글입니다';
     super(reason);
     this.reason = reason;
     this.data = data;
