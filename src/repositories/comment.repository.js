@@ -30,12 +30,15 @@ export const editComment = async (data) => {
 
 export const deleteComment = async (data) => {
     console.log("Repository Input:", data);
+    
     const eraseComment = await prisma.comment.delete({ 
-        where: { id: data.commentId },
+        where: { id: BigInt(data.commentId) },
     });
-    console.log("Delete Comment:", eraseComment);
     return eraseComment;
-    };
+};
+
+
+    
 
 export const getAllmomentComments =  async({ momentId, cursor }) => {
     const comments = await prisma.comment.findMany({

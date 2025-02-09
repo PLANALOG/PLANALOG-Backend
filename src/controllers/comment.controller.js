@@ -65,7 +65,7 @@ export const handleAddComment = async (req, res, next) => {
 
 #swagger.responses[404] = {
     description: "존재하지 않는 Moment",
-  }
+  }   
 
 #swagger.responses[500] = {
     description: "서버 내부 오류 또는 데이터베이스 오류"
@@ -135,11 +135,8 @@ export const handleAddComment = async (req, res, next) => {
   description: "잘못된 요청 - 댓글 내용이 500자를 초과함 (C005)"
 }
     #swagger.responses[404] = {
-      description: "존재하지 않는 댓글"
+      description: "존재하지 않는 댓글 또는 게시글"
     } 
-    #swagger.responses[404] = {
-      description: "존재하지 않는 게시글"
-  }
     #swagger.responses[403] = {
       description: "권한 없음"
     }
@@ -199,17 +196,15 @@ export const handleAddComment = async (req, res, next) => {
   #swagger.responses[200] = {
     description: "댓글 삭제 성공"
   }
-swagger.responses[404] = {
-    description: "존재하지 않는 댓글"
-  }
   #swagger.responses[403] = {
     description: "권한 없음"
+  }
+  #swagger.responses[404] = {
+    description: "존재하지 않는 댓글"
   }
     #swagger.responses[500] = {
     description: "서버 내부 오류 또는 데이터베이스 오류"
   }
-
-
   */
 
       try{

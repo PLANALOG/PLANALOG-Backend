@@ -18,7 +18,7 @@
     export const bodyToDeleteComment = (userId, commentId) => {
         return{
             userId: userId, 
-            commentId: parseInt(commentId),
+            commentId: BigInt(commentId),
         };
     };
 

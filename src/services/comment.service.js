@@ -22,16 +22,15 @@ try {
         throw new Error("userId가 요청되지 않았습니다.");
     }
     if (!momentExists) {
-        throw new momentIdNotFoundError("존재하지 않는 게시글입니다.", data);
+        throw new momentIdNotFoundError(data);
     }
     if (!data.content || data.content.trim() === "") {
-        throw new ContentNotFoundError("댓글 내용이 비어 있습니다.", data);
+        throw new ContentNotFoundError(data);
     }
     if (data.content.length > 500) {
-        throw new ContentTooLongError("댓글 내용은 500자를 초과할 수 없습니다.", data);
+        throw new ContentTooLongError(data);
     }
     
-
     const addNewCommentId = await addComment({
         userId: data.userId,
         momentId: data.momentId,
@@ -40,6 +39,12 @@ try {
 });
     return addNewCommentId;
 } catch (error) {
+    if (error instanceof momentIdNotFoundError || 
+        error instanceof ContentNotFoundError || 
+        error instanceof ContentTooLongError) {
+        throw error;
+    }
+
     try {
       handleDatabaseError(error, "댓글 추가 중 문제가 발생했습니다.");
     } catch (dbError) {
@@ -56,7 +61,7 @@ export const editUserComment = async(data) =>{
     });
 
     if (!momentExists) {
-        throw new momentIdNotFoundError("존재하지 않는 게시글입니다.", { momentId: data.momentId });
+        throw new momentIdNotFoundError({ momentId: data.momentId });
     }
 
     const commentExists = await prisma.comment.findUnique({
@@ -64,17 +69,17 @@ export const editUserComment = async(data) =>{
     });
 
     if (!commentExists) {
-        throw new CommentIdNotFoundError("존재하지 않는 댓글입니다.",data);
+        throw new CommentIdNotFoundError(data); 
     }
     if (!data.content || data.content.trim() === "") {
-        throw new ContentNotFoundError("댓글 내용이 비어 있습니다.", data);
+        throw new ContentNotFoundError(data);
     }
 
     if (BigInt(data.userId) !== commentExists.userId) {
-        throw new PermissionDeniedError("수정 권한이 없습니다.", data);
+        throw new PermissionDeniedError(data);
     }
     if (data.content.length > 500) {
-        throw new ContentTooLongError("댓글 내용은 500자를 초과할 수 없습니다.", data);
+        throw new ContentTooLongError(data);
     }
     const updatedComment = await editComment({
         userId: data.userId,
@@ -85,6 +90,14 @@ export const editUserComment = async(data) =>{
 }); 
     return updatedComment;
     } catch (error) {
+        if (error instanceof momentIdNotFoundError || 
+            error instanceof CommentIdNotFoundError || 
+            error instanceof ContentNotFoundError || 
+            error instanceof ContentTooLongError ||
+            error instanceof PermissionDeniedError) {
+            throw error;
+        }
+
     try {
         handleDatabaseError(error, "댓글 수정 중 문제가 발생했습니다.");
     } catch (dbError) {
@@ -96,24 +109,33 @@ export const editUserComment = async(data) =>{
 
 export const deleteUserComment = async(data) =>{
     try {
-    const commentExists = await prisma.comment.findUnique({
-        where: { id: data.commentId },
-        include: { moment: true }
+        const commentExists = await prisma.comment.findUnique({
+            where: { id: BigInt(data.commentId) },
+            include: { moment: true }
     });
+
+
     if (!commentExists) {
-        throw new CommentIdNotFoundError("존재하지 않는 댓글입니다.",data);
+        throw new CommentIdNotFoundError(data); 
     }
         // 댓글 작성자이거나 게시물 작성자인 경우만 삭제 허용
-        if (data.userId !== commentExists.userId && data.userId !== commentExists.moment.userId) {
-            throw new PermissionDeniedError("삭제 권한이 없습니다.",data);
+        if (BigInt(data.userId) !== commentExists.userId && data.userId !== commentExists.moment.userId) {
+            throw new PermissionDeniedError(data);
         }
+
     const removeComment = await deleteComment({
         userId: data.userId,
-        momentId: data.momentId,
-        commentId: data.commentId,
+        commentId: BigInt(data.commentId)
     });
+
+
     return removeComment;
 } catch (error) {
+    if (error instanceof CommentIdNotFoundError || 
+        error instanceof PermissionDeniedError) {
+        throw error;
+    }
+
   try {
     handleDatabaseError(error, "댓글 삭제 중 문제가 발생했습니다.");
   } catch (dbError) {
@@ -130,13 +152,17 @@ try {
     where: { id: momentId },
 });
 if (!momentExists) {
-    throw new momentIdNotFoundError("존재하지 않는 게시글입니다.", { momentId });
+    throw new momentIdNotFoundError({ momentId });
 }
 // 댓글 목록 조회
 const comments = await getAllmomentComments({ momentId, cursor });
 //댓글이 없는 경우 빈 배열 반환
 return responseFromComments(comments || []);
 } catch (error) {
+    if (error instanceof momentIdNotFoundError) {
+        throw error;
+    }
+    
     try {
       handleDatabaseError(error, "댓글 목록 조회 중 문제가 발생했습니다.");
     } catch (dbError) {
