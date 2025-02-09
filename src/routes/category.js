@@ -1,6 +1,6 @@
 import express from "express";
 import {handleCreateCategory, handleUpdateCategory, handleViewCategory , handleDeleteCategory,
-    handleCreateTaskCategory
+    handleCreateTaskCategory, handleCreateCategoryBulk
 } from "../controllers/category.controller.js";
 
 
@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.post("/", handleCreateCategory);
 
+router.post("/bulk/", handleCreateCategoryBulk);
 
 router.post("/:task_category_id/tasks", handleCreateTaskCategory);
 
