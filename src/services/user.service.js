@@ -1,4 +1,4 @@
-import { DuplicateUserNicknameError, NoExistsUserError } from "../errors.js";
+import { DuplicateUserNicknameError, InvalidSocialRefreshTokenError, NoExistsUserError } from "../errors.js";
 import { getUserByNickname, updateUserProfile, getMyProfile, getUserProfile, deleteUser } from "../repositories/user.repository.js";
 import { responseFromUser } from "../dtos/user.dto.js";
 import { kakaoDisconnect, googleDisconnect, naverDisconnect } from "../auth.config.js";
@@ -32,7 +32,7 @@ export const myProfile = async (userId) => {
 
     const user = await getMyProfile(userId);
 
-    if (!user) throw new NoExistsUserError(userId)
+    if (!user) throw new NoExistsUserError({ userId })
 
     return responseFromUser(user)
 }
@@ -42,17 +42,36 @@ export const userProfile = async (userId) => {
 
     const user = await getUserProfile(userId);
 
-    if (!user) throw new NoExistsUserError(userId)
+    if (!user) throw new NoExistsUserError({ userId })
 
     return responseFromUser(user)
 }
 
 
-export const userDelete = async (userId, user) => {
+export const userDelete = async (userId) => {
     const isUserExist = await getMyProfile(userId);
-    if (!isUserExist) throw new NoExistsUserError(userId);
+    if (!isUserExist) throw new NoExistsUserError({ userId });
 
-    // 유저의 리프레시 토큰 삭제 
+    const user = await getMyProfile(userId);
+
+    //탈퇴하는 유저의 socialRefreshToken 가져오기 (연결끊기 요청을 위해)
+    const socialRefreshToken = user.socialRefreshToken;
+    console.log('탈퇴하는 유저의 소셜리프레시토큰 : ', socialRefreshToken)
+    if (!socialRefreshToken) {
+        throw new InvalidSocialRefreshTokenError("noExist");
+    };
+
+    if (user.platform === "kakao") {
+        await kakaoDisconnect(socialRefreshToken);
+    }
+    else if (user.platform === "google") {
+        await googleDisconnect(socialRefreshToken);
+    }
+    else if (user.platform === "naver") {
+        await naverDisconnect(socialRefreshToken);
+    }
+
+    // 유저의 서버 자체 리프레시 토큰 삭제 
     await prisma.refreshToken.deleteMany({
         where: { userId: userId }
     });
@@ -62,23 +81,6 @@ export const userDelete = async (userId, user) => {
     // DB에서 유저 삭제 
     const deletedUser = await deleteUser(userId);
     console.log('DB에서 유저 삭제 성공');
-
-
-    if (deletedUser.platform === "kakao") {
-
-        const refreshToken = user.refreshToken;
-        await kakaoDisconnect(userId, refreshToken);
-    }
-    else if (deletedUser.platform === "google") {
-
-        const accessToken = user.accessToken
-        console.log('accessToken', accessToken)
-        await googleDisconnect(userId, accessToken);
-    }
-    else if (deletedUser.platform === "naver") {
-        const refreshToken = user.refreshToken;
-        await naverDisconnect(userId, refreshToken);
-    }
 
     return deletedUser;
 }

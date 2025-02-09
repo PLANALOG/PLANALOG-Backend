@@ -2,51 +2,44 @@ import { prisma } from "../db.config.js";
 
 export const createMoment = async (data) => {
     return await prisma.$transaction(async (prisma) => {
-        // ✅ plannerId가 존재할 때만 유효성 검증 수행
         if (data.plannerId !== null && data.plannerId !== undefined) {
             const planner = await prisma.planner.findUnique({
                 where: { id: data.plannerId }
             });
-
             if (!planner) {
                 throw new Error("유효하지 않은 plannerId입니다.");
             }
         }
 
-        // Moment 생성
         const createMoment = await prisma.moment.create({
             data: {
                 userId: data.userId,
                 title: data.title,
-                status: data.status,
-                plannerId: data.plannerId || null  // ✅ plannerId가 없으면 null 처리
-            },
+                plannerId: data.plannerId ?? null,
+            }
+        });
+
+        if (data.momentContents?.length > 0) {
+            const contents = data.momentContents.map((content) => ({
+                momentId: createMoment.id,
+                sortOrder: content.sortOrder,
+                content: content.content,
+                url: content.url ?? null
+            }));
+            await prisma.momentContent.createMany({ data: contents });
+        }
+
+        // moment와 momentContents를 다시 조회하여 반환
+        const momentWithContents = await prisma.moment.findUnique({
+            where: { id: createMoment.id },
             include: { momentContents: true }
         });
 
-        // MomentContent 추가
-        if (data.momentContents?.length > 0) {
-            const contents = data.momentContents.map((content, index) => ({
-                momentId: createMoment.id,
-                sortOrder: content.sortOrder || index + 1,
-                content: content.content ?? null,
-                url: content.url || null
-            }));
-            await prisma.momentContent.createMany({ data: contents });
-        } else if (data.status === "draft") {
-            await prisma.momentContent.create({
-                data: {
-                    momentId: createMoment.id,
-                    sortOrder: 1,
-                    content: null,
-                    url: null
-                }
-            });
-        }
-
-        return createMoment;
+        return momentWithContents;
     });
 };
+
+
 
 
 

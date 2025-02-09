@@ -67,8 +67,6 @@ export const likeMoment = async (data) => {
     } catch (dbError) {
       throw dbError;
     }
-
-    //예상치 못한 서버 내부 오류 처리
     throw handleServerError(error);
   }
 };

@@ -1,6 +1,8 @@
 # 디폴트 무시된 파일
 /shelf/
 /workspace.xml
+.idea/
+.vscode/
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
