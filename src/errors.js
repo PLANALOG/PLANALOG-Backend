@@ -227,8 +227,10 @@ export class momentIdNotFoundError extends Error {
 //댓글 내용 공백
 export class ContentNotFoundError extends Error {
   errorCode = "C002";
+  statusCode = 400;
 
-  constructor(reason, data) {
+  constructor(data) {
+    const reason = "댓글 내용이 비어 있습니다."
     super(reason);
     this.reason = reason;
     this.data = data;
@@ -237,8 +239,10 @@ export class ContentNotFoundError extends Error {
 
 export class CommentIdNotFoundError extends Error {
   errorCode = "C003";
+  statusCode = 404;
 
-  constructor(reason, data) {
+  constructor(data) {
+    const reason = "존재하지 않는 댓글입니다."
     super(reason);
     this.reason = reason;
     this.data = data;
@@ -247,8 +251,10 @@ export class CommentIdNotFoundError extends Error {
 //수정 권한
 export class PermissionDeniedError extends Error {
   errorCode = "C004";
+  statusCode = 403;
 
-  constructor(reason, data) {
+  constructor(data) {
+    const reason = "댓글 수정 권한이 없습니다."
     super(reason);
     this.reason = reason;
     this.data = data;
@@ -257,8 +263,10 @@ export class PermissionDeniedError extends Error {
 //500자 이상 댓글
 export class ContentTooLongError extends Error {
   errorCode = "C005";
+  statusCode = 422;
 
-  constructor(reason, data) {
+  constructor(data) {
+    const reason = "댓글 내용이 500자를 초과할 수 없습니다."
     super(reason);
     this.reason = reason;
     this.data = data;
