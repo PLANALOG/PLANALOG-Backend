@@ -11,28 +11,29 @@ export const addTask = async (data) => {
     if (data.category_id) {
         category_id = data.category_id;
     }
-    
+    console.log("task_category_id", category_id);
+    const bigIntUserId = BigInt(data.userId);
+    console.log("bigIntUserId", bigIntUserId);
     // 해당 날짜에 플래너가 있는지 조회
     // 해당 날짜의 플래너 확인 (기존 코드 활용)
-    let planner = await getPlannerWithTasks(data.user_id, data.planner_date);
+    let planner = await getPlannerWithTasks(bigIntUserId, data.planner_date);
     console.log("planner 날짜로 확인", planner);
 
     // 플래너가 있는지 확인하고 없으면 플래너 생성. 
 
-    // 아직 미완성 
+    
     // 플래너가 없으면 새로 생성
     if (!planner) {
         console.log("Planner not found. Creating a new planner...");
         planner = await prisma.planner.create({
             data: {
                 plannerDate: data.planner_date,
-                userId: data.user_id,
+                userId: bigIntUserId,
                 isCompleted: false,
             },
         });
         console.log("New planner created:", planner);
     }
-
     // 중복존재하는지 여부는 플래너 id와 task 이름으로 확인 
     const existingTask = await prisma.task.findFirst({
         where: {
@@ -158,7 +159,7 @@ export const findTaskWithPlanner = async (data) => {
         where: { id: taskId },
         include: {
             planner: {
-                // 연결된 Planner에서 user_id도 가져옴
+                // 연결된 Planner에서 userId도 가져옴
                 select: { userId: true }
             }
         }

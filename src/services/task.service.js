@@ -26,15 +26,15 @@ export const createTask = async (taskData) => {
 
 
 }
-export const createTaskBulk = async (taskData, user_id) => {
-  console.log("request received to Service and userId", taskData, user_id);
+export const createTaskBulk = async (taskData, userId) => {
+  console.log("request received to Service and userId", taskData, userId);
   console.log("type of taskData", typeof taskData);
   const addedTaskData = [];
   
   try {
     //반복문으로 taskData의 각 요소를 하나씩 받아서 task 생성
     for (const task of taskData) {
-      const newTask = await addTask({...task, user_id});
+      const newTask = await addTask({...task, userId});
       addedTaskData.push(newTask);
     }
     return addedTaskData;

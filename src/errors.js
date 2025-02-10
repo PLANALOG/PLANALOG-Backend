@@ -495,3 +495,42 @@ export class NoticeFetchError extends Error {
     this.reason = reason;
   }
 }
+
+// 카테고리 추가중 중복 오류 
+export class DuplicateCategoryError extends Error {
+  errorCode = "CA001";  // 카테고리 관련 중복 에러
+  statusCode = 400;  // Bad Request
+
+  constructor(data) {
+    const reason = "중복된 카테고리입니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data; // { name: "중복된이름" } 등 추가 데이터
+  }
+}
+
+// 존재하지 않는 카테고리 접근 
+export class NoExistsCategoryError extends Error {
+  errorCode = "CA002"; 
+  statusCode = 404;  // Not Found
+
+  constructor(data) {
+    const reason = "존재하지 않는 카테고리입니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data;  // { categoryId: "1234" } 등 추가 정보
+  }
+}
+
+// 카테고리 수정 권한 없음
+export class CategoryDeletionNotAllowedError extends Error {
+  errorCode = "CA003"; 
+  statusCode = 400;  // Bad Request
+
+  constructor(data) {
+    const reason = "이 카테고리는 삭제할 수 없습니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data;  // { categoryId: "1234" }
+  }
+}

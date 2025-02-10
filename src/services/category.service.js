@@ -5,6 +5,7 @@ import {
     deleteCategoryRepository,
     createTaskCategoryRepository
 } from "../repositories/category.repository.js";
+import { DuplicateCategoryError } from "../errors.js";
 import {prisma} from "../db.config.js";
 import { addTask } from "../repositories/task.repository.js";
 
@@ -17,48 +18,74 @@ export const createCategory = async ({ userId, name }) => {
         const createdCategory = await createCategoryRepository({ userId, name });
         return createdCategory;
     } catch (error) {
-        throw new Error("Failed to create task category");
+        throw error;
     }
 };
 // 카테고리 여러개 생성
 export const createCategoryBulk = async ({userId, names}) => {
-    // 배열 생성 (추가된 카테고리) 
     const success = [];
     const failed = [];
+
     try {
-        // 반복문으로 categories의 각 요소를 하나씩 받아서 카테고리 생성
-        for (const name of names) {
-            const newCategory = await createCategoryRepository({ userId, name: name });
-            // 중복 카테고리가 아니면 추가
-            if (newCategory) {
-                success.push(newCategory);
+        // Promise.allSettled()을 사용하여 모든 요청을 병렬로 실행 (중간에 에러가 발생해도 나머지 실행됨)
+        const results = await Promise.allSettled(
+            names.map(async (name) => {
+                try {
+                    return await createCategoryRepository({ userId, name });
+                } catch (error) {
+                    throw error;
+                }
+            })
+        );
+
+        // 생성 결과를 success / failed 리스트로 분류
+        results.forEach((result, index) => {
+            const name = names[index];
+
+            if (result.status === "fulfilled") {
+                success.push(result.value);
             } else {
-                failed.push({ name, reason: "중복된 카테고리" });
+                const error = result.reason;
+                if (error instanceof DuplicateCategoryError) {
+                    failed.push({ name, reason: "중복된 카테고리" });
+                } else {
+                    failed.push({ name, reason: error.message || "알 수 없는 오류" });
+                }
             }
-        }
-        
+        });
+
+        // 모든 요청이 실패한 경우에도 정상 응답을 반환 (throw error 하지 않음)
         if (success.length === 0) {
-            // 모든 요청이 실패한 경우 → `error` 형식에 맞춰 전역 미들웨어에 전달
-            const error = new Error("모든 카테고리 생성이 실패했습니다.");
-            error.statusCode = 400;
-            error.errorCode = "CATEGORY_CREATION_FAILED";
-            error.reason = failed.map((item) => `${item.name}: ${item.reason}`).join(", ");
-            error.data = failed;
-            throw error; // 전역 에러 미들웨어에서 처리됨
+            return {
+                resultType: "FAIL",
+                error: {
+                    errorCode: "CATEGORY_CREATION_FAILED",
+                    reason: "모든 카테고리 생성이 실패했습니다.",
+                    data: failed
+                },
+                data: null
+            };
         }
 
+        // 일부 성공한 경우
         return {
             resultType: failed.length > 0 ? "PARTIAL_SUCCESS" : "SUCCESS",
-            error: null,
-            data: {
-                success,
-                failed
-            }
+            error: failed.length > 0 ? { errorCode: "PARTIAL_FAILURE", data: failed } : null,
+            data: { success, failed }
         };
-    } catch (error) {   
-        throw new Error(`${error.message}`);
+
+    } catch (error) {
+        return {
+            resultType: "FAIL",
+            error: {
+                errorCode: "UNKNOWN_ERROR",
+                reason: "알 수 없는 서버 오류가 발생했습니다.",
+                data: error.message
+            },
+            data: null
+        };
     }
-}
+};
 // 카테고리 수정
 export const updateCategory = async (id, name) => {
     try {
@@ -116,6 +143,7 @@ export const deleteCategoryService = async (categoryIds, userId) => {
 };
 export const createTaskCategory = async ({ task_category_id, title, planner_date, userId }) => {
     // 서비스 로직: 예외 처리, 비즈니스 로직 추가
+    console.log("createTaskCategory Service called with", task_category_id, title, planner_date, userId);
     if (!task_category_id || isNaN(task_category_id)) {
         throw new Error("Invalid task_category_id");
     }
@@ -126,7 +154,7 @@ export const createTaskCategory = async ({ task_category_id, title, planner_date
         title,
         planner_date,
         task_category_id: task_category_id,
-        userId        
+        userId: userId        
         });
 
     if (!newTask) {
@@ -141,3 +169,20 @@ export const createTaskCategory = async ({ task_category_id, title, planner_date
         isCompleted: newTask.isCompleted
     };
 };
+
+export const createTaskCategoryBulk = async ({taskData, task_category_id, userId }) => {
+    console.log("request received to Service and userId", taskData, task_category_id, userId);  
+    const addedTaskData = [];
+    try {
+        for (const task of taskData) {
+            const newTask = await addTask({...task, task_category_id, userId});
+            if (!newTask) {
+                throw new Error("Failed to create task category.");
+            }
+            addedTaskData.push(newTask);    
+        }
+        return addedTaskData;
+    } catch (error) {
+        throw error;
+    }
+} 
