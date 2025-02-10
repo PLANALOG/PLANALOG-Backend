@@ -1,5 +1,5 @@
-import {createCategory,
-        updateCategory,
+import {createCategoryService,
+        updateCategoryService,
         getCategoriesByUser,
         deleteCategoryService,
         createTaskCategory,
@@ -47,7 +47,7 @@ export const handleCreateCategory = async (req, res, next) => {
             throw new AuthError;
         }
 
-        const createdTaskCategory = await createCategory({ userId, name }); // 서비스 호출
+        const createdTaskCategory = await createCategoryService({ userId, name }); // 서비스 호출
         res.success(createdTaskCategory); // 성공 응답
     } catch (error) {
         next(error); // 전역 오류 처리 미들웨어로 전달
@@ -129,6 +129,7 @@ export const handleUpdateCategory = async (req, res, next) => {
     }
     */
     try {
+        const userId = req.user.id; // 인증 미들웨어에서 설정된 사용자 ID   
         if (!req.user || !userId) {
             throw new AuthError;
         }
@@ -143,7 +144,7 @@ export const handleUpdateCategory = async (req, res, next) => {
             });
         }
 
-        const updatedTaskCategory = await updateCategory(task_category_id, name); // 서비스 호출
+        const updatedTaskCategory = await updateCategoryService(task_category_id, name, userId); // 서비스 호출
         res.success(updatedTaskCategory); // 성공 응답
     } catch (error) {
         next(error); // 전역 오류 처리 미들웨어로 전달

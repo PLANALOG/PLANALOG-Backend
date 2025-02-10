@@ -509,6 +509,17 @@ export class DuplicateCategoryError extends Error {
   }
 }
 
+export class CategoryDeletionNotAllowedError extends Error {
+  errorCode = "CA007";
+  statusCode = 400;
+
+  constructor(data) {
+    const reason = "이 카테고리는 삭제할 수 없습니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
 // 존재하지 않는 카테고리 접근 
 export class NoExistsCategoryError extends Error {
   errorCode = "CA002"; 
@@ -522,15 +533,26 @@ export class NoExistsCategoryError extends Error {
   }
 }
 
-// 카테고리 수정 권한 없음
-export class CategoryDeletionNotAllowedError extends Error {
-  errorCode = "CA003"; 
-  statusCode = 400;  // Bad Request
+
+
+export class UnauthorizedCategoryAccessError extends Error {
+  errorCode = "CA005";
+  statusCode = 403; // Forbidden: 권한 없음
 
   constructor(data) {
-    const reason = "이 카테고리는 삭제할 수 없습니다.";
+    const reason = "이 카테고리에 대한 접근 권한이 없습니다.";
     super(reason);
     this.reason = reason;
-    this.data = data;  // { categoryId: "1234" }
+    this.data = data;  // { categoryId: 1234, userId: 5678 }
+  }
+}
+export class InvalidCategoryIdError extends Error {
+  errorCode = "CA008";
+  statusCode = 400;
+
+  constructor() {
+    const reason = "잘못된 카테고리 ID입니다.";
+    super(reason);
+    this.reason = reason;
   }
 }

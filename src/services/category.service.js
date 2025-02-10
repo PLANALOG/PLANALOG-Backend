@@ -11,7 +11,7 @@ import { addTask } from "../repositories/task.repository.js";
 
 
 
-export const createCategory = async ({ userId, name }) => {
+export const createCategoryService = async ({ userId, name }) => {
     //카테고리 생성
     try {
         // 리포지토리 호출
@@ -87,8 +87,18 @@ export const createCategoryBulk = async ({userId, names}) => {
     }
 };
 // 카테고리 수정
-export const updateCategory = async (id, name) => {
+export const updateCategoryService = async (id, name, userId) => {
     try {
+        const category = await getCategoryById(task_category_id);
+        // 2️⃣ 카테고리가 존재하지 않으면 예외 발생 (CA004)
+        if (!category) {
+            throw new NoExistsCategoryError({ categoryId: task_category_id });
+        }
+
+        // 3️⃣ userId가 일치하지 않으면 접근 권한 없음 (CA005)
+        if (category.userId !== BigInt(userId)) {
+            throw new UnauthorizedCategoryAccessError({ categoryId: task_category_id, userId });
+        }
         const updatedCategory = await updateCategoryRepository(id, name); // 리포지토리 호출
         if (!updatedCategory) {
             throw new Error("Category not found or failed to update");
