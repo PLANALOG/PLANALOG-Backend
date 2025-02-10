@@ -1,21 +1,21 @@
 import { prisma } from '../db.config.js';
-
+import { DuplicateCategoryError } from '../errors.js';
 export const createCategoryRepository = async ({ userId, name }) => {
     
     try {
         //중복 값 확인 
-
+        const bigIntUserId = BigInt(userId);
         const existingCategory = await prisma.taskCategory.findFirst({
-            where: {name: name, userId: BigInt(userId)}
-        })
+            where: {name: name, userId: bigIntUserId}
+        });
         if (existingCategory) {
-            // 중복된 카테고리가 이미 존재하면 null 반환환
-            return null;
+            // 중복 에러 코드 설정 
+            throw new DuplicateCategoryError(); 
         }
         // 카테고리 생성
         const createdCategory = await prisma.taskCategory.create({
             data: {
-                userId: userId,
+                userId: bigIntUserId,
                 name: name,
             },
         });
@@ -26,10 +26,11 @@ export const createCategoryRepository = async ({ userId, name }) => {
 };
 // 카테고리 수정
 export const updateCategoryRepository = async (id, name) => {
+    const bigIntUserId = BigInt(userId);
     try {
         const updatedCategory = await prisma.taskCategory.update({
             where: {
-                id: BigInt(id, 10), // ID를 Bigint로 변환
+                id: bigIntUserId, 
             },
             data: {
                 name: name, // 새로운 이름으로 업데이트
@@ -44,10 +45,12 @@ export const updateCategoryRepository = async (id, name) => {
 
 // 유저별 카테고리 조회
 export const getAllCategoriesRepository = async (userId) => {
+    const bigIntUserId = BigInt(userId);
+
     try {
         const categories = await prisma.taskCategory.findMany({
             where: {
-                userId: parseInt(userId, 10), // 사용자 ID로 필터링
+                userId: bigIntUserId, // 사용자 ID로 필터링
             },
             orderBy: {
                 createdAt: "desc", // 최신 순으로 정렬
@@ -82,7 +85,7 @@ export const createTaskCategoryRepository = async ({ task_category_id, title, pl
         // 데이터베이스에 카테고리 추가
         const newTaskCategory = await prisma.task.create({
             data: {
-                title,
+                title: title,
                 plannerDate: new Date(planner_date),
                 taskCategoryId: BigInt(task_category_id), // task_category_id와 연결
             },
