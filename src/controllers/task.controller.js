@@ -5,7 +5,7 @@ import { updateTask, getTask, deleteTask } from "../services/task.service.js";
 import { toggleTaskCompletion } from "../services/task.service.js";
 import { findTaskWithPlanner } from "../repositories/task.repository.js";
 import { prisma } from "../db.config.js";
-
+import { AuthError } from "../errors.js";
 export const handleCreateTask = async (req, res, next) => {
     /*
     #swagger.tags = ['Tasks']
@@ -38,16 +38,14 @@ export const handleCreateTask = async (req, res, next) => {
             }
         }
     }
-
-
 */
-
     try {
         // 1. req.session에서 userId 가져오기
         const userId = req.user.id;
-        if (!userId) {
-            throw new Error("사용자 인증이 필요합니다."); // 세션에 userId가 없으면 에러 처리
+        if (!req.user || !userId) {
+            throw new AuthError;
         }
+
         console.log("userId from session", userId);
         // console.log("request recevied to controller: ", req.body)
         // 요청 데이터 검증 (DTO에서 수행)
@@ -81,7 +79,7 @@ export const handleCreateTaskBulk = async (req, res, next) => {
                 schema: {
                     type: "object",
                     properties: {
-                        title: {
+                        titles: {
                             type: "array",
                             description: "할일 제목 리스트",
                             example: ["오늘 할일 1", "오늘 할일 2", "오늘 할일 3"]
@@ -99,16 +97,18 @@ export const handleCreateTaskBulk = async (req, res, next) => {
     }
     */
    try {
-        const user_id = req.user.id;
-        if (!user_id) {
-            throw new Error("사용자 인증이 필요합니다.");
+        const userId = req.user.id;
+        if (!req.user || !userId) {
+                throw new AuthError;
         }
+        
+        console.log("request body", req.body);
         //dto로 검증 
         const validTaskData = await createTaskBulkDto(req.body);
         
         console.log(validTaskData);
         //여러개 생성 
-        const newTasks= await createTaskBulk (validTaskData, user_id);
+        const newTasks= await createTaskBulk (validTaskData, userId);
 
         res.success(newTasks);
    } catch (error) {
@@ -146,9 +146,10 @@ export const handleUpdateTask = async (req, res, next) => {
     try {
         // userId 가져오기
         const userId = req.user.id; // 세션에서 userId 추출
-        if (!userId) {
-            throw new Error("사용자 인증이 필요합니다."); // 로그인되지 않은 사용자 처리
-        }
+        if (!req.user || !userId) {
+                    throw new AuthError;
+                }
+        
 
         // task_id 추출 및 검증
         console.log("data received to controller", req.body);
@@ -247,11 +248,6 @@ export const handleGetTask = async (req, res, next) => {
 
     
     const task_id = req.params.task_id;
-
-
-    
-
-
     try {
         const validTaskId = getTaskDto(task_id); 
         
@@ -295,7 +291,12 @@ export const handleDeleteTask = async (req, res, next) => {
 */
     try {
         // 요청 데이터에서 ids 추출
+        const userId = req.user.id; 
         const { ids } = req.body;
+        if (!req.user || !userId) {
+            throw new AuthError;
+                }
+        
         console.log("전달받은 id들:", ids);
         // 유효성 검사
         if (!ids || !Array.isArray(ids) || ids.length === 0) {
@@ -378,6 +379,10 @@ export const handleToggleCompletion = async (req, res, next) => {
     // Task ID 추출
     const task_id = req.params;
     const validTaskId = await getTaskDto(task_id.task_id);
+    const userId = req.user.id;
+    if (!req.user || !userId) {
+        throw new AuthError;
+    }
 
     try {
         const { toggledTask, newPlannerIsCompleted } = await toggleTaskCompletion(validTaskId);

@@ -1,6 +1,7 @@
 import { addTask, changeTask, getTaskFromRepository, deleteTaskFromRepository, taskCompletionChange } from "../repositories/task.repository.js";
 import { prisma } from "../db.config.js";
 import { updatePlannerIsCompleted, deletePlannerWithNoTasks } from "../repositories/planner.repository.js";
+import { TaskNotFoundError, UnauthorizedTaskAccessError } from "../errors.js";
 
 export const createTask = async (taskData) => {
   console.log("request received to Service:", taskData);
@@ -26,15 +27,15 @@ export const createTask = async (taskData) => {
 
 
 }
-export const createTaskBulk = async (taskData, user_id) => {
-  console.log("request received to Service and userId", taskData, user_id);
+export const createTaskBulk = async (taskData, userId) => {
+  console.log("request received to Service and userId", taskData, userId);
   console.log("type of taskData", typeof taskData);
   const addedTaskData = [];
   
   try {
     //반복문으로 taskData의 각 요소를 하나씩 받아서 task 생성
     for (const task of taskData) {
-      const newTask = await addTask({...task, user_id});
+      const newTask = await addTask({...task, userId});
       addedTaskData.push(newTask);
     }
     return addedTaskData;
@@ -47,7 +48,7 @@ export const updateTask = async (taskData) => {
   // Task 수정 로직 
 
   try {
-    const changedTask = await changeTask(taskData)
+    const changedTask = await changeTask(taskData);
     // 수정된 Task 반환환
     return changedTask;
 
@@ -66,7 +67,7 @@ export const deleteTask = async (ids, userId) => {
     });
 
     if (tasksToDelete.length === 0) {
-      throw new Error("No tasks found for the given IDs.");
+      throw new TaskNotFoundError ();
     }
 
     // 사용자 권한 확인
@@ -74,7 +75,7 @@ export const deleteTask = async (ids, userId) => {
       (task) => task.planner.userId !== BigInt(userId)
     );
     if (unauthorizedTasks.length > 0) {
-      throw new Error("Unauthorized: You cannot delete tasks that you don't own.");
+      throw new UnauthorizedTaskAccessError({ taskIds: unauthorizedTasks.map((task) => task.id) });
     }
 
     // 삭제 실행 및 반환
