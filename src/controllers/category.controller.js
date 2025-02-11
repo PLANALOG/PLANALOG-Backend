@@ -249,7 +249,7 @@ export const handleDeleteCategory = async (req, res, next) => {
 try {
     // 삭제할 카테고리 배열 전달받기 
     const { categoryIds } = req.body; 
-
+    const userId = req.user.id; // 인증 미들웨어에서 설정된 사용자 ID
     if (!req.user || !userId) {
         throw new AuthError;
     }
@@ -262,7 +262,7 @@ try {
     }
 
     
-    const result = await deleteCategoryService(categoryIds, req.user.id); // 서비스 호출
+    const result = await deleteCategoryService(categoryIds, userId); // 서비스 호출
 
     // 성공 응답
     res.success({ 

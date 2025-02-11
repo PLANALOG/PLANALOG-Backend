@@ -3,9 +3,10 @@ import {
     updateCategoryRepository,
     getAllCategoriesRepository,
     deleteCategoryRepository,
-    createTaskCategoryRepository
+    createTaskCategoryRepository,
+    getCategoryById
 } from "../repositories/category.repository.js";
-import { DuplicateCategoryError } from "../errors.js";
+import { DuplicateCategoryError, NoExistsCategoryError, UnauthorizedCategoryAccessError, InvalidCategoryIdError } from "../errors.js";
 import {prisma} from "../db.config.js";
 import { addTask } from "../repositories/task.repository.js";
 
@@ -89,7 +90,7 @@ export const createCategoryBulk = async ({userId, names}) => {
 // 카테고리 수정
 export const updateCategoryService = async (id, name, userId) => {
     try {
-        const category = await getCategoryById(task_category_id);
+        const category = await getCategoryById(id);
         // 2️⃣ 카테고리가 존재하지 않으면 예외 발생 (CA004)
         if (!category) {
             throw new NoExistsCategoryError({ categoryId: task_category_id });
@@ -100,14 +101,12 @@ export const updateCategoryService = async (id, name, userId) => {
             throw new UnauthorizedCategoryAccessError({ categoryId: task_category_id, userId });
         }
         const updatedCategory = await updateCategoryRepository(id, name); // 리포지토리 호출
-        if (!updatedCategory) {
-            throw new Error("Category not found or failed to update");
-        }
+        
         return updatedCategory;
     } catch (error) {
-        throw new Error("Failed to update task category");
+        throw error;
     }
-};
+}; 
 
 // 유저별 카테고리 조회
 export const getCategoriesByUser = async (userId) => {
@@ -118,7 +117,7 @@ export const getCategoriesByUser = async (userId) => {
         }
         return viewedCategories;
     } catch (error) {
-        throw new Error("Failed to fetch task categories");
+        throw error;
     }
 };
 
@@ -131,7 +130,7 @@ export const deleteCategoryService = async (categoryIds, userId) => {
         });
 
         if (categoriesToDelete.length === 0) {
-            throw new Error("No task categories found for the given IDs.");
+            throw new NoExistsCategoryError({ categoryIds });
         }
 
         // 2️⃣ 사용자 권한 검증
@@ -140,7 +139,7 @@ export const deleteCategoryService = async (categoryIds, userId) => {
         );
 
         if (unauthorizedCategories.length > 0) {
-            throw new Error("Unauthorized: You cannot delete categories that you don't own.");
+            throw new UnauthorizedCategoryAccessError({ categoryIds: unauthorizedCategories.map((category) => category.id) });
         }
 
         // 3️⃣ 삭제 실행
@@ -148,14 +147,14 @@ export const deleteCategoryService = async (categoryIds, userId) => {
         
         return deletedCategories; // 삭제된 항목 반환
     } catch (error) {
-        throw new Error(`Failed to delete task categories: ${error.message}`);
+        throw error;
     }
 };
 export const createTaskCategory = async ({ task_category_id, title, planner_date, userId }) => {
     // 서비스 로직: 예외 처리, 비즈니스 로직 추가
     console.log("createTaskCategory Service called with", task_category_id, title, planner_date, userId);
     if (!task_category_id || isNaN(task_category_id)) {
-        throw new Error("Invalid task_category_id");
+        throw new InvalidCategoryIdError();
     }
 
 
@@ -168,7 +167,7 @@ export const createTaskCategory = async ({ task_category_id, title, planner_date
         });
 
     if (!newTask) {
-        throw new Error("Failed to create task category.");
+        throw error;
     }
 
     return {
