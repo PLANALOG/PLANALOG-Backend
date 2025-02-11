@@ -1,6 +1,6 @@
 import { prisma } from "../db.config.js";
 import { getPlannerWithTasks } from "./planner.repository.js"; // 기존 코드 활용
-
+import { DuplicateTaskError, TaskNotFoundError, TaskDeleteNotFoundError } from "../errors.js";
 
 export const addTask = async (data) => {
     // Prisma를 사용하여 DB에 새로운 Task 생성
@@ -44,7 +44,7 @@ export const addTask = async (data) => {
     });
 
     if (existingTask) {
-        throw new Error("이미 같은 날짜에 같은 Task가 존재합니다");
+        throw new DuplicateTaskError();
     }
 
     //새로운 task 생성. 
@@ -69,7 +69,7 @@ export const changeTask = async (data) => {
     }
     )
     if (!existingTask) {
-        throw new Error("No such task exists");
+        throw new TaskNotFoundError();
     }
 
     console.log("Task 있는지 조회", existingTask);
@@ -82,7 +82,7 @@ export const changeTask = async (data) => {
         data: {
             title: data.title
         }
-    })
+    });
 
     return updatedTask;
 };
@@ -93,9 +93,10 @@ export const getTaskFromRepository = async (data) => {
             id: data.task_id
         }
     }
-    )
+    );
+
     if (!task) {
-        throw new Error("No such Task exists");
+        throw new TaskNotFoundError();
     }
     return task;
 };
@@ -108,7 +109,7 @@ export const deleteTaskFromRepository = async (ids) => {
         });
 
         if (tasksToDelete.length === 0) {
-            throw new Error("No tasks found for the given IDs.");
+            throw new TaskDeleteNotFoundError();
         }
 
         // 삭제 실행
@@ -119,9 +120,6 @@ export const deleteTaskFromRepository = async (ids) => {
         // 삭제된 항목 반환
         return tasksToDelete; // 삭제 전에 조회한 데이터를 반환
     } catch (error) {
-        if (error.code === "P2025") {
-            throw new Error("No such Tasks exist.");
-        }
         throw error;
     }
 };
@@ -135,7 +133,7 @@ export const taskCompletionChange = async (data) => {
             }
         });
         if (!task) {
-            throw new Error("No such Task exists");
+            throw new TaskNotFoundError();
         }
 
         const changedTask = await prisma.task.update({
