@@ -1,6 +1,7 @@
 import { addTask, changeTask, getTaskFromRepository, deleteTaskFromRepository, taskCompletionChange } from "../repositories/task.repository.js";
 import { prisma } from "../db.config.js";
 import { updatePlannerIsCompleted, deletePlannerWithNoTasks } from "../repositories/planner.repository.js";
+import { TaskNotFoundError, UnauthorizedTaskAccessError } from "../errors.js";
 
 export const createTask = async (taskData) => {
   console.log("request received to Service:", taskData);
@@ -47,7 +48,7 @@ export const updateTask = async (taskData) => {
   // Task 수정 로직 
 
   try {
-    const changedTask = await changeTask(taskData)
+    const changedTask = await changeTask(taskData);
     // 수정된 Task 반환환
     return changedTask;
 
@@ -66,7 +67,7 @@ export const deleteTask = async (ids, userId) => {
     });
 
     if (tasksToDelete.length === 0) {
-      throw new Error("No tasks found for the given IDs.");
+      throw new TaskNotFoundError ();
     }
 
     // 사용자 권한 확인
@@ -74,7 +75,7 @@ export const deleteTask = async (ids, userId) => {
       (task) => task.planner.userId !== BigInt(userId)
     );
     if (unauthorizedTasks.length > 0) {
-      throw new Error("Unauthorized: You cannot delete tasks that you don't own.");
+      throw new UnauthorizedTaskAccessError({ taskIds: unauthorizedTasks.map((task) => task.id) });
     }
 
     // 삭제 실행 및 반환

@@ -38,10 +38,7 @@ export const handleCreateTask = async (req, res, next) => {
             }
         }
     }
-
-
 */
-
     try {
         // 1. req.session에서 userId 가져오기
         const userId = req.user.id;
@@ -251,11 +248,6 @@ export const handleGetTask = async (req, res, next) => {
 
     
     const task_id = req.params.task_id;
-
-
-    
-
-
     try {
         const validTaskId = getTaskDto(task_id); 
         
@@ -299,6 +291,7 @@ export const handleDeleteTask = async (req, res, next) => {
 */
     try {
         // 요청 데이터에서 ids 추출
+        const userId = req.user.id; 
         const { ids } = req.body;
         if (!req.user || !userId) {
             throw new AuthError;
@@ -386,6 +379,7 @@ export const handleToggleCompletion = async (req, res, next) => {
     // Task ID 추출
     const task_id = req.params;
     const validTaskId = await getTaskDto(task_id.task_id);
+    const userId = req.user.id;
     if (!req.user || !userId) {
         throw new AuthError;
     }

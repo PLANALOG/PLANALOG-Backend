@@ -560,3 +560,47 @@ export class InvalidCategoryIdError extends Error {
 
   }
 }
+export class TaskNotFoundError extends Error {
+  errorCode = "T001";
+  statusCode = 404; // Not Found
+
+  constructor(data) {
+    const reason = "해당 Task가 존재하지 않습니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data; // { taskId: 1234 }
+  }
+}
+export class DuplicateTaskError extends Error {
+  errorCode = "T002";
+  statusCode = 400; // Bad Request
+
+  constructor(data) {
+    const reason = "이미 같은 날짜에 동일한 Task가 존재합니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data; // { title: "운동하기", plannerId: 1234 }
+  }
+}
+export class TaskDeleteNotFoundError extends Error {
+  errorCode = "T003";
+  statusCode = 404; // Not Found
+
+  constructor(data) {
+    const reason = "삭제할 Task를 찾을 수 없습니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data; // { taskIds: [123, 456] }
+  }
+}
+export class UnauthorizedTaskAccessError extends Error {
+  errorCode = "T005";
+  statusCode = 403; // Forbidden
+
+  constructor(data) {
+    const reason = "해당 Task에 대한 접근 권한이 없습니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data; // { taskId: 1234, userId: 5678 }
+  }
+}
