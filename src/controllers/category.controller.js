@@ -47,7 +47,9 @@ export const handleCreateCategory = async (req, res, next) => {
             throw new AuthError;
         }
 
+
         const createdTaskCategory = await createCategoryService({ userId, name }); // 서비스 호출
+
         res.success(createdTaskCategory); // 성공 응답
     } catch (error) {
         next(error); // 전역 오류 처리 미들웨어로 전달
@@ -130,6 +132,7 @@ export const handleUpdateCategory = async (req, res, next) => {
     */
     try {
         const userId = req.user.id; // 인증 미들웨어에서 설정된 사용자 ID   
+
         if (!req.user || !userId) {
             throw new AuthError;
         }
@@ -250,6 +253,10 @@ try {
     // 삭제할 카테고리 배열 전달받기 
     const { categoryIds } = req.body; 
     const userId = req.user.id; // 인증 미들웨어에서 설정된 사용자 ID
+    if (!req.user || !userId) {
+        throw new AuthError;
+    }
+
     if (!req.user || !userId) {
         throw new AuthError;
     }

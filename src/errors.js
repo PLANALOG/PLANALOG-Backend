@@ -509,6 +509,7 @@ export class DuplicateCategoryError extends Error {
   }
 }
 
+
 export class CategoryDeletionNotAllowedError extends Error {
   errorCode = "CA007";
   statusCode = 400;
@@ -520,6 +521,7 @@ export class CategoryDeletionNotAllowedError extends Error {
     this.data = data;
   }
 }
+
 // 존재하지 않는 카테고리 접근 
 export class NoExistsCategoryError extends Error {
   errorCode = "CA002"; 
@@ -532,6 +534,7 @@ export class NoExistsCategoryError extends Error {
     this.data = data;  // { categoryId: "1234" } 등 추가 정보
   }
 }
+
 
 
 
@@ -554,5 +557,6 @@ export class InvalidCategoryIdError extends Error {
     const reason = "잘못된 카테고리 ID입니다.";
     super(reason);
     this.reason = reason;
+
   }
 }

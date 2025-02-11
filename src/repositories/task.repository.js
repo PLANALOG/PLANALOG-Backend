@@ -11,7 +11,10 @@ export const addTask = async (data) => {
     if (data.category_id) {
         category_id = data.category_id;
     }
+
     const bigIntUserId = BigInt(data.userId);
+    
+
     // 해당 날짜에 플래너가 있는지 조회
     // 해당 날짜의 플래너 확인 (기존 코드 활용)
     let planner = await getPlannerWithTasks(bigIntUserId, data.planner_date);

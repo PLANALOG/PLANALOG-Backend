@@ -4,7 +4,6 @@ export const createCategoryRepository = async ({ userId, name }) => {
     
     try {
         //중복 값 확인 
-        
         const bigIntUserId = BigInt(userId);
 
         const existingCategory = await prisma.taskCategory.findFirst({
@@ -14,7 +13,6 @@ export const createCategoryRepository = async ({ userId, name }) => {
 
         if (existingCategory) {
             // 중복 에러 코드 설정 
-            
             throw new DuplicateCategoryError(); 
         }
 
@@ -33,8 +31,10 @@ export const createCategoryRepository = async ({ userId, name }) => {
 };
 // 카테고리 수정
 export const updateCategoryRepository = async (id, name) => {
+
     
     const bigIntId = BigInt(id);
+
     try {
         // 중복값 확인 
         const existingCategory = await prisma.taskCategory.findFirst({
@@ -48,7 +48,9 @@ export const updateCategoryRepository = async (id, name) => {
         // 카테고리 업데이트
         const updatedCategory = await prisma.taskCategory.update({
             where: {
+
                 id: bigIntId, 
+
             },
             data: {
                 name: name// 새로운 이름으로 업데이트
