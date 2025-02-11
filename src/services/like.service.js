@@ -1,5 +1,5 @@
 import { 
-  ValidationError, 
+  EntityValidationError, 
   DuplicateLikeMomentError, 
   momentIdNotFoundError, 
   LikeIdNotExistError, 
@@ -24,8 +24,8 @@ const handleDatabaseError = (error, message) => {
 export const likeMoment = async (data) => {
   try {
     // 입력값 검증
-    if (!data.entityId || !data.entityType || !data.userId) { 
-      throw new ValidationError(data);
+    if (!data.entityId || !data.entityType ) { 
+      throw new EntityValidationError(data);
     }
 
     // 게시글 존재 여부 확인

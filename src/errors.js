@@ -184,13 +184,12 @@ export class LikeIdMissingError extends Error {
   }
 }
 
-//entityId, entityType 또는 userId가 누락 
-export class ValidationError extends Error{
+export class EntityValidationError extends Error{
   errorCode = "L005";
   statusCode = 400; // Bad Request
 
   constructor(data) {
-    const reason = 'entityId, entityType 또는 userId가 누락되었습니다.';
+    const reason = 'entityId 또는 entityType가가 누락되었습니다.';
     super(reason);
     this.reason = reason;
     this.data = data;
