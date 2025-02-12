@@ -1,11 +1,14 @@
-import {createCategory,
-        updateCategory,
+import {createCategoryService,
+        updateCategoryService,
         getCategoriesByUser,
         deleteCategoryService,
-        createTaskCategory
+        createTaskCategory,
+        createTaskCategoryBulk,
+        createCategoryBulk
 } from '../services/category.service.js'
-import { createTaskDto } from '../dtos/task.dto.js';
+import { createTaskBulkDto, createTaskDto } from '../dtos/task.dto.js';
 import { deleteCategoryRepository } from '../repositories/category.repository.js';
+import { DuplicateCategoryError, AuthError } from '../errors.js';
 // 카테고리 생성
 export const handleCreateCategory = async (req, res, next) => {
     /*
@@ -23,7 +26,7 @@ export const handleCreateCategory = async (req, res, next) => {
                         properties: {
                             name: { 
                                 type: "string", 
-                                example: "Work", 
+                                example: "과제", 
                                 description: "카테고리 이름" 
                             }
                         },
@@ -40,23 +43,71 @@ export const handleCreateCategory = async (req, res, next) => {
         console.log("Data received to controller(userId, name):", userId, name);
 
         // userId 있는지 확인 
-        if (!req.user || !req.user.id) {
-            throw new Error("사용자 인증 정보가 누락되었습니다.");
+        if (!req.user || !userId) {
+            throw new AuthError;
         }
 
-        const createdTaskCategory = await createCategory({ userId, name }); // 서비스 호출
+
+        const createdTaskCategory = await createCategoryService({ userId, name }); // 서비스 호출
+
         res.success(createdTaskCategory); // 성공 응답
     } catch (error) {
         next(error); // 전역 오류 처리 미들웨어로 전달
     }
 };
 
+// 카테고리 한번에 여러개 생성
+export const handleCreateCategoryBulk = async (req, res, next) => {
+    /*
+    #swagger.tags = ['Categories']
+    #swagger.summary = '카테고리 다중 생성 API'
+    #swagger.description = '여러 카테고리들을을 한 번에 생성하는 API입니다.'
+    #swagger.security = [{
+        "bearerAuth": []
+    }]
+    #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        names: {
+                            type: "array",
+                            description: "카테고리 리스트",
+                            example: ["운동", "공부", "알바"]
+                        }
+                    }
+                }
+            }
+        }
+    }
+    */
+   try {
+        // 인증 미들웨어에서 설정된 사용자 ID
+        const userId = req.user.id; 
+        const names = req.body.names;
+        
+        
+        // userId 있는지 확인 
+        if (!req.user || !userId) {
+            throw new AuthError;
+        }
 
+         
+        const createdCategories = await createCategoryBulk({ userId, names }); // 서비스 호출
+        // 성공 응답
+        res.success(createdCategories); 
+   } catch (error) {
+       next(error); 
+   }
+}
 // 카테고리 수정
 export const handleUpdateCategory = async (req, res, next) => {
-/*
+    /*
     #swagger.tags = ['Categories']
     #swagger.summary = '카테고리 수정 API'
+    #swagger.description = '카테고리를 수정하는 API입니다.'
     #swagger.security = [{
         "bearerAuth": []
         }]
@@ -80,6 +131,12 @@ export const handleUpdateCategory = async (req, res, next) => {
     }
     */
     try {
+        const userId = req.user.id; // 인증 미들웨어에서 설정된 사용자 ID   
+
+        if (!req.user || !userId) {
+            throw new AuthError;
+        }
+
         const { task_category_id } = req.params; // URL에서 ID 추출
         const { name } = req.body; // 요청 본문에서 새로운 카테고리 이름 추출
 
@@ -90,7 +147,7 @@ export const handleUpdateCategory = async (req, res, next) => {
             });
         }
 
-        const updatedTaskCategory = await updateCategory(task_category_id, name); // 서비스 호출
+        const updatedTaskCategory = await updateCategoryService(task_category_id, name, userId); // 서비스 호출
         res.success(updatedTaskCategory); // 성공 응답
     } catch (error) {
         next(error); // 전역 오류 처리 미들웨어로 전달
@@ -102,6 +159,7 @@ export const handleViewCategory = async (req, res, next) => {
     /*
         #swagger.tags = ['Categories']
         #swagger.summary = '카테고리 조회 API'
+        #swagger.description = '유저별 카테고리를 조회하는 API입니다.'
         #swagger.security = [{
         "bearerAuth": []
         }]
@@ -150,12 +208,10 @@ export const handleViewCategory = async (req, res, next) => {
     try {
         const userId = req.user.id; // 인증 미들웨어에서 설정된 사용자 ID
 
-        if (!userId) {
-            return res.error({
-                errorCode: "UNAUTHORIZED",
-                reason: "User ID is missing",
-            });
+        if (!req.user || !userId) {
+            throw new AuthError;
         }
+
 
         const taskCategories = await getCategoriesByUser(userId); // 서비스 호출
         res.success(taskCategories); // 성공 응답
@@ -196,6 +252,14 @@ export const handleDeleteCategory = async (req, res, next) => {
 try {
     // 삭제할 카테고리 배열 전달받기 
     const { categoryIds } = req.body; 
+    const userId = req.user.id; // 인증 미들웨어에서 설정된 사용자 ID
+    if (!req.user || !userId) {
+        throw new AuthError;
+    }
+
+    if (!req.user || !userId) {
+        throw new AuthError;
+    }
 
     if (!Array.isArray(categoryIds) || categoryIds.length === 0) {
         return res.error({
@@ -205,7 +269,7 @@ try {
     }
 
     
-    const result = await deleteCategoryService(categoryIds, req.user.id); // 서비스 호출
+    const result = await deleteCategoryService(categoryIds, userId); // 서비스 호출
 
     // 성공 응답
     res.success({ 
@@ -221,6 +285,7 @@ export const handleCreateTaskCategory = async (req, res, next) => {
     /*
         #swagger.tags = ['Categories']
         #swagger.summary = '카테고리형 유저 할일 생성 API'
+        #swagger.description = '해당 카테고리에 해당하는 할일을 생성하는 API입니다.'
         #swagger.security = [{
         "bearerAuth": []
         }]
@@ -254,16 +319,10 @@ export const handleCreateTaskCategory = async (req, res, next) => {
         const taskData = createTaskDto(req.body);     
         // ✅ 사용자 ID 가져오기   
         const userId = req.user.id; 
-        if (!userId) {
-                return res.status(400).json({
-                    resultType: "FAIL",
-                    error: {
-                        errorCode: "USER_NOT_FOUND",
-                        reason: "사용자 인증이 필요합니다.",
-                    },
-                    success: null,
-                });
-            }
+        if (!req.user || !userId) {
+            throw new AuthError;
+        }
+
         const createdTaskCategory = await createTaskCategory({
             ...taskData, // 자바스크립트 스프레드 문법으로 객체 병합
             task_category_id,
@@ -279,3 +338,66 @@ export const handleCreateTaskCategory = async (req, res, next) => {
             next(error); // 전역 오류 처리 미들웨어로 전달
         }
     } 
+
+// 카테고리형 유저 할일 다중생성 
+export const handleCreateTaskCategoryBulk = async (req, res, next) => {
+    /*
+    #swagger.tags = ['Categories']
+    #swagger.summary = '해당카테고리에 해당하는 할일 다중 생성 api'
+    #swagger.description = '해당 카테고리에 해당하는 할일들을 한 번에 여러 개 생성하는 API입니다.'
+    #swagger.security = [{
+        "bearerAuth": []
+    }]          
+    #swagger.requestBody = {
+    required: true,
+    content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        titles: { 
+                            type: "array", 
+                            example: ["해야할일 1","해야할일 2","해야할일 3"],
+                            items: {type:"string"}, 
+                            description: "할일 제목들 배열" 
+                        },
+                        planner_date: { 
+                            type: "string", 
+                            format: "date",
+                            example: "2022-12-25", 
+                            description: "할일 계획 날짜" 
+                        }
+                    },
+                    required: ["titles", "planner_date"]
+                }
+            }
+        }
+    }
+    
+    */
+    try {
+        // URL에서 ID 추출
+        const { task_category_id } = req.params; 
+        // 요청 본문에서 할일 데이터 추출
+        const taskData = createTaskBulkDto(req.body);
+        console.log("taskData", taskData);  
+        // ✅ 사용자 ID 가져오기
+        const userId = req.user.id; 
+        if (!req.user || !userId) {
+            throw new AuthError;
+        }
+
+        const createdTaskCategory = await createTaskCategoryBulk({
+            taskData,
+            task_category_id,
+            userId
+        });
+        return res.status(200).json({
+            resultType: "SUCCESS",
+            error: null,
+            success: createdTaskCategory,
+        });
+    } catch (error) {
+        next(error); // 전역 오류 처리 미들웨어로 전달
+    }
+}
