@@ -120,7 +120,7 @@ export const handleUpdateCategory = async (req, res, next) => {
                     properties: {
                         name: { 
                             type: "string", 
-                            example: "기타 업무무", 
+                            example: "기타 업무", 
                             description: "수정할 카테고리 이름" 
                         }
                     },

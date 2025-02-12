@@ -157,16 +157,30 @@ export const createTaskCategory = async ({ task_category_id, title, planner_date
     if (!task_category_id || isNaN(task_category_id)) {
         throw new InvalidCategoryIdError();
     }
-
-
+    
+    
+    const category = await prisma.taskCategory.findUnique({
+        where: {
+            id: BigInt(task_category_id),
+        },
+    });
+    if (category==null) {
+        throw new NoExistsCategoryError({ categoryId: task_category_id });  
+    }
+    // task_category가 본인것인지 확인. 
+    if (category.userId !== BigInt(userId)) {
+        throw new UnauthorizedCategoryAccessError({ categoryId: task_category_id, userId });
+    };
+    
+    
     // Task 생성 (카테고리 id 값 넣어서)
     const newTask = await addTask({
         title,
         planner_date,
-        task_category_id: task_category_id,
-        userId: userId        
+        task_category_id,
+        userId
         });
-
+    
     if (!newTask) {
         throw error;
     }
@@ -184,6 +198,18 @@ export const createTaskCategoryBulk = async ({taskData, task_category_id, userId
     console.log("request received to Service and userId", taskData, task_category_id, userId);  
     const addedTaskData = [];
     try {
+        const category = await prisma.taskCategory.findUnique({
+            where: {
+                id: BigInt(task_category_id),
+            },
+        });
+        if (category==null) {
+            throw new NoExistsCategoryError({ categoryId: task_category_id });  
+        }
+        // task_category가 본인것인지 확인. 
+        if (category.userId !== BigInt(userId)) {
+            throw new UnauthorizedCategoryAccessError({ categoryId: task_category_id, userId });
+        };
         for (const task of taskData) {
             const newTask = await addTask({...task, task_category_id, userId});
             if (!newTask) {
