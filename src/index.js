@@ -73,7 +73,8 @@ app.get("/openapi.json", async (req, res, next) => {
       title: "PLANALOG",
       description: "PLANALOG 테스트 문서입니다.",
     },
-    host: process.env.SWAGGER_HOST,
+    //host: process.env.SWAGGER_HOST,
+    host: "localhost:3000",
     components: {
       securitySchemes: {
         bearerAuth: {

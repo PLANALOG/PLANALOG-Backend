@@ -15,6 +15,7 @@ export const createMoment = async (data) => {
             data: {
                 userId: data.userId,
                 title: data.title,
+                date: data.date,
                 plannerId: data.plannerId ?? null,
             }
         });
@@ -59,7 +60,6 @@ export const updateMoment = async (momentId, data) => {
             where: { id: momentId },
             data: {
                 title: data.title,
-                status: data.status,
             },
             include: { momentContents: true },
         });
@@ -157,7 +157,6 @@ export const findMyMoments = async (userId) => {
         const moments = await prisma.moment.findMany({
             where: {
                 userId: BigInt(userId), // ✅ 이 부분이 특정 사용자로 제한
-                status: { not: "draft" } // ✅ draft 상태 제외
             },
             include: {
                 momentContents: true,

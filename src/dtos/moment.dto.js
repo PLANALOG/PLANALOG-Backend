@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 export const bodyToCreateMoment = (body) => {
     if (!body) {
         throw new Error("요청 body값이 없습니다."); // body값이 없는 경우
@@ -10,8 +12,9 @@ export const bodyToCreateMoment = (body) => {
     const momentContents = body.momentContents;
 
 
-    if (!body.title) {
-        throw new Error("제목을 작성해주세요.");
+    // 🔹 title 유효성 검사 강화
+    if (!body.title || typeof body.title !== "string") {
+        throw new Error("제목을 문자열로 작성해주세요.");
     }
     if (momentContents.length === 0) {
         throw new Error("최소 하나의 페이지가 존재해야합니다.");
@@ -44,6 +47,7 @@ export const responseFromCreateMoment = (moment) => {
         id: moment.id,
         userId: moment.userId,
         title: moment.title,
+        date: dayjs(moment.date).format("YYYY-MM-DD"),
         plannerId: moment.plannerId ?? null,
         createdAt: moment.createdAt,
         updatedAt: moment.updatedAt,
@@ -58,26 +62,18 @@ export const responseFromCreateMoment = (moment) => {
 
 //  moment 수정 DTO
 export const bodyToUpdateMoment = (body) => {
-    // 유효성 검증: status 필수
-    if (!body.status) {
-        throw new Error("저장할 상태를 지정해주세요.");
+
+    // 🔹 title 유효성 검사 강화
+    if (!body.title || typeof body.title !== "string") {
+        throw new Error("제목을 문자열로 작성해주세요.");
     }
 
     // momentContents 배열 확인
     const momentContents = Array.isArray(body.momentContents) ? body.momentContents : [];
     const deletedSortOrders = Array.isArray(body.deletedSortOrders) ? body.deletedSortOrders : [];
 
-    // status가 public인 경우: title + momentContents 필수
-    if (body.status === "public") {
-        if (!body.title) {
-            throw new Error("공개(public) 상태에서는 제목(title)이 필수입니다.");
-        }
-        if (momentContents.length === 0 && deletedSortOrders.length === 0) {
-            throw new Error("공개(public) 상태에서는 최소 하나 이상의 페이지가 필요합니다.");
-        }
-        if (momentContents.some(momentContent => !momentContent.content)) {
-            throw new Error("공개(public) 상태에서는 모든 페이지에 content 값이 포함되어야 합니다.");
-        }
+    if (momentContents.some(content => content.content === undefined || content.content === null || content.content.trim() === '')) {
+        throw new Error("모든 페이지에 빈 내용이 포함될 수 없습니다.");
     }
 
     // momentContents 내부의 sortOrder 중복 검사 (null 제외)
@@ -91,13 +87,13 @@ export const bodyToUpdateMoment = (body) => {
     }
 
     return {
-        title: body.title || null,
-        status: body.status,
+        title: body.title,
+        plannerId: body.plannerId ?? null,
         momentContents: momentContents.map(content => ({
             sortOrder: content.sortOrder,
-            content: content.content ?? null,
-            url: content.url || null,
-            insertAfterId: content.insertAfterId || null, // 추가된 부분
+            content: content.content,
+            url: content.url ?? null,
+            insertAfterSortOrder: content.insertAfterSortOrder || null, // 추가된 부분
         })),
         deletedSortOrders: deletedSortOrders, // ✅ 삭제할 페이지 정보 추가
     };
@@ -109,7 +105,6 @@ export const responseFromUpdateMoment = (moment) => {
         id: moment.id,
         userId: moment.userId,
         title: moment.title,
-        status: moment.status,
         plannerId: moment.plannerId || null,
         createdAt: moment.createdAt,
         updatedAt: moment.updatedAt,
