@@ -90,9 +90,9 @@ export const createCategoryBulk = async ({userId, names}) => {
     }
 };
 // 카테고리 수정
-export const updateCategoryService = async (id, name, userId) => {
+export const updateCategoryService = async (task_category_id, name, userId) => {
     try {
-        const category = await getCategoryById(id);
+        const category = await getCategoryById(task_category_id);
         // 2️⃣ 카테고리가 존재하지 않으면 예외 발생 (CA004)
         if (!category) {
             throw new NoExistsCategoryError({ categoryId: task_category_id });
@@ -102,7 +102,7 @@ export const updateCategoryService = async (id, name, userId) => {
         if (category.userId !== BigInt(userId)) {
             throw new UnauthorizedCategoryAccessError({ categoryId: task_category_id, userId });
         }
-        const updatedCategory = await updateCategoryRepository(id, name); // 리포지토리 호출
+        const updatedCategory = await updateCategoryRepository(task_category_id, name); // 리포지토리 호출
         
         return updatedCategory;
     } catch (error) {

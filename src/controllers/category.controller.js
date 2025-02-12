@@ -120,7 +120,7 @@ export const handleUpdateCategory = async (req, res, next) => {
                     properties: {
                         name: { 
                             type: "string", 
-                            example: "Personal", 
+                            example: "기타 업무무", 
                             description: "수정할 카테고리 이름" 
                         }
                     },
@@ -139,7 +139,7 @@ export const handleUpdateCategory = async (req, res, next) => {
 
         const { task_category_id } = req.params; // URL에서 ID 추출
         const { name } = req.body; // 요청 본문에서 새로운 카테고리 이름 추출
-
+        console.log("Data received to controller(task_category_id, name):", task_category_id, name);    
         if (!name) {
             return res.error({
                 errorCode: "INVALID_INPUT",
