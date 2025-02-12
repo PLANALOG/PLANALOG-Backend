@@ -2,9 +2,10 @@ import { addTask, changeTask, getTaskFromRepository, deleteTaskFromRepository, t
 import { prisma } from "../db.config.js";
 import { updatePlannerIsCompleted, deletePlannerWithNoTasks } from "../repositories/planner.repository.js";
 import { TaskNotFoundError, UnauthorizedTaskAccessError } from "../errors.js";
-
+import { isDeletedUser } from "../repositories/user.repository.js";
 export const createTask = async (taskData) => {
   console.log("request received to Service:", taskData);
+  await isDeletedUser(taskData.userId);
   // Task 생성 로직
   const task = {
     "title": taskData.title,
@@ -28,8 +29,8 @@ export const createTask = async (taskData) => {
 
 }
 export const createTaskBulk = async (taskData, userId) => {
-  console.log("request received to Service and userId", taskData, userId);
-  console.log("type of taskData", typeof taskData);
+  
+  await isDeletedUser(userId);
   const addedTaskData = [];
   
   try {
@@ -59,6 +60,7 @@ export const updateTask = async (taskData) => {
 
 };
 export const deleteTask = async (ids, userId) => {
+  await isDeletedUser(userId);
   try {
     // 권한 확인 및 삭제 대상 조회
     const tasksToDelete = await prisma.task.findMany({
@@ -101,6 +103,7 @@ export const getTask = async (taskData) => {
   }
 }
 export const toggleTaskCompletion = async (taskId, userId) => {
+  await isDeletedUser(userId);
   // Task 완료상태 수정 로직
   try {
     console.log(taskId, userId);
