@@ -86,6 +86,7 @@ model Planner {
   Moment Moment[]
 
   @@index([userId], map: "userId")
+  @@unique([userId, plannerDate], map: "unique_user_planner_date") // Composite Unique Constraint
   @@map("planner")
 }
 

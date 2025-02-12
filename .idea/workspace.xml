@@ -6,6 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="aa057fb3-95e3-4ca5-9656-3792bd70e880" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/category.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/category.controller.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/category.service.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/category.service.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

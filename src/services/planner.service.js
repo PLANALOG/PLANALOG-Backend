@@ -1,5 +1,6 @@
 import { getPlannerWithTasks, getMonthPlanners, deletePlanner } from "../repositories/planner.repository.js";
 import { responseFromPlannerWithTasks, responseFromPlannerCalendarView } from "../dtos/planner.dto.js";
+import { NoExistsPlannerError } from "../errors.js";
 
 
 export const plannerDisplay = async (userId, plannerDate) => {
@@ -31,7 +32,7 @@ export const plannerDelete = async (plannerId, userId) => {
     console.log('deletedPlanner : ', deletedPlanner);
 
     if (deletedPlanner === null) {
-        throw new Error(`해당 id를 가진 플래너가 존재하지 않습니다. ${plannerId}`);
+        throw new NoExistsPlannerError();
     };
 
     return deletedPlanner;
