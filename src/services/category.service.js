@@ -115,7 +115,7 @@ export const getCategoriesByUser = async (userId) => {
     try {
         const viewedCategories = await getAllCategoriesRepository(userId); // 리포지토리 호출
         if (!viewedCategories || viewedCategories.length === 0) {
-            throw new Error("No categories found for the user");
+            throw new Error("유저에 해당되는 카테고리가 없습니다.");
         }
         return viewedCategories;
     } catch (error) {
@@ -154,7 +154,6 @@ export const deleteCategoryService = async (categoryIds, userId) => {
 };
 export const createTaskCategory = async ({ task_category_id, title, planner_date, userId }) => {
     // 서비스 로직: 예외 처리, 비즈니스 로직 추가
-    console.log("createTaskCategory Service called with", task_category_id, title, planner_date, userId);
     if (!task_category_id || isNaN(task_category_id)) {
         throw new InvalidCategoryIdError();
     }
@@ -188,7 +187,7 @@ export const createTaskCategoryBulk = async ({taskData, task_category_id, userId
         for (const task of taskData) {
             const newTask = await addTask({...task, task_category_id, userId});
             if (!newTask) {
-                throw new Error("Failed to create task category.");
+                throw new Error("할일 생성에 실패했습니다.");
             }
             addedTaskData.push(newTask);    
         }

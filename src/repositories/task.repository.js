@@ -1,6 +1,6 @@
 import { prisma } from "../db.config.js";
 import { getPlannerWithTasks } from "./planner.repository.js"; // 기존 코드 활용
-import { DuplicateTaskError, TaskNotFoundError, TaskDeleteNotFoundError } from "../errors.js";
+import { DuplicateTaskError, TaskNotFoundError, TaskDeleteNotFoundError, UnauthorizedTaskAccessError } from "../errors.js";
 
 export const addTask = async (data) => {
     // Prisma를 사용하여 DB에 새로운 Task 생성
@@ -124,21 +124,33 @@ export const deleteTaskFromRepository = async (ids) => {
     }
 };
 
-export const taskCompletionChange = async (data) => {
+export const taskCompletionChange = async (taskId, userId) => {
     try {
         // 있는지 확인 
+        console.log("data in repository",taskId, userId);    
         const task = await prisma.task.findUnique({
             where: {
-                id: data.task_id
-            }
+                id: taskId,
+            },
+            include: {
+                planner: { // ✅ Planner 정보 포함
+                  select: { id: true, userId: true } // ✅ Planner의 userId 가져오기
+                }
+              }
         });
         if (!task) {
             throw new TaskNotFoundError();
         }
+        // Task 를 변경하려는 사용자가 task 접근 권한이 있는지 확인
+        
+        if (task.planner.userId !== userId) {
+            console.log("Task의 userId 확인", task.planner.userId, userId); 
+            throw new UnauthorizedTaskAccessError();
+        }
 
         const changedTask = await prisma.task.update({
             where: {
-                id: data.task_id
+                id: taskId
             },
             data: {
                 // 값 반대로 바꾸기

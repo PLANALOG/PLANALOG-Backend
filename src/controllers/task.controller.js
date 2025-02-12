@@ -377,15 +377,16 @@ export const handleToggleCompletion = async (req, res, next) => {
  }
      */
     // Task ID 추출
-    const task_id = req.params;
-    const validTaskId = await getTaskDto(task_id.task_id);
+    
+    const validTaskId = await getTaskDto(req.params.task_id);
+    console.log("task_id", validTaskId);    
     const userId = req.user.id;
     if (!req.user || !userId) {
         throw new AuthError;
     }
 
     try {
-        const { toggledTask, newPlannerIsCompleted } = await toggleTaskCompletion(validTaskId);
+        const { toggledTask, newPlannerIsCompleted } = await toggleTaskCompletion(validTaskId.task_id, userId);
         res.success(responseFromToggledTask({ task: toggledTask, newIsCompleted: newPlannerIsCompleted }));
     }
     catch (error) {
