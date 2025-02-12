@@ -100,13 +100,21 @@ export const getTask = async (taskData) => {
     throw error;
   }
 }
-export const toggleTaskCompletion = async (taskData) => {
+export const toggleTaskCompletion = async (taskId, userId) => {
   // Task 완료상태 수정 로직
   try {
-    const toggledTask = await taskCompletionChange(taskData);
+    console.log(taskId, userId);
+    console.log({taskId, userId});
+    const bigIntUserId = BigInt(userId);
+    const toggledTask = await taskCompletionChange(taskId, bigIntUserId);
+    
+    
 
     //만약 해당 플래너의 모든 task가 완료되었으면 플래너의 isCompleted값 변경
+    
+    
     const plannerId = toggledTask.plannerId;
+
     const newPlannerIsCompleted = await updatePlannerIsCompleted(plannerId);
     //newIsCompleted는 플래너의 isCompleted 값이 변경되었으면 변경된 boolean값, 변경되지 않았다면 null값 
 

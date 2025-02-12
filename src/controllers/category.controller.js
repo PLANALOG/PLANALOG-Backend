@@ -143,7 +143,7 @@ export const handleUpdateCategory = async (req, res, next) => {
         if (!name) {
             return res.error({
                 errorCode: "INVALID_INPUT",
-                reason: "Category name is required",
+                reason: "카테고리 이름이 필요합니다다",
             });
         }
 
@@ -264,7 +264,7 @@ try {
     if (!Array.isArray(categoryIds) || categoryIds.length === 0) {
         return res.error({
             errorCode: "INVALID_INPUT",
-            reason: "Category IDs must be a non-empty array",
+            reason: "Category ID는 배열형태이어야합니다다",
         });
     }
 
@@ -273,7 +273,7 @@ try {
 
     // 성공 응답
     res.success({ 
-        message: "Task categories deleted successfully",
+        message: "할일 카테고리가 삭제되었습니다. ",
         count: result.count, // 삭제된 레코드 수
     });
 } catch (error) {
