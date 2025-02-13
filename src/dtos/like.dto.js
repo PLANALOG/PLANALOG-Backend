@@ -1,7 +1,6 @@
 export const bodyToLike = ({ moment }, userId) => {
     return {
-      fromUserId: userId, 
-      userId: moment.userId,
+      fromUserId: userId,    //좋아요 누른 사람
       entityId: moment.id, 
       entityType: moment.entityType || "moment", 
     };

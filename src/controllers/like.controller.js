@@ -29,7 +29,6 @@ export const handleLikeMoment = async (req, res, next) => {
               type: "object",
               properties: {
                 id: { type: "integer", description: "Moment ID" },
-                userId: { type: "integer", description: "Moment 작성자 ID" },
                 entityType: { type: "string", default: "moment", description: "엔터티 유형" }
               },
               required: ["id", "userId"]
@@ -39,7 +38,6 @@ export const handleLikeMoment = async (req, res, next) => {
         example: {
           moment: {
             id: 1,
-            userId: 1,
             entityType: "moment"
           }
         }

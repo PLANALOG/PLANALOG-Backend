@@ -19,8 +19,7 @@ export const addMomentLike = async (data) => {
   const newLike = await prisma.like.create({
     data: {
       entityType: data.entityType,
-      entityId: data.entityId,
-      user: { connect: { id: data.userId } },         
+      entityId: data.entityId,       
       fromUser: { connect: { id: data.fromUserId } }, 
     },
   });
