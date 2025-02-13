@@ -11,12 +11,14 @@ import { DuplicateCategoryError, NoExistsCategoryError, UnauthorizedCategoryAcce
 
 import {prisma} from "../db.config.js";
 import { addTask } from "../repositories/task.repository.js";
-
+import { isDeletedUser } from "../repositories/user.repository.js";
 
 
 export const createCategoryService = async ({ userId, name }) => {
+    
     //카테고리 생성
     try {
+        await isDeletedUser(userId);
         // 리포지토리 호출
         const createdCategory = await createCategoryRepository({ userId, name });
         return createdCategory;
@@ -26,10 +28,12 @@ export const createCategoryService = async ({ userId, name }) => {
 };
 // 카테고리 여러개 생성
 export const createCategoryBulk = async ({userId, names}) => {
+    
     const success = [];
     const failed = [];
 
     try {
+        await isDeletedUser(userId);
         // Promise.allSettled()을 사용하여 모든 요청을 병렬로 실행 (중간에 에러가 발생해도 나머지 실행됨)
         const results = await Promise.allSettled(
             names.map(async (name) => {
@@ -90,9 +94,11 @@ export const createCategoryBulk = async ({userId, names}) => {
     }
 };
 // 카테고리 수정
-export const updateCategoryService = async (id, name, userId) => {
+export const updateCategoryService = async (task_category_id, name, userId) => {
+    
     try {
-        const category = await getCategoryById(id);
+        await isDeletedUser(userId);
+        const category = await getCategoryById(task_category_id);
         // 2️⃣ 카테고리가 존재하지 않으면 예외 발생 (CA004)
         if (!category) {
             throw new NoExistsCategoryError({ categoryId: task_category_id });
@@ -102,7 +108,7 @@ export const updateCategoryService = async (id, name, userId) => {
         if (category.userId !== BigInt(userId)) {
             throw new UnauthorizedCategoryAccessError({ categoryId: task_category_id, userId });
         }
-        const updatedCategory = await updateCategoryRepository(id, name); // 리포지토리 호출
+        const updatedCategory = await updateCategoryRepository(task_category_id, name); // 리포지토리 호출
         
         return updatedCategory;
     } catch (error) {
@@ -112,10 +118,12 @@ export const updateCategoryService = async (id, name, userId) => {
 
 // 유저별 카테고리 조회
 export const getCategoriesByUser = async (userId) => {
+    
     try {
+        await isDeletedUser(userId);
         const viewedCategories = await getAllCategoriesRepository(userId); // 리포지토리 호출
         if (!viewedCategories || viewedCategories.length === 0) {
-            throw new Error("No categories found for the user");
+            throw new Error("유저에 해당되는 카테고리가 없습니다.");
         }
         return viewedCategories;
     } catch (error) {
@@ -124,7 +132,9 @@ export const getCategoriesByUser = async (userId) => {
 };
 
 export const deleteCategoryService = async (categoryIds, userId) => {
+    
     try {
+        await isDeletedUser(userId);
         // 1️⃣ 삭제 대상 카테고리 조회
         const categoriesToDelete = await prisma.taskCategory.findMany({
             where: { id: { in: categoryIds} }, 
@@ -153,21 +163,35 @@ export const deleteCategoryService = async (categoryIds, userId) => {
     }
 };
 export const createTaskCategory = async ({ task_category_id, title, planner_date, userId }) => {
+    await isDeletedUser(userId);
     // 서비스 로직: 예외 처리, 비즈니스 로직 추가
-    console.log("createTaskCategory Service called with", task_category_id, title, planner_date, userId);
     if (!task_category_id || isNaN(task_category_id)) {
         throw new InvalidCategoryIdError();
     }
-
-
+    
+    
+    const category = await prisma.taskCategory.findUnique({
+        where: {
+            id: BigInt(task_category_id),
+        },
+    });
+    if (category==null) {
+        throw new NoExistsCategoryError({ categoryId: task_category_id });  
+    }
+    // task_category가 본인것인지 확인. 
+    if (category.userId !== BigInt(userId)) {
+        throw new UnauthorizedCategoryAccessError({ categoryId: task_category_id, userId });
+    };
+    
+    
     // Task 생성 (카테고리 id 값 넣어서)
     const newTask = await addTask({
         title,
         planner_date,
-        task_category_id: task_category_id,
-        userId: userId        
+        task_category_id,
+        userId
         });
-
+    
     if (!newTask) {
         throw error;
     }
@@ -182,13 +206,27 @@ export const createTaskCategory = async ({ task_category_id, title, planner_date
 };
 
 export const createTaskCategoryBulk = async ({taskData, task_category_id, userId }) => {
+    
     console.log("request received to Service and userId", taskData, task_category_id, userId);  
     const addedTaskData = [];
     try {
+        await isDeletedUser(userId);
+        const category = await prisma.taskCategory.findUnique({
+            where: {
+                id: BigInt(task_category_id),
+            },
+        });
+        if (category==null) {
+            throw new NoExistsCategoryError({ categoryId: task_category_id });  
+        }
+        // task_category가 본인것인지 확인. 
+        if (category.userId !== BigInt(userId)) {
+            throw new UnauthorizedCategoryAccessError({ categoryId: task_category_id, userId });
+        };
         for (const task of taskData) {
             const newTask = await addTask({...task, task_category_id, userId});
             if (!newTask) {
-                throw new Error("Failed to create task category.");
+                throw new Error("할일 생성에 실패했습니다.");
             }
             addedTaskData.push(newTask);    
         }

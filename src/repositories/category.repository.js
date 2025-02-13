@@ -1,8 +1,10 @@
 import { prisma } from '../db.config.js';
 import { DuplicateCategoryError } from '../errors.js';
+import { isDeletedUser } from './user.repository.js';
 export const createCategoryRepository = async ({ userId, name }) => {
-    
+   
     try {
+        await isDeletedUser(userId);
         //중복 값 확인 
         const bigIntUserId = BigInt(userId);
 
@@ -32,7 +34,6 @@ export const createCategoryRepository = async ({ userId, name }) => {
 // 카테고리 수정
 export const updateCategoryRepository = async (id, name) => {
 
-    
     const bigIntId = BigInt(id);
 
     try {
@@ -64,9 +65,11 @@ export const updateCategoryRepository = async (id, name) => {
 
 // 유저별 카테고리 조회
 export const getAllCategoriesRepository = async (userId) => {
+    
     const bigIntUserId = BigInt(userId);
-
+    
     try {
+        await isDeletedUser(userId);
         const categories = await prisma.taskCategory.findMany({
             where: {
                 userId: bigIntUserId, // 사용자 ID로 필터링

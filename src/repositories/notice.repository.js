@@ -1,18 +1,18 @@
 import { prisma } from "../db.config.js";
 
 // 알림 생성
-export const createNotice = async (userId, { message, entityType, entityId }) => {
+export const createNotice = async (fromUserId, toUserId, { message, entityType, entityId }) => {
   return await prisma.notice.create({
     data: {
-      userId: BigInt(userId),
+      fromUserId: BigInt(fromUserId),
+      toUserId: BigInt(toUserId),
       message,
       entityType,
       entityId,
-      isRead: false, 
+      isRead: false,
     },
   });
 };
-
 
 // 알림 읽음 상태 수정
 export const updateNoticeReadStatus = async (noticeId, isRead, userId) => {
@@ -66,14 +66,23 @@ export const deleteNotice = async (noticeId, userId) => {
 
 
 
-// 특정 유저의 알림 목록 조회
+
+// 나에게 온 알림 조회할 때, 보낸 사람(`fromUserId`)의 `name` 포함
 export const getNoticesByUserId = async (userId) => {
   return await prisma.notice.findMany({
     where: {
-      userId: BigInt(userId),
+      toUserId: BigInt(userId), //
     },
     orderBy: {
-      createdAt: "desc", 
+      createdAt: "desc",
+    },
+    include: {
+      fromUser: {  
+        select: { id: true, name: true },
+      },
     },
   });
 };
+
+
+
