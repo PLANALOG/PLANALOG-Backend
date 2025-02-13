@@ -53,8 +53,8 @@ export const formatNoticeListDTO = (notices) => {
     entityType: notice.entityType,
     entityId: notice.entityId,
     createdAt: notice.createdAt,
-    fromUserId: notice.fromUser.id,  // ✅ 보낸 사람 ID 추가
-    fromUserName: notice.fromUser.name, // ✅ 보낸 사람 이름 추가
+    fromUserId: notice.fromUser.id,  
+    fromUserName: notice.fromUser.name, 
   }));
 };
 
