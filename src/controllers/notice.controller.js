@@ -11,42 +11,37 @@ import {
   validateUpdateNoticeReadDTO,
 } from "../dtos/notice.dto.js";
 
+
 export const createNotice = async (req, res) => {
   /* 
   #swagger.tags = ['Notices']
   #swagger.summary = '알림 생성 API'
-  #swagger.description = `새로운 알림을 생성합니다.`
-  #swagger.security = [{ "bearerAuth": [] }]
+  #swagger.security = [{ "bearerAuth": [] }]  // ✅ 인증 필요하도록 설정
   */
 
   try {
-    const userId = req.user?.id; 
-    const { message, entityType, entityId } = req.body;
+    const fromUserId = req.user?.id;
+    const { toUserId, message, entityType, entityId } = req.body;
 
-    if (!userId) {
-      return res.error({
-        errorCode: "USER001",
-        reason: "사용자 인증 정보가 필요합니다.",
-        data: null,
+    if (!fromUserId || !toUserId) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        errorCode: "NOTICE001",
+        reason: "보낸 사람과 받는 사람 정보가 필요합니다.",
       });
     }
 
-    const validatedNotice = validateCreateNoticeDTO({
-      message,
-      entityType,
-      entityId,
-    });
+    const validatedNotice = validateCreateNoticeDTO({ message, entityType, entityId });
 
-    const notice = await createNoticeService(userId, validatedNotice);
+    const notice = await createNoticeService(fromUserId, toUserId, validatedNotice);
 
-    res.status(StatusCodes.CREATED).success({
+    res.status(StatusCodes.CREATED).json({
       message: "알림 생성 성공",
       data: notice,
     });
   } catch (error) {
     console.error("알림 생성 중 에러:", error.message);
-    res.status(StatusCodes.BAD_REQUEST).error({
-      errorCode: "NOTICE001",
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      errorCode: "NOTICE002",
       reason: "알림 생성 중 오류가 발생했습니다.",
       data: error.message,
     });
@@ -167,3 +162,4 @@ export const getNotices = async (req, res) => {
     });
   }
 };
+

@@ -2,8 +2,8 @@ import { createNotice,getNoticesByUserId,updateNoticeReadStatus,deleteNotice   }
 import { formatNoticeListDTO } from "../dtos/notice.dto.js";
 
 
-export const createNoticeService = async (userId, noticeData) => {
-  return await createNotice(userId, noticeData);
+export const createNoticeService = async (fromUserId, toUserId, noticeData) => {
+  return await createNotice(fromUserId, toUserId, noticeData);
 };
 
 
@@ -23,3 +23,4 @@ export const getNoticesService = async (userId) => {
   
   return formatNoticeListDTO(notices);
 };
+
