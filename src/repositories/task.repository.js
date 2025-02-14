@@ -87,18 +87,18 @@ export const changeTask = async (data) => {
     return updatedTask;
 };
 
-export const getTaskFromRepository = async (data) => {
-    const task = await prisma.task.findUnique({
+export const getTaskFromRepository = async (planner_date) => {
+    
+    const plannerWithTasks = await prisma.planner.findFirst({
         where: {
-            id: data.task_id
-        }
+            plannerDate: planner_date
+        },
+        include: {tasks: true}
     }
     );
 
-    if (!task) {
-        throw new TaskNotFoundError();
-    }
-    return task;
+    
+    return plannerWithTasks.tasks;
 };
 
 export const deleteTaskFromRepository = async (ids) => {
