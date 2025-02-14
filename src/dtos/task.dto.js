@@ -67,10 +67,12 @@ export const getTaskDto = (planner_date) => {
 };
 
 
-export const responseFromToggledTask = ({ task, newIsCompleted }) => {
-    console.log("반환값 확인 task :", task, ", newIsCompleted :", newIsCompleted);
+export const responseFromToggledTask = ( tasks, newIsCompleted ) => {
+    console.log("반환값 확인 task :", tasks, ", newIsCompleted :", newIsCompleted);
 
-    const response = {
+    // 개별 task를 포맷팅하는 함수
+    const formatTask = (task) => {
+        const response = {
         id: task.id,
         plannerId: task.plannerId,
         taskCategoryId: task.taskCategoryId,
@@ -80,8 +82,17 @@ export const responseFromToggledTask = ({ task, newIsCompleted }) => {
     };
 
     if (newIsCompleted !== null) {
-        response.message = `해당 날짜의 플래너의 할 일 모두 완료 여부가 ${newIsCompleted}로 변경되었습니다`;
+      response.message = `해당 날짜의 플래너의 할 일 모두 완료 여부가 ${newIsCompleted}로 변경되었습니다`;
     }
 
     return response;
-}
+  };
+
+  // 전달된 tasks가 배열이면 map으로, 단일 객체면 바로 포맷팅하여 반환
+  if (Array.isArray(tasks)) {
+    return tasks.map(formatTask);
+  } else {
+    return formatTask(tasks);
+  }
+};
+    
