@@ -51,18 +51,21 @@ export const updateTaskDto = (task_id, body) => {
         title: body.title
     }
 }
-export const getTaskDto = (task_id) => {
-    //task_id 숫자인지 확인
-
-    if (isNaN(task_id)) {
-        throw new Error("Task_id 가 숫자가 아닙니다.");
+export const getTaskDto = (planner_date) => {
+    console.log("planner_date", planner_date);
+    if (typeof planner_date !== "string") {
+        throw new Error("planner_date 는 문자열이어야 합니다.");
     }
-    return {
-        task_id: BigInt(task_id)
-    }
-    
 
-}
+    const date = new Date(planner_date);
+
+    if (isNaN(date.getTime())) {
+        throw new Error("planner_date 값이 올바른 날짜 형식이 아닙니다. (예: YYYY-MM-DD)");
+    }
+
+    return date;
+};
+
 
 export const responseFromToggledTask = ({ task, newIsCompleted }) => {
     console.log("반환값 확인 task :", task, ", newIsCompleted :", newIsCompleted);

@@ -196,64 +196,34 @@ export const handleGetTask = async (req, res, next) => {
     /*
         #swagger.tags = ['Tasks']
         #swagger.summary = '할일 조회 API'
-        #swagger.description = '특정 할일을 조회하는 API입니다.'
+        #swagger.description = '날짜별로 (플래너별로) 할일들을 모두 조회하는 api 입니다다.'
         #swagger.security = [{
         "bearerAuth": []
         }]
-        #swagger.responses[200] = {
-        description: "할일 조회 성공 응답",
-        content: {
-            "application/json": {
-                schema: {
-                    type: "object",
-                    properties: {
-                        resultType: { 
-                            type: "string", 
-                            example: "SUCCESS", 
-                            description: "결과 상태 (SUCCESS: 성공)"
-                        },
-                        error: { 
-                            type: "object", 
-                            nullable: true, 
-                            example: null, 
-                            description: "에러 정보 (없을 경우 null)"
-                        },
-                        success: { 
-                            type: "object", 
-                            properties: {
-                                id: { 
-                                    type: "integer", 
-                                    description: "할일 ID", 
-                                    example: 123 
-                                },
-                                title: { 
-                                    type: "string", 
-                                    description: "할일 제목", 
-                                    example: "수정된 할일 제목" 
-                                },
-                                isCompleted: { 
-                                    type: "boolean", 
-                                    description: "완료 여부", 
-                                    example: false 
-                                }
-                            }
-                        }
-                    }
-                }
+        #swagger.parameters = [
+            {
+            "name": "planner_date",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "date",
+            "description": "조회할 날짜 (YYYY-MM-DD 형식)"
             }
-        }
-    }
+        ]
     */
     //Task 조회. 
 
     
-    const task_id = req.params.task_id;
+    const userId = req.user.id;
+    const planner_date = req.query.planner_date;
     try {
-        const validTaskId = getTaskDto(task_id); 
-        
-        const task = await getTask(validTaskId);
+        const validDate = getTaskDto(planner_date); 
+        console.log("validDate after dto", validDate);
 
-        res.success(task)
+        
+        const tasks = await getTask(validDate, userId);
+        
+        res.success(tasks);
     }
     catch (error) {
         console.log(error);

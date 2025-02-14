@@ -93,11 +93,29 @@ export const deleteTask = async (ids, userId) => {
     throw error;
   }
 };
-export const getTask = async (taskData) => {
+export const getTask = async (planner_date, userId) => {
   // Task 조회 로직
   try {
-    const receivedTask = await getTaskFromRepository(taskData);
-    return receivedTask;
+    //회원탈퇴 로직. 
+    await isDeletedUser;
+
+    
+    const planner = await prisma.planner.findFirst({
+      where: {
+        plannerDate: planner_date
+      }
+    });
+    
+    if (!planner) {
+      throw new TaskNotFoundError();
+    }
+
+    if (userId != planner.userId) {
+      throw new UnauthorizedTaskAccessError();
+    }
+
+    const receivedTasks = await getTaskFromRepository(planner_date);
+    return receivedTasks;
   } catch (error) {
     throw error;
   }
