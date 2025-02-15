@@ -5,7 +5,6 @@ export const addMomentLike = async (data) => {
   const existingLike = await prisma.like.findFirst({ 
     where: {
       fromUserId: data.fromUserId,
-      userId: data.userId,
       entityId: data.entityId,
       entityType: data.entityType,
       user: { isDeleted: false },  //탈퇴 회원 배제
@@ -20,6 +19,7 @@ export const addMomentLike = async (data) => {
     data: {
       entityType: data.entityType,
       entityId: data.entityId,       
+      user: { connect: { id: data.userId } },   
       fromUser: { connect: { id: data.fromUserId } }, 
     },
   });

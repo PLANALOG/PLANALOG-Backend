@@ -19,7 +19,6 @@ const handleDatabaseError = (error, message) => {
   throw new DatabaseError(message, error);
 };
 
-
 export const likeMoment = async (data) => {
   try {
     // 입력값 검증
@@ -30,6 +29,7 @@ export const likeMoment = async (data) => {
     // 게시글 존재 여부 확인
     const momentExists = await prisma.moment.findUnique({
       where: { id: data.entityId }, 
+      select: { userId: true } , 
     });
 
     if (!momentExists) {
@@ -55,7 +55,7 @@ export const likeMoment = async (data) => {
 
   } catch (error) {
     // 사용자의 잘못된 요청
-    if (error instanceof ValidationError || 
+    if (error instanceof EntityValidationError || 
         error instanceof momentIdNotFoundError || 
         error instanceof DuplicateLikeMomentError) {
       throw error; 
