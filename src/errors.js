@@ -295,6 +295,7 @@ export class UnauthorizedPlannerDeletionError extends Error {
     this.reason = reason;
   }
 }
+
 // moment생성 에러처리
 
 // 서버 오류
@@ -376,6 +377,20 @@ export class DuplicateSortOrderError extends Error {
     this.data = data;
   }
 }
+
+//moment 목록 조회 
+export class UnauthorizedAccessError extends Error {
+  errorCode = "M007";
+  statusCode = 401;
+
+  constructor() {
+    const reason = "인증되지 않은 사용자입니다. 로그인 후 다시 시도하세요.";
+    super(reason);
+    this.reason = reason;
+    this.data = {};
+  }
+}
+
 // 사용자 인증 정보가 없을 때 발생
 export class UserAuthenticationError extends Error {
   errorCode = "USER001";
@@ -604,3 +619,4 @@ export class UnauthorizedTaskAccessError extends Error {
     this.data = data; // { taskId: 1234, userId: 5678 }
   }
 }
+

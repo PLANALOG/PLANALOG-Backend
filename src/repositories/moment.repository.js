@@ -46,7 +46,7 @@ export const createMoment = async (data) => {
 
 export const updateMoment = async (momentId, data) => {
     return await prisma.$transaction(async (prisma) => {
-        // 🔍 1️⃣ Moment 존재 여부 확인
+        // Moment 존재 여부 확인
         const existingMoment = await prisma.moment.findUnique({
             where: { id: momentId },
         });
@@ -55,7 +55,7 @@ export const updateMoment = async (momentId, data) => {
             throw new Error(`Moment ID ${momentId}에 해당하는 데이터가 존재하지 않습니다.`);
         }
 
-        // 2️⃣ 기존 Moment 업데이트
+        // 기존 Moment 업데이트
         const updatedMoment = await prisma.moment.update({
             where: { id: momentId },
             data: {
@@ -64,7 +64,7 @@ export const updateMoment = async (momentId, data) => {
             include: { momentContents: true },
         });
 
-        // 3️⃣ 페이지 삭제 처리
+        // 페이지 삭제 처리
         if (data.deletedSortOrders?.length > 0) {
             for (const sortOrder of data.deletedSortOrders) {
                 await prisma.momentContent.deleteMany({
@@ -86,7 +86,7 @@ export const updateMoment = async (momentId, data) => {
             }
         }
 
-        // 4️⃣ 콘텐츠 수정 및 추가 처리
+        // 콘텐츠 수정 및 추가 처리
         for (const content of data.momentContents) {
             if (content.sortOrder) {
                 // 기존 콘텐츠 수정
@@ -151,15 +151,18 @@ export const deleteMomentFromDB = async (momentId) => {
 };
 
 
-// 기존 쿼리 (유저의 Moment 조회)
 export const findMyMoments = async (userId) => {
     try {
         const moments = await prisma.moment.findMany({
             where: {
-                userId: BigInt(userId), // ✅ 이 부분이 특정 사용자로 제한
+                userId: BigInt(userId),
             },
             include: {
-                momentContents: true,
+                user: { select: { name: true } },  // 사용자 이름 추가
+                momentContents: {
+                    select: { url: true },  // 첫 번째 이미지 URL만 가져옴
+                    take: 1  // 첫 번째 이미지만 가져오기 (불필요한 데이터 방지)
+                },
             },
             orderBy: {
                 createdAt: 'desc',
@@ -174,15 +177,8 @@ export const findMyMoments = async (userId) => {
     }
 };
 
-// 추가 디버깅: 필터링 조건 없이 모든 Moments 조회
-export const findAllMomentsForDebug = async () => {
-    const moments = await prisma.moment.findMany({
-        include: { momentContents: true },
-        orderBy: { createdAt: 'desc' }
-    });
-    console.log("DB의 모든 Moments (필터링 없음):", JSON.stringify(moments, null, 2));
-    return moments;
-};
+
+
 
 
 
@@ -190,7 +186,6 @@ export const findAllMomentsForDebug = async () => {
 // 나의 특정 Moment 상세 조회
 export const findMyMomentDetail = async (userId, momentId) => {
     try {
-        console.log("DB 쿼리 실행:", { userId, momentId }); // ✅ 쿼리 입력 로그
 
         const moment = await prisma.moment.findUnique({
             where: { id: BigInt(momentId) },
@@ -200,10 +195,9 @@ export const findMyMomentDetail = async (userId, momentId) => {
             }
         });
 
-        console.log("DB 조회된 Moment:", moment); // ✅ 쿼리 결과 확인
         return moment;
     } catch (error) {
-        console.error("DB 조회 오류:", error.message); // ✅ DB 에러 로그
+        console.error("DB 조회 오류:", error.message); //  에러 로그
         throw error;
     }
 };

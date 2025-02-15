@@ -3,7 +3,6 @@ import {
     updateMoment, 
     deleteMomentFromDB, 
     findMyMoments, 
-    findAllMomentsForDebug,
     findMyMomentDetail, 
     findFriendsMoments, 
     findFriendMomentDetail 
@@ -24,7 +23,8 @@ import {
   MissingMomentContentError,
   MissingContentInPageError,
   DuplicateSortOrderError,
-  MomentServerError
+  MomentServerError,
+  UnauthorizedAccessError
 } from "../errors.js";
 
 import dayjs from "dayjs"; 
@@ -132,19 +132,25 @@ export const momentDelete = async (momentId) => {
 };
 
 
-
 export const getMyMoments = async (userId) => {
     try {
-        const myMoments = await findMyMoments(userId);
-        const allMoments = await findAllMomentsForDebug(); // ✅ 모든 데이터 조회
+        // 인증되지 않은 사용자 처리
+        if (!userId) {
+            throw new UnauthorizedAccessError();
+        }
 
-        console.log("현재 로그인한 사용자의 Moments:", JSON.stringify(myMoments, null, 2));
-        console.log("DB에 존재하는 모든 Moments:", JSON.stringify(allMoments, null, 2));
+        const myMoments = await findMyMoments(userId);
 
         return responseFromMyMoments(myMoments);
     } catch (error) {
         console.error("나의 Moment 목록 조회 오류:", error);
-        throw new Error("Moment 목록 조회 실패");
+
+        if (error instanceof UnauthorizedAccessError) {
+            throw error;
+        }
+
+        // 기타 예상치 못한 오류는 서버 오류로 처리
+        throw new MomentServerError();
     }
 };
 
@@ -154,10 +160,9 @@ export const getMyMoments = async (userId) => {
 
 export const getMyMomentDetail = async (userId, momentId) => {
     try {
-        console.log("조회 요청 - userId:", userId, "momentId:", momentId); // ✅ 추가된 로그
 
         const momentDetail = await findMyMomentDetail(userId, momentId);
-        console.log("DB 조회 결과:", momentDetail); // ✅ DB 결과 확인
+        console.log("DB 조회 결과:", momentDetail); // DB 결과 확인
 
         if (!momentDetail) {
             throw new Error("Moment를 찾을 수 없습니다.");

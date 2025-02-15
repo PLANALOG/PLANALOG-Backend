@@ -95,7 +95,7 @@ export const bodyToUpdateMoment = (body) => {
             url: content.url ?? null,
             insertAfterSortOrder: content.insertAfterSortOrder || null, // 추가된 부분
         })),
-        deletedSortOrders: deletedSortOrders, // ✅ 삭제할 페이지 정보 추가
+        deletedSortOrders: deletedSortOrders, // 삭제할 페이지 정보 추가
     };
 };
 
@@ -117,7 +117,6 @@ export const responseFromUpdateMoment = (moment) => {
 };
 
 
-
 export const responseFromMyMoments = (moments) => {
     if (!Array.isArray(moments)) {
         console.error("moments가 배열이 아님:", moments);
@@ -134,14 +133,11 @@ export const responseFromMyMoments = (moments) => {
             return {
                 momentId: typeof moment.id === 'bigint' ? Number(moment.id) : moment.id, // BigInt 처리
                 title: moment.title,
-                status: moment.status,
-                createdAt: moment.createdAt instanceof Date 
-                    ? moment.createdAt.toISOString() 
-                    : moment.createdAt,
-                updatedAt: moment.updatedAt instanceof Date 
-                    ? moment.updatedAt.toISOString() 
-                    : moment.updatedAt,
-                thumbnailUrl: moment.momentContents[0]?.url || null
+                userName: moment.user?.name || "알 수 없음",  // 사용자 이름 추가
+                date: dayjs(moment.date).format("YYYY-MM-DD"),  // YYYY-MM-DD 형식 변환
+                likingCount: moment.likingCount ?? 0,  // 공감 수
+                commentCount: moment.commentCount ?? 0,  // 댓글 수
+                thumbnailUrl: moment.momentContents.length > 0 ? moment.momentContents[0].url : null // 첫 번째 이미지 가져오기
             };
         } catch (error) {
             console.error("DTO 변환 중 오류 발생:", error, moment);
@@ -149,9 +145,6 @@ export const responseFromMyMoments = (moments) => {
         }
     }).filter(moment => moment !== null);
 };
-
-
-
 
 
 
