@@ -6,13 +6,15 @@ const router = express.Router();
 
 router.post("/", handleCreateTask);
 router.post("/bulk", handleCreateTaskBulk);
+router.patch("/status", handleToggleCompletion);
 
 router.patch("/:task_id", handleUpdateTask);
 
-router.get("/:task_id", handleGetTask);
+//할일 조회
+router.get("/", handleGetTask);
 
 // router.delete("/:task_id", handleDeleteTask);
 router.delete("/", handleDeleteTask);
  
-router.patch("/:task_id/status", handleToggleCompletion);
+
 export default router;
