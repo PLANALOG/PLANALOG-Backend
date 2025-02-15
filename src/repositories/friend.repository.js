@@ -1,15 +1,22 @@
 // src/repositories/friend.repository.js
 import { prisma } from "../db.config.js";
 
-
 export const findExistingFriend = async (fromUserId, toUserId) => {
   return await prisma.friend.findFirst({
     where: { fromUserId, toUserId },
   });
 };
 
-
 export const createFriendRequest = async (fromUserId, toUserId) => {
+  const toUser = await prisma.user.findUnique({
+    where: { id: toUserId },
+    select: { isDeleted: true },
+  });
+
+  if (!toUser || toUser.isDeleted) {
+    throw new Error("친구 요청을 보낼 수 없는 사용자입니다. (탈퇴 또는 존재하지 않음)");
+  }
+
   const existingFriend = await prisma.friend.findFirst({
     where: {
       fromUserId,
@@ -19,18 +26,17 @@ export const createFriendRequest = async (fromUserId, toUserId) => {
   });
 
   if (existingFriend) {
-    return existingFriend; 
+    return existingFriend;
   }
 
   return await prisma.friend.create({
     data: {
       fromUserId,
       toUserId,
-      isAccepted: false, 
+      isAccepted: false,
     },
   });
 };
-
 
 export const createFriend = async (fromUserId, toUserId) => {
   return await prisma.friend.create({
@@ -43,11 +49,13 @@ export const findFriends = async (fromUserId) => {
   return await prisma.friend.findMany({
     where: {
       fromUserId: BigInt(fromUserId),
+      isAccepted: true,
+      toUser: { isDeleted: false },
     },
     select: {
-      id: true, 
+      id: true,
       isAccepted: true,
-      toUser: { 
+      toUser: {
         select: {
           id: true,
           name: true,
@@ -61,21 +69,23 @@ export const findFriends = async (fromUserId) => {
   });
 };
 
-
 // 닉네임 및 이름으로 친구 검색
 export const findFriendsByNickname = async (fromUserId, nickname) => {
   return await prisma.friend.findMany({
     where: {
       fromUserId: BigInt(fromUserId),
-      OR: [
-        { toUser: { nickname: { contains: nickname } } },
-        { toUser: { name: { contains: nickname } } },
-      ],
+      isAccepted: true,
+      toUser: {
+        isDeleted: false,
+        OR: [
+          { name: { contains: nickname } },
+          { nickname: { contains: nickname } },
+        ],
+      },
     },
     select: {
-      id: true, 
-      isAccepted: true,
-      toUser: { 
+      id: true,
+      toUser: {
         select: {
           id: true,
           name: true,
@@ -94,31 +104,30 @@ export const deleteFriendDeleteDTO = (friendId) => {
   if (!friendId) {
     throw new Error("friend_id는 필수 항목입니다.");
   }
-
-  return {
-    friendId,
-  };
+  return { friendId };
 };
-
 
 export const countFollowers = async (userId) => {
   try {
     const count = await prisma.friend.count({
       where: {
         toUserId: BigInt(userId),
-        isAccepted: true, 
+        isAccepted: true,
+        fromUser: {
+          isDeleted: false, 
+        },
       },
     });
 
     return count;
   } catch (error) {
-    console.error('Repository 에러 상세:', error);
+    console.error("Repository 에러 상세:", error);
     throw error;
   }
 };
 
-export const acceptFriendRequest = async (friendId, userId) => {
 
+export const acceptFriendRequest = async (friendId, userId) => {
   const friendRequest = await prisma.friend.findUnique({
     where: { id: friendId },
   });
@@ -128,7 +137,6 @@ export const acceptFriendRequest = async (friendId, userId) => {
   }
 
   if (friendRequest.toUserId !== BigInt(userId)) {
-    
     throw new Error("권한이 없거나 유효하지 않은 요청입니다.");
   }
 
@@ -138,15 +146,13 @@ export const acceptFriendRequest = async (friendId, userId) => {
   });
 };
 
-
-
 export const findFollowers = async (userId, search) => {
   return await prisma.friend.findMany({
     where: {
       toUserId: BigInt(userId),
       isAccepted: true,
       fromUser: {
-        isDeleted: false, 
+        isDeleted: false,
         ...(search && {
           OR: [
             { name: { contains: search } },
@@ -171,15 +177,13 @@ export const findFollowers = async (userId, search) => {
   });
 };
 
-
-
 export const findFollowings = async (userId, search) => {
   return await prisma.friend.findMany({
     where: {
       fromUserId: BigInt(userId),
       isAccepted: true,
       toUser: {
-        isDeleted: false, 
+        isDeleted: false,
         ...(search && {
           OR: [
             { name: { contains: search } },
