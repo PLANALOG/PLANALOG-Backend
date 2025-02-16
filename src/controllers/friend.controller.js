@@ -1,4 +1,6 @@
 import { StatusCodes } from "http-status-codes";
+import { createNoticeService } from "../services/notice.service.js";
+
 import {
   addFriendService,
   getFriendsService,
@@ -12,6 +14,7 @@ import {
   createFriendCountDTO,
   deleteFriendDeleteDTO
 } from "../dtos/friend.dto.js";
+
 
 export const addFriend = async (req, res) => {
   /* 
@@ -40,7 +43,16 @@ export const addFriend = async (req, res) => {
       });
     }
 
+    // 친구 추가 로직 실행
     const result = await addFriendService(fromUserId, toUserId);
+
+    // 📌 친구 요청을 받은 사용자에게 알림 생성
+    await createNoticeService(fromUserId, toUserId, {
+      message: "새로운 친구 요청이 도착했습니다!",
+      entityType: "FRIEND",
+      entityId: fromUserId, // 보낸 사람 ID를 entityId로 설정
+    });
+
     res.status(StatusCodes.CREATED).success({
       message: "친구 요청이 성공적으로 생성되었습니다.",
       data: result,

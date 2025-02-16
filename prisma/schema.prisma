@@ -60,7 +60,8 @@ model User {
   searches       Search[]
   friendsTo      Friend[]       @relation("UserToFriends")
   friendsFrom    Friend[]       @relation("FriendsToUser")
-  notices        Notice[]
+  noticesTo      Notice[]       @relation("ToUser")   // 사용자가 받은 알림
+  noticesFrom    Notice[]       @relation("FromUser") // 사용자가 보낸 알림
   likes          Like[]         @relation("LikeToUser")
   fromLikes      Like[]         @relation("LikeFromUser")
   avatars        Avatar[]
@@ -176,21 +177,31 @@ model Friend {
  * }
  */
 
+ enum NoticeType {
+  MOMENT
+  COMMENT
+  FRIEND
+}
+
+
 model Notice {
-  id         BigInt      @id @default(autoincrement())
-  userId     BigInt      @map("user_id")
-  isRead     Boolean     @map("is_read")
-  message    String      @db.VarChar(100)
-  entityType notice_type @map("entity_type") // ENUM (moment, comment, friend)
-  entityId   Int         @map("entity_id")
-  createdAt  DateTime    @default(now()) @map("created_at")
+  id         BigInt     @id @default(autoincrement())
+  toUserId   BigInt     @map("to_user_id")
+  fromUserId BigInt     @map("from_user_id")
+  isRead     Boolean    @map("is_read")
+  message    String     @db.VarChar(100)
+  entityType NoticeType @map("entity_type") // ENUM (MOMENT, COMMENT, FRIEND)
+  entityId   Int        @map("entity_id")
+  createdAt  DateTime   @default(now()) @map("created_at")
 
   // Relationships
-  user User @relation(fields: [userId], references: [id])
+  toUser   User @relation(fields: [toUserId], references: [id], name: "ToUser")
+  fromUser User @relation(fields: [fromUserId], references: [id], name: "FromUser")
 
-  @@index([userId], map: "userId")
+  @@index([toUserId], map: "to_user_id")
   @@map("notice")
 }
+
 
 model Like {
   id         BigInt    @id @default(autoincrement())
