@@ -24,7 +24,9 @@ import {
   MissingContentInPageError,
   DuplicateSortOrderError,
   MomentServerError,
-  UnauthorizedAccessError
+  UnauthorizedAccessError,
+  InvalidMomentIdError,
+  MomentNotFoundError
 } from "../errors.js";
 
 import dayjs from "dayjs"; 
@@ -156,22 +158,31 @@ export const getMyMoments = async (userId) => {
 
 
 
-
-
 export const getMyMomentDetail = async (userId, momentId) => {
     try {
+        // 유효하지 않은 momentId 체크
+        if (isNaN(momentId) || !Number.isInteger(Number(momentId))) {
+            throw new InvalidMomentIdError(momentId);
+        }
 
-        const momentDetail = await findMyMomentDetail(userId, momentId);
-        console.log("DB 조회 결과:", momentDetail); // DB 결과 확인
+        const momentDetail = await findMyMomentDetail(userId, BigInt(momentId));
 
+        // 존재하지 않는 momentId 체크
         if (!momentDetail) {
-            throw new Error("Moment를 찾을 수 없습니다.");
+            throw new MomentNotFoundError(momentId);
         }
 
         return responseFromMyMomentDetail(momentDetail);
     } catch (error) {
         console.error("나의 Moment 상세 조회 중 오류 발생:", error.message);
-        throw new Error("나의 Moment 상세 조회에 실패했습니다. 다시 시도해주세요.");
+
+        // 존재하지 않는 moment 에러
+        if (error instanceof MomentNotFoundError || error instanceof InvalidMomentIdError) {
+            throw error;
+        }
+
+        // 기타 예상치 못한 오류는 서버 오류로 처리
+        throw new MomentServerError("나의 Moment 상세 조회에 실패했습니다. 다시 시도해주세요.", { error });
     }
 };
 

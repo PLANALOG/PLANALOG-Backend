@@ -131,13 +131,13 @@ export const responseFromMyMoments = (moments) => {
             }
 
             return {
-                momentId: typeof moment.id === 'bigint' ? Number(moment.id) : moment.id, // BigInt 처리
+                momentId: typeof moment.id === 'bigint' ? Number(moment.id) : moment.id,
                 title: moment.title,
-                userName: moment.user?.name || "알 수 없음",  // 사용자 이름 추가
-                date: dayjs(moment.date).format("YYYY-MM-DD"),  // YYYY-MM-DD 형식 변환
-                likingCount: moment.likingCount ?? 0,  // 공감 수
-                commentCount: moment.commentCount ?? 0,  // 댓글 수
-                thumbnailUrl: moment.momentContents.length > 0 ? moment.momentContents[0].url : null // 첫 번째 이미지 가져오기
+                userName: moment.user?.name || "알 수 없음",
+                date: dayjs(moment.date).format("YYYY-MM-DD"),
+                likingCount: moment.likingCount ?? 0, // `_count.likes` 제거하고 개별적으로 가져온 값 사용
+                commentCount: moment._count?.comments ?? 0,
+                thumbnailUrl: moment.momentContents.length > 0 ? moment.momentContents[0].url : null
             };
         } catch (error) {
             console.error("DTO 변환 중 오류 발생:", error, moment);
@@ -148,23 +148,28 @@ export const responseFromMyMoments = (moments) => {
 
 
 
+
+
+
+
 // 나의 Moment 상세 조회 DTO
 export const responseFromMyMomentDetail = (moment) => {
     return {
         userId: moment.userId,
         momentId: moment.id,
         title: moment.title,
-        status: moment.status,
-        plannerId: moment.plannerId || null,
+        date: dayjs(moment.date).format("YYYY-MM-DD"),
+        plannerId: moment.plannerId ?? null,
         createdAt: moment.createdAt,
         updatedAt: moment.updatedAt,
         momentContents: moment.momentContents.map(content => ({
             sortOrder: content.sortOrder,
             content: content.content,
-            url: content.url,
+            url: content.url ?? null
         }))
     };
 };
+
 
 //  친구의 Moment 목록 조회 DTO
 export const responseFromFriendsMoments = (moments) => {

@@ -153,21 +153,38 @@ export const deleteMomentFromDB = async (momentId) => {
 
 export const findMyMoments = async (userId) => {
     try {
+        // 사용자 Moments 조회
         const moments = await prisma.moment.findMany({
             where: {
                 userId: BigInt(userId),
             },
             include: {
-                user: { select: { name: true } },  // 사용자 이름 추가
+                user: { select: { name: true } }, // 사용자 이름 추가
                 momentContents: {
-                    select: { url: true },  // 첫 번째 이미지 URL만 가져옴
-                    take: 1  // 첫 번째 이미지만 가져오기 (불필요한 데이터 방지)
+                    select: { url: true },
+                    take: 1, // 대표 이미지 -> 썸네일 이미지
                 },
+                _count: {
+                    select: {
+                        comments: true, // 댓글 개수
+                    }
+                }
             },
             orderBy: {
-                createdAt: 'desc',
+                createdAt: "desc",
             },
         });
+
+        // 개별 moment에 대해 likes 개수를 Prisma에서 별도로 조회
+        for (const moment of moments) {
+            const likesCount = await prisma.like.count({
+                where: {
+                    entityId: Number(moment.id), // BigInt → Number 변환
+                    entityType: "moment", // moment에 해당하는 좋아요만 조회
+                },
+            });
+            moment.likingCount = likesCount; // 좋아요 개수 추가
+        }
 
         console.log("현재 사용자 Moments:", JSON.stringify(moments, null, 2));
         return moments;
@@ -176,6 +193,11 @@ export const findMyMoments = async (userId) => {
         throw new Error("Moment 목록 조회 실패");
     }
 };
+
+
+
+
+
 
 
 
