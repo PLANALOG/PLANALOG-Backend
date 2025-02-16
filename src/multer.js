@@ -40,6 +40,24 @@ export const upload = multer({ //
 
 })
 
+/*
+export const uploadMomentImage = multer({
+    storage: multerS3({
+        s3: s3,
+        bucket: process.env.AWS_BUCKET_NAME,
+        contentType: multerS3.AUTO_CONTENT_TYPE,
+        key: (req, file, cb) => {
+            const uploadDirectory = "moment_images/";
+
+            file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8'); // 한글 파일명 깨짐 방지
+            const ext = path.extname(file.originalname);
+
+            cb(null, uploadDirectory + path.basename(file.originalname, ext) + Date.now() + ext);
+        }
+    })
+}).array("images"); // 📌 Moment는 여러 장 업로드 가능 (제한 없음)
+*/
+
 
 //s3 파일 삭제
 export const deleteFile = async (fileUrl) => {

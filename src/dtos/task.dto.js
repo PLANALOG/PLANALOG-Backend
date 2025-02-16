@@ -51,23 +51,28 @@ export const updateTaskDto = (task_id, body) => {
         title: body.title
     }
 }
-export const getTaskDto = (task_id) => {
-    //task_id 숫자인지 확인
-
-    if (isNaN(task_id)) {
-        throw new Error("Task_id 가 숫자가 아닙니다.");
+export const getTaskDto = (planner_date) => {
+    console.log("planner_date", planner_date);
+    if (typeof planner_date !== "string") {
+        throw new Error("planner_date 는 문자열이어야 합니다.");
     }
-    return {
-        task_id: BigInt(task_id)
+
+    const date = new Date(planner_date);
+
+    if (isNaN(date.getTime())) {
+        throw new Error("planner_date 값이 올바른 날짜 형식이 아닙니다. (예: YYYY-MM-DD)");
     }
-    
 
-}
+    return date;
+};
 
-export const responseFromToggledTask = ({ task, newIsCompleted }) => {
-    console.log("반환값 확인 task :", task, ", newIsCompleted :", newIsCompleted);
 
-    const response = {
+export const responseFromToggledTask = ( tasks, newIsCompleted ) => {
+    console.log("반환값 확인 task :", tasks, ", newIsCompleted :", newIsCompleted);
+
+    // 개별 task를 포맷팅하는 함수
+    const formatTask = (task) => {
+        const response = {
         id: task.id,
         plannerId: task.plannerId,
         taskCategoryId: task.taskCategoryId,
@@ -77,8 +82,17 @@ export const responseFromToggledTask = ({ task, newIsCompleted }) => {
     };
 
     if (newIsCompleted !== null) {
-        response.message = `해당 날짜의 플래너의 할 일 모두 완료 여부가 ${newIsCompleted}로 변경되었습니다`;
+      response.message = `해당 날짜의 플래너의 할 일 모두 완료 여부가 ${newIsCompleted}로 변경되었습니다`;
     }
 
     return response;
-}
+  };
+
+  // 전달된 tasks가 배열이면 map으로, 단일 객체면 바로 포맷팅하여 반환
+  if (Array.isArray(tasks)) {
+    return tasks.map(formatTask);
+  } else {
+    return formatTask(tasks);
+  }
+};
+    

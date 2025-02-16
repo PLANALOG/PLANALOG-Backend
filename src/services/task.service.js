@@ -2,9 +2,10 @@ import { addTask, changeTask, getTaskFromRepository, deleteTaskFromRepository, t
 import { prisma } from "../db.config.js";
 import { updatePlannerIsCompleted, deletePlannerWithNoTasks } from "../repositories/planner.repository.js";
 import { TaskNotFoundError, UnauthorizedTaskAccessError } from "../errors.js";
-
+import { isDeletedUser } from "../repositories/user.repository.js";
 export const createTask = async (taskData) => {
   console.log("request received to Service:", taskData);
+  await isDeletedUser(taskData.userId);
   // Task 생성 로직
   const task = {
     "title": taskData.title,
@@ -28,8 +29,8 @@ export const createTask = async (taskData) => {
 
 }
 export const createTaskBulk = async (taskData, userId) => {
-  console.log("request received to Service and userId", taskData, userId);
-  console.log("type of taskData", typeof taskData);
+  
+  await isDeletedUser(userId);
   const addedTaskData = [];
   
   try {
@@ -59,6 +60,7 @@ export const updateTask = async (taskData) => {
 
 };
 export const deleteTask = async (ids, userId) => {
+  await isDeletedUser(userId);
   try {
     // 권한 확인 및 삭제 대상 조회
     const tasksToDelete = await prisma.task.findMany({
@@ -91,26 +93,53 @@ export const deleteTask = async (ids, userId) => {
     throw error;
   }
 };
-export const getTask = async (taskData) => {
+export const getTask = async (planner_date, userId) => {
   // Task 조회 로직
   try {
-    const receivedTask = await getTaskFromRepository(taskData);
-    return receivedTask;
+    //회원탈퇴 로직. 
+    await isDeletedUser;
+
+    
+    const planner = await prisma.planner.findFirst({
+      where: {
+        plannerDate: planner_date
+      }
+    });
+    
+    if (!planner) {
+      throw new TaskNotFoundError();
+    }
+
+    if (userId != planner.userId) {
+      throw new UnauthorizedTaskAccessError();
+    }
+
+    const receivedTasks = await getTaskFromRepository(planner_date);
+    return receivedTasks;
   } catch (error) {
     throw error;
   }
 }
-export const toggleTaskCompletion = async (taskData) => {
+export const toggleTaskCompletion = async (ids, userId) => {
+  await isDeletedUser(userId);
   // Task 완료상태 수정 로직
   try {
-    const toggledTask = await taskCompletionChange(taskData);
+    console.log("service ", ids, userId);
+    
+    const bigIntUserId = BigInt(userId);
+    const toggledTasks = await taskCompletionChange(ids, bigIntUserId);
+    
+    
 
     //만약 해당 플래너의 모든 task가 완료되었으면 플래너의 isCompleted값 변경
-    const plannerId = toggledTask.plannerId;
+    
+    // 화면상에 보이는 한 플래너에 있는 할일들끼리만 수정가능하다고 가정. 
+    const plannerId = toggledTasks[0].plannerId;
+    console.log(plannerId);
     const newPlannerIsCompleted = await updatePlannerIsCompleted(plannerId);
     //newIsCompleted는 플래너의 isCompleted 값이 변경되었으면 변경된 boolean값, 변경되지 않았다면 null값 
-
-    return { toggledTask, newPlannerIsCompleted };
+    console.log("newPlannerIsCompleted:", newPlannerIsCompleted);
+    return { toggledTasks, newPlannerIsCompleted };
   } catch (error) {
     throw error;
   }

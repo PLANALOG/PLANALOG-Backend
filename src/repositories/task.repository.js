@@ -1,6 +1,6 @@
 import { prisma } from "../db.config.js";
 import { getPlannerWithTasks } from "./planner.repository.js"; // 기존 코드 활용
-import { DuplicateTaskError, TaskNotFoundError, TaskDeleteNotFoundError } from "../errors.js";
+import { DuplicateTaskError, TaskNotFoundError, TaskDeleteNotFoundError, UnauthorizedTaskAccessError } from "../errors.js";
 
 export const addTask = async (data) => {
     // Prisma를 사용하여 DB에 새로운 Task 생성
@@ -87,18 +87,18 @@ export const changeTask = async (data) => {
     return updatedTask;
 };
 
-export const getTaskFromRepository = async (data) => {
-    const task = await prisma.task.findUnique({
+export const getTaskFromRepository = async (planner_date) => {
+    
+    const plannerWithTasks = await prisma.planner.findFirst({
         where: {
-            id: data.task_id
-        }
+            plannerDate: planner_date
+        },
+        include: {tasks: true}
     }
     );
 
-    if (!task) {
-        throw new TaskNotFoundError();
-    }
-    return task;
+    
+    return plannerWithTasks.tasks;
 };
 
 export const deleteTaskFromRepository = async (ids) => {
@@ -124,33 +124,50 @@ export const deleteTaskFromRepository = async (ids) => {
     }
 };
 
-export const taskCompletionChange = async (data) => {
+export const taskCompletionChange = async (ids, userId) => {
     try {
-        // 있는지 확인 
-        const task = await prisma.task.findUnique({
-            where: {
-                id: data.task_id
+        // 1. 입력받은 ids 배열에 해당하는 Task 조회 (planner 정보 포함해서, 단 검증용으로만 사용)
+        const tasks = await prisma.task.findMany({
+          where: {
+            id: { in: ids },
+          },
+          include: {
+            planner: {
+              select: {id: true ,userId: true } 
             }
+          },
         });
-        if (!task) {
-            throw new TaskNotFoundError();
+    
+        // 2. 모든 Task가 존재하는지, 그리고 현재 사용자의 Planner에 속하는지 확인
+        if (!tasks || tasks.length !== ids.length) {
+          throw new TaskNotFoundError();
         }
-
-        const changedTask = await prisma.task.update({
-            where: {
-                id: data.task_id
-            },
+        for (const task of tasks) {
+            console.log("task id",task.id);
+          if (task.planner.userId !== userId) {
+            throw new UnauthorizedTaskAccessError();
+          }
+        }
+    
+        // 3. 각 Task의 isCompleted 값을 순차적으로 업데이트 (반복문 사용)
+        const updatedTasks = [];
+        for (const task of tasks) {
+          const updatedTask = await prisma.task.update({
+            where: { id: task.id },
             data: {
-                // 값 반대로 바꾸기
-                isCompleted: !task.isCompleted
-            }
-        })
-
-        return changedTask;
-    } catch (error) {
+                // 값 반대로바꾸기  
+                isCompleted: !task.isCompleted 
+            },
+          });
+          updatedTasks.push(updatedTask);
+        }
+        console.log("updatedTasks", updatedTasks);
+        return updatedTasks;
+      } catch (error) {
         throw error;
-    }
+      }
 };
+
 export const findTaskWithPlanner = async (data) => {
     // task_id를 bigint로 바꾸기 
     const taskId = typeof (data.task_id) === "string" ? BigInt(data.task_id) : data.task_id;
