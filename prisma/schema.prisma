@@ -101,7 +101,7 @@ model Task {
   updatedAt      DateTime      @updatedAt @map("updated_at")
   // Relationships
   planner        Planner       @relation(fields: [plannerId], references: [id], onDelete: Cascade)
-  taskCategory   TaskCategory? @relation(fields: [taskCategoryId], references: [id] ,onDelete: Cascade)
+  taskCategory   TaskCategory? @relation(fields: [taskCategoryId], references: [id], onDelete: Cascade)
 
   @@index([plannerId], map: "plannerId")
   @@index([taskCategoryId], map: "taskCategoryId")
@@ -237,6 +237,7 @@ model Moment {
   id           BigInt   @id @default(autoincrement())
   userId       BigInt   @map("user_id")
   title        String   @db.VarChar(100)
+  date         DateTime @default(now()) @map("date")
   //status       share_status @map("status") // ENUM (public, draft)
   plannerId    BigInt?  @map("planner_id")
   likingCount  BigInt   @default(0) @map("liking_count")
