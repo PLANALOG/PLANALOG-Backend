@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { 
     bodyToCreateMoment, 
     bodyToUpdateMoment,
+    responseFromMyMoments,
     responseFromMyMomentDetail, 
     responseFromFriendsMoments, 
     responseFromFriendMomentDetail  } from "../dtos/moment.dto.js";
@@ -198,18 +199,20 @@ export const handleGetMyMoments = async (req, res, next) => {
     #swagger.security = [{ "bearerAuth": [] }]
     */
 
+
     try {
-        console.log("JWT 토큰의 userId:", req.user.id); // userId 확인
+        console.log("JWT 토큰의 userId:", req.user.id);
         const moments = await getMyMoments(req.user.id);
+        const responseData = responseFromMyMoments(moments);  // 데이터를 변환
 
         res.status(200).json({ 
             resultType: "SUCCESS", 
             error: null, 
-            success: { data: moments } 
+            success: { data: responseData } 
         });
     } catch (error) {
         console.error("응답 반환 중 오류 발생:", error);
-        next(error);  // Express 에러 핸들러로 전달
+        next(error);
     }
 };
 
