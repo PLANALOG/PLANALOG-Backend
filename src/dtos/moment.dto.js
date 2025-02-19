@@ -1,3 +1,27 @@
+// YYYY-MM-DD 형식으로 변환하는 함수 (UTC+9 적용)
+const formatDate = (date) => {
+    if (!date) return null;
+    const validDate = date instanceof Date ? date : new Date(date); // 문자열이면 Date 객체로 변환
+    if (isNaN(validDate.getTime())) {
+        console.error("Invalid date detected:", date);
+        return null;
+    }
+    const KST = new Date(validDate.getTime() + 9 * 60 * 60 * 1000); // UTC+9 적용
+    return KST.toISOString().split("T")[0]; // YYYY-MM-DD
+};
+
+// YYYY-MM-DDTHH:mm:ss.sssZ 형식으로 변환하는 함수 (UTC+9 적용)
+const formatDateTime = (date) => {
+    if (!date) return null;
+    const validDate = date instanceof Date ? date : new Date(date); // 문자열이면 Date 객체로 변환
+    if (isNaN(validDate.getTime())) {
+        console.error("Invalid date detected:", date);
+        return null;
+    }
+    const KST = new Date(validDate.getTime() + 9 * 60 * 60 * 1000); // UTC+9 적용
+    return KST.toISOString(); // ISO 형식 유지
+};
+
 export const bodyToCreateMoment = (body) => {
     if (!body) {
         throw new Error("요청 body값이 없습니다."); // body값이 없는 경우
@@ -46,8 +70,8 @@ export const responseFromCreateMoment = (moment) => {
         title: moment.title,
         date: formatDate(moment.createdAt),  // YYYY-MM-DD 형식의 새로운 필드 추가
         plannerId: moment.plannerId ?? null,
-        createdAt: moment.createdAt,  
-        updatedAt: moment.updatedAt,  
+        createdAt: formatDateTime(moment.createdAt), 
+        updatedAt: formatDateTime(moment.updatedAt), 
         momentContents: moment.momentContents.map(content => ({
             sortOrder: content.sortOrder,
             content: content.content,
@@ -55,13 +79,6 @@ export const responseFromCreateMoment = (moment) => {
         }))
     };
 };
-
-// 🔍 YYYY-MM-DD 형식으로 변환하는 함수
-const formatDate = (date) => {
-    if (!date) return null;  // 예외 처리
-    return date.toISOString().split("T")[0];  // "YYYY-MM-DDTHH:mm:ss.sssZ" → "YYYY-MM-DD"
-};
-
 
 
 //  moment 수정 DTO
@@ -110,8 +127,8 @@ export const responseFromUpdateMoment = (moment) => {
         userId: moment.userId,
         title: moment.title,
         plannerId: moment.plannerId || null,
-        createdAt: moment.createdAt,
-        updatedAt: moment.updatedAt,
+        createdAt: formatDateTime(moment.createdAt), 
+        updatedAt: formatDateTime(moment.updatedAt), 
         momentContents: moment.momentContents.map(content => ({
             sortOrder: content.sortOrder,
             content: content.content,
@@ -166,8 +183,8 @@ export const responseFromMyMomentDetail = (moment) => {
         title: moment.title,
         date: formatDate(moment.createdAt),
         plannerId: moment.plannerId ?? null,
-        createdAt: moment.createdAt,
-        updatedAt: moment.updatedAt,
+        createdAt: formatDateTime(moment.createdAt), 
+        updatedAt: formatDateTime(moment.updatedAt), 
         momentContents: moment.momentContents.map(content => ({
             sortOrder: content.sortOrder,
             content: content.content,
@@ -184,8 +201,8 @@ export const responseFromFriendsMoments = (moments) => {
         momentId: moment.id,
         title: moment.title,
         status: moment.status,
-        createdAt: moment.createdAt,
-        updatedAt: moment.updatedAt,
+        createdAt: formatDateTime(moment.createdAt), 
+        updatedAt: formatDateTime(moment.updatedAt), 
         thumbnailUrl: moment.momentContents[0]?.url || null
     }));
 };
@@ -198,8 +215,8 @@ export const responseFromFriendMomentDetail = (moment) => {
         title: moment.title,
         status: moment.status,
         plannerId: moment.plannerId || null,
-        createdAt: moment.createdAt,
-        updatedAt: moment.updatedAt,
+        createdAt: formatDateTime(moment.createdAt), 
+        updatedAt: formatDateTime(moment.updatedAt), 
         momentContents: moment.momentContents.map(content => ({
             sortOrder: content.sortOrder,
             content: content.content,
