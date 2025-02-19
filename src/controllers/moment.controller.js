@@ -102,33 +102,7 @@ export const handleUpdateMoment = async (req, res, next) => {
         required: true,
         schema: { type: 'integer', example: 2 }
     }
-    #swagger.requestBody = {
-        required: true,
-        content: {
-            "application/json": {
-                schema: {
-                    type: "object",
-                    properties: {
-                        title: { type: "string", example: "수정된 제목", description: "수정된 Moment 제목" },
-                        status: { type: "string", enum: ["draft", "public"], example: "public", description: "수정된 Moment 상태" },
-                        momentContents: {
-                            type: "array",
-                            items: {
-                                type: "object",
-                                properties: {
-                                    sortOrder: { type: "integer", example: 2, description: "수정할 페이지 순서" },
-                                    content: { type: "string", example: "수정된 내용 (기존 페이지)", description: "수정된 페이지 내용" },
-                                    url: { type: "string", example: "https://newimage1.com/newimage1.jpg", description: "수정된 이미지 URL" }
-                                }
-                            }
-                        }
-                    },
-                    required: ["status"]
-                }
-            }
-        }
-    }
-    */
+*/
 
     try {
         console.log("moment 수정 요청");
@@ -251,7 +225,7 @@ export const handleGetMyMomentDetail = async (req, res, next) => {
             success: { data: responseFromMyMomentDetail(moment) } 
         });
     } catch (error) {
-        console.error("Moment 상세 조회 오류:", error.message);  // ✅ 에러 로그 추가
+        console.error("Moment 상세 조회 오류:", error.message);  //  에러 로그 추가
         next(error);
     }
 };
@@ -267,57 +241,6 @@ export const handleGetFriendsMoments = async (req, res, next) => {
         "bearerAuth": []
     }]
 
-        #swagger.responses[200] = {
-            description: '친구의 Moment 목록 조회 성공',
-            content: {
-                "application/json": {
-                    schema: {
-                        type: "object",
-                        properties: {
-                            resultType: { type: "string", example: "SUCCESS", description: "결과 상태" },
-                            error: { type: "null", example: null, description: "에러 정보 (없을 경우 null)" },
-                            success: {
-                                type: "object",
-                                properties: {
-                                    data: {
-                                        type: "array",
-                                        description: "친구의 Moment 목록",
-                                        items: {
-                                            oneOf: [
-                                                {
-                                                    type: "object",
-                                                    properties: {
-                                                        userId: { type: "integer", example: 5, description: "친구의 사용자 ID" },
-                                                        momentId: { type: "integer", example: 201, description: "Moment ID" },
-                                                        title: { type: "string", example: "친구의 여행기", description: "Moment 제목" },
-                                                        status: { type: "string", example: "public", description: "Moment 상태" },
-                                                        createdAt: { type: "string", format: "date-time", example: "2025-02-01T09:00:00Z", description: "Moment 생성일" },
-                                                        updatedAt: { type: "string", format: "date-time", example: "2025-02-01T10:15:00Z", description: "Moment 수정일" },
-                                                        thumbnailUrl: { type: "string", example: "https://image3.com/image3.jpg", description: "썸네일 이미지 URL" }
-                                                    }
-                                                },
-                                                {
-                                                    type: "object",
-                                                    properties: {
-                                                        userId: { type: "integer", example: 5, description: "친구의 사용자 ID" },
-                                                        momentId: { type: "integer", example: 202, description: "Moment ID" },
-                                                        title: { type: "string", example: "카페 탐방기", description: "Moment 제목" },
-                                                        status: { type: "string", example: "public", description: "Moment 상태" },
-                                                        createdAt: { type: "string", format: "date-time", example: "2025-02-03T11:45:00Z", description: "Moment 생성일" },
-                                                        updatedAt: { type: "string", format: "date-time", example: "2025-02-03T12:20:00Z", description: "Moment 수정일" },
-                                                        thumbnailUrl: { type: "string", example: "https://image4.com/image4.jpg", description: "썸네일 이미지 URL" }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
     */
 
     try {
@@ -352,69 +275,6 @@ export const handleGetFriendMomentDetail = async (req, res, next) => {
             schema: { type: "integer", example: 456 }
         }
 
-        #swagger.responses[200] = {
-            description: '친구의 Moment 상세 조회 성공',
-            content: {
-                "application/json": {
-                    schema: {
-                        type: "object",
-                        properties: {
-                            resultType: { type: "string", example: "SUCCESS", description: "결과 상태" },
-                            error: { type: "null", example: null, description: "에러 정보 (없을 경우 null)" },
-                            success: {
-                                type: "object",
-                                properties: {
-                                    data: {
-                                        type: "object",
-                                        properties: {
-                                            userId: { type: "integer", example: 5, description: "친구의 사용자 ID" },
-                                            momentId: { type: "integer", example: 456, description: "Moment ID" },
-                                            plannerId: { type: "integer", example: 123, description: "Planner ID" },
-                                            title: { type: "string", example: "25년 1월 7일", description: "Moment 제목" },
-                                            status: { type: "string", example: "draft", description: "Moment 상태" },
-                                            createdAt: { type: "string", format: "date-time", example: "2025-01-21T12:34:56Z", description: "Moment 생성일" },
-                                            updatedAt: { type: "string", format: "date-time", example: "2025-01-21T13:00:00Z", description: "Moment 수정일" },
-                                            momentContents: {
-                                                type: "array",
-                                                description: "Moment 콘텐츠 목록",
-                                                items: {
-                                                    oneOf: [
-                                                        {
-                                                            type: "object",
-                                                            properties: {
-                                                                sortOrder: { type: "integer", example: 1, description: "콘텐츠 순서" },
-                                                                content: { type: "string", example: "오늘 하루 열심히 공부했어요!", description: "콘텐츠 내용" },
-                                                                url: { type: "string", example: "https://image1.com/image1.jpg", description: "이미지 URL" }
-                                                            }
-                                                        },
-                                                        {
-                                                            type: "object",
-                                                            properties: {
-                                                                sortOrder: { type: "integer", example: 2, description: "콘텐츠 순서" },
-                                                                content: { type: "string", example: "카페에서 공부 중", description: "콘텐츠 내용" },
-                                                                url: { type: "string", example: "https://image2.com/image2.jpg", description: "이미지 URL" }
-                                                            }
-                                                        },
-                                                        {
-                                                            type: "object",
-                                                            properties: {
-                                                                sortOrder: { type: "integer", example: 3, description: "콘텐츠 순서" },
-                                                                content: { type: "string", example: "독서실에서 마지막 정리!", description: "콘텐츠 내용" },
-                                                                url: { type: "string", example: "https://image3.com/image3.jpg", description: "이미지 URL" }
-                                                            }
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
     */
 
     try {

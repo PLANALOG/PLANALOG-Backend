@@ -15,7 +15,6 @@ export const createMoment = async (data) => {
             data: {
                 userId: data.userId,
                 title: data.title,
-                date: data.date,
                 plannerId: data.plannerId ?? null,
             }
         });
