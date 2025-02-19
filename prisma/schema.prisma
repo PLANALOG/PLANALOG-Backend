@@ -60,7 +60,7 @@ model User {
   searches       Search[]
   friendsTo      Friend[]       @relation("UserToFriends")
   friendsFrom    Friend[]       @relation("FriendsToUser")
-  noticesTo      Notice[]       @relation("ToUser")   // 사용자가 받은 알림
+  noticesTo      Notice[]       @relation("ToUser") // 사용자가 받은 알림
   noticesFrom    Notice[]       @relation("FromUser") // 사용자가 보낸 알림
   likes          Like[]         @relation("LikeToUser")
   fromLikes      Like[]         @relation("LikeFromUser")
@@ -86,8 +86,8 @@ model Planner {
   //shared_planners Shared_Planner[]
   Moment Moment[]
 
-  @@index([userId], map: "userId")
   @@unique([userId, plannerDate], map: "unique_user_planner_date") // Composite Unique Constraint
+  @@index([userId], map: "userId")
   @@map("planner")
 }
 
@@ -177,12 +177,11 @@ model Friend {
  * }
  */
 
- enum NoticeType {
+enum NoticeType {
   MOMENT
   COMMENT
   FRIEND
 }
-
 
 model Notice {
   id         BigInt     @id @default(autoincrement())
@@ -201,7 +200,6 @@ model Notice {
   @@index([toUserId], map: "to_user_id")
   @@map("notice")
 }
-
 
 model Like {
   id         BigInt    @id @default(autoincrement())
@@ -237,7 +235,7 @@ model Moment {
   id           BigInt   @id @default(autoincrement())
   userId       BigInt   @map("user_id")
   title        String   @db.VarChar(100)
-  date         DateTime @default(now()) @map("date")
+  //date         DateTime @default(now()) @map("date")
   //status       share_status @map("status") // ENUM (public, draft)
   plannerId    BigInt?  @map("planner_id")
   likingCount  BigInt   @default(0) @map("liking_count")
