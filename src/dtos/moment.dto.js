@@ -120,24 +120,36 @@ export const responseFromMyMoments = (moments) => {
         return [];
     }
 
-    return moments.map(moment => {
-        try {
-            const firstContent = moment.momentContents?.length > 0 ? moment.momentContents[0].url : null; // 🔥 thumbnailURL 보장
+    return moments
+        //  map() 실행 전에 undefined 또는 id 없는 객체 제거
+        .filter(moment => {
+            const isValid = moment && moment.id !== undefined;
+            return isValid;
+        })
+        .map(moment => {
+            try {
+                const firstContent = moment.momentContents?.length > 0 ? moment.momentContents[0].url : null;
 
-            return {
-                momentId: typeof moment.id === 'bigint' ? Number(moment.id) : moment.id,
-                title: moment.title,
-                userName: moment.user?.name ?? "알 수 없음",
-                likingCount: moment.likingCount ?? 0,
-                commentCount: moment._count?.comments ?? 0,
-                thumbnailURL: firstContent
-            };
-        } catch (error) {
-            console.error("DTO 변환 중 오류 발생:", error, moment);
-            return null;
-        }
-    }).filter(moment => moment !== null);
+                return {
+                    momentId: typeof moment.id === 'bigint' ? BigInt(moment.id) : moment.id,
+                    title: moment.title,
+                    userName: moment.user?.name ?? "알 수 없음",
+                    likingCount: moment.likingCount ?? 0,
+                    commentCount: moment._count?.comments ?? 0,
+                    thumbnailURL: firstContent
+                };
+            } catch (error) {
+                console.error("DTO 변환 중 오류 발생:", error, moment);
+                return null;
+            }
+        })
+        //  map() 실행 후 변환 오류로 인해 null이 된 데이터 제거
+        .filter(moment => {
+            return moment !== null;
+        });
 };
+
+
 
 
 
