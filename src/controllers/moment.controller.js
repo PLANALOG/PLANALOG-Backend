@@ -2,7 +2,6 @@ import { StatusCodes } from "http-status-codes";
 import { 
     bodyToCreateMoment, 
     bodyToUpdateMoment,
-    responseFromMyMoments,
     responseFromMyMomentDetail, 
     responseFromFriendsMoments, 
     responseFromFriendMomentDetail  } from "../dtos/moment.dto.js";
@@ -172,17 +171,16 @@ export const handleGetMyMoments = async (req, res, next) => {
         응답 데이터는 썸네일, 제목, 작성자, 날짜, 공감 수, 댓글 수만 포함했습니니다.'
     #swagger.security = [{ "bearerAuth": [] }]
     */
-
-
     try {
-        console.log("JWT 토큰의 userId:", req.user.id);
-        const moments = await getMyMoments(req.user.id);
-        const responseData = responseFromMyMoments(moments);  // 데이터를 변환
 
-        res.status(200).json({ 
-            resultType: "SUCCESS", 
-            error: null, 
-            success: { data: responseData } 
+        const responseData = await getMyMoments(req.user.id);  
+
+        console.log(" 최종 반환할 데이터:", JSON.stringify(responseData, null, 2));
+
+        res.status(200).json({
+            resultType: "SUCCESS",
+            error: null,
+            success: { data: responseData }
         });
     } catch (error) {
         console.error("응답 반환 중 오류 발생:", error);
