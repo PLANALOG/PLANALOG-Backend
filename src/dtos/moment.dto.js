@@ -140,6 +140,7 @@ export const responseFromMyMoments = (moments) => {
                 return {
                     momentId: typeof moment.id === 'bigint' ? BigInt(moment.id) : moment.id,
                     title: moment.title,
+                    date: formatDate(moment.createdAt), 
                     userName: moment.user?.name ?? "알 수 없음",
                     likingCount: moment.likingCount ?? 0,
                     commentCount: moment._count?.comments ?? 0,
