@@ -15,17 +15,17 @@ export const addFriendService = async (fromUserId, toUserId) => {
   });
 
   if (existingFriend) {
-    throw {
+    throw new Error(JSON.stringify({
       errorCode: "FRIEND_EXIST",
       reason: "이미 친구 요청이 존재합니다.",
       data: { friendId: existingFriend.id }, // friendId 포함
-    };
+    }));
   }
 
   const newFriend = await prisma.friend.create({
     data: {
-      fromUserId: fromUserId,
-      toUserId: toUserId,
+      fromUserId: BigInt(fromUserId),  // ✅ BigInt 변환
+      toUserId: BigInt(toUserId),      // ✅ BigInt 변환
       isAccepted: false,
     },
   });
