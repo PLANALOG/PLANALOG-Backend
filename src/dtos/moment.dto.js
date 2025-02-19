@@ -125,19 +125,16 @@ export const responseFromMyMoments = (moments) => {
 
     return moments.map(moment => {
         try {
-            if (!moment || !Array.isArray(moment.momentContents)) {
-                console.warn("moment 또는 momentContents가 올바르지 않음:", moment);
-                return null;
-            }
+            const firstContent = moment.momentContents?.length > 0 ? moment.momentContents[0].url : null; // 🔥 thumbnailURL 보장
 
             return {
                 momentId: typeof moment.id === 'bigint' ? Number(moment.id) : moment.id,
                 title: moment.title,
-                userName: moment.user?.name || "알 수 없음",
+                userName: moment.user?.name ?? "알 수 없음",
                 date: dayjs(moment.date).format("YYYY-MM-DD"),
-                likingCount: moment.likingCount ?? 0, // `_count.likes` 제거하고 개별적으로 가져온 값 사용
+                likingCount: moment.likingCount ?? 0,
                 commentCount: moment._count?.comments ?? 0,
-                thumbnailUrl: moment.momentContents.length > 0 ? moment.momentContents[0].url : null
+                thumbnailURL: firstContent
             };
         } catch (error) {
             console.error("DTO 변환 중 오류 발생:", error, moment);
