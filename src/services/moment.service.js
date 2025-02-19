@@ -29,7 +29,6 @@ import {
   MomentNotFoundError
 } from "../errors.js";
 
-import dayjs from "dayjs"; 
 
 export const momentCreate = async (data) => {
   try {
@@ -51,19 +50,10 @@ export const momentCreate = async (data) => {
       throw new DuplicateSortOrderError();
     }
 
-    // 날짜 변환 (YYYY-MM-DD 형식으로 저장)
-    const formattedDate = dayjs(data.date, "YYYY-MM-DD").toDate();
 
     // Moment 생성 
-    const createdMoment = await createMoment({
-      ...data,
-      date: formattedDate, 
-    });
+    const createdMoment = await createMoment(data);
 
-
-
-    // 추가 처리 
-    console.log(`Moment 생성 완료: ID = ${createdMoment.id}`);
 
     // 클라이언트에 반환할 데이터 변환
     return responseFromCreateMoment(createdMoment);

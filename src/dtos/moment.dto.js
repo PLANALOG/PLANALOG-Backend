@@ -1,5 +1,3 @@
-import dayjs from "dayjs";
-
 export const bodyToCreateMoment = (body) => {
     if (!body) {
         throw new Error("요청 body값이 없습니다."); // body값이 없는 경우
@@ -47,7 +45,6 @@ export const responseFromCreateMoment = (moment) => {
         id: moment.id,
         userId: moment.userId,
         title: moment.title,
-        date: dayjs(moment.date).format("YYYY-MM-DD"),
         plannerId: moment.plannerId ?? null,
         createdAt: moment.createdAt,
         updatedAt: moment.updatedAt,
@@ -131,7 +128,6 @@ export const responseFromMyMoments = (moments) => {
                 momentId: typeof moment.id === 'bigint' ? Number(moment.id) : moment.id,
                 title: moment.title,
                 userName: moment.user?.name ?? "알 수 없음",
-                date: dayjs(moment.date).format("YYYY-MM-DD"),
                 likingCount: moment.likingCount ?? 0,
                 commentCount: moment._count?.comments ?? 0,
                 thumbnailURL: firstContent
@@ -155,7 +151,6 @@ export const responseFromMyMomentDetail = (moment) => {
         userId: moment.userId,
         momentId: moment.id,
         title: moment.title,
-        date: dayjs(moment.date).format("YYYY-MM-DD"),
         plannerId: moment.plannerId ?? null,
         createdAt: moment.createdAt,
         updatedAt: moment.updatedAt,
