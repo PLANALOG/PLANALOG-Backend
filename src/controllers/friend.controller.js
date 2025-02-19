@@ -1,6 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 import { createNoticeService } from "../services/notice.service.js";
-
 import {
   addFriendService,
   getFriendsService,
@@ -46,7 +45,7 @@ export const addFriend = async (req, res) => {
     // 친구 추가 로직 실행
     const result = await addFriendService(fromUserId, toUserId);
 
-    // 📌 친구 요청을 받은 사용자에게 알림 생성
+    //  친구 요청을 받은 사용자에게 알림 생성
     await createNoticeService(fromUserId, toUserId, {
       message: "새로운 친구 요청이 도착했습니다!",
       entityType: "FRIEND",
@@ -59,6 +58,17 @@ export const addFriend = async (req, res) => {
     });
   } catch (error) {
     console.error("친구 추가 중 에러:", error.message);
+
+      if (error.errorCode === "FRIEND_EXIST") {
+      return res.status(StatusCodes.BAD_REQUEST).error({
+        errorCode: error.errorCode,
+        reason: error.reason,
+        data: error.data, // { friendId: 기존 친구 요청 ID }
+      });
+    }
+
+
+
     res.status(StatusCodes.BAD_REQUEST).error({
       errorCode: "FRIEND002",
       reason: "친구 요청 중 오류가 발생했습니다.",

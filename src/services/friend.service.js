@@ -9,21 +9,30 @@ export const addFriendService = async (fromUserId, toUserId) => {
       fromUserId: fromUserId, 
       toUserId: toUserId,     
     },
+    select: {
+      id: true, // 기존 friendId 가져오기
+    },
   });
 
   if (existingFriend) {
-    throw new Error('이미 친구 관계가 존재합니다.');
+    throw {
+      errorCode: "FRIEND_EXIST",
+      reason: "이미 친구 요청이 존재합니다.",
+      data: { friendId: existingFriend.id }, // friendId 포함
+    };
   }
 
   const newFriend = await prisma.friend.create({
     data: {
       fromUserId: fromUserId,
       toUserId: toUserId,
+      isAccepted: false,
     },
   });
 
   return newFriend;
 };
+
 
 
 export const getFriendsService = async (fromUserId, nickname) => {
