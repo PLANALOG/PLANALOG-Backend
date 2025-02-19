@@ -39,15 +39,15 @@ export const bodyToCreateMoment = (body) => {
 };
 
 
-//  moment 생성 응답 DTO
 export const responseFromCreateMoment = (moment) => {
     return {
         id: moment.id,
         userId: moment.userId,
         title: moment.title,
+        date: formatDate(moment.createdAt),  // YYYY-MM-DD 형식의 새로운 필드 추가
         plannerId: moment.plannerId ?? null,
-        createdAt: moment.createdAt,
-        updatedAt: moment.updatedAt,
+        createdAt: moment.createdAt,  
+        updatedAt: moment.updatedAt,  
         momentContents: moment.momentContents.map(content => ({
             sortOrder: content.sortOrder,
             content: content.content,
@@ -55,6 +55,13 @@ export const responseFromCreateMoment = (moment) => {
         }))
     };
 };
+
+// 🔍 YYYY-MM-DD 형식으로 변환하는 함수
+const formatDate = (date) => {
+    if (!date) return null;  // 예외 처리
+    return date.toISOString().split("T")[0];  // "YYYY-MM-DDTHH:mm:ss.sssZ" → "YYYY-MM-DD"
+};
+
 
 
 //  moment 수정 DTO
@@ -150,19 +157,13 @@ export const responseFromMyMoments = (moments) => {
 };
 
 
-
-
-
-
-
-
-
 // 나의 Moment 상세 조회 DTO
 export const responseFromMyMomentDetail = (moment) => {
     return {
         userId: moment.userId,
         momentId: moment.id,
         title: moment.title,
+        date: formatDate(moment.createdAt),
         plannerId: moment.plannerId ?? null,
         createdAt: moment.createdAt,
         updatedAt: moment.updatedAt,
