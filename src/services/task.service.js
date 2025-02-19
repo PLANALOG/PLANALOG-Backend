@@ -100,9 +100,12 @@ export const getTask = async (planner_date, userId) => {
     await isDeletedUser;
 
     
-    const planner = await prisma.planner.findFirst({
+    const planner = await prisma.planner.findUnique({
       where: {
-        plannerDate: planner_date
+        userId_plannerDate: {
+          userId: userId, 
+          plannerDate: planner_date
+        }
       }
     });
     
