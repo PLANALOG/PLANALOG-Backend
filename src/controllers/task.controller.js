@@ -1,6 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import { createTask,createTaskBulk} from "../services/task.service.js";
-import { createTaskBulkDto, createTaskDto, getTaskDto, responseFromToggledTask, updateTaskDto } from "../dtos/task.dto.js";
+import { createTaskBulkDto, createTaskDto, getTaskDto, responseFromToggledTask, updateTaskDto,
+    transformTaskListResponse, transformTaskResponse
+} from "../dtos/task.dto.js";
 import { updateTask, getTask, deleteTask } from "../services/task.service.js";
 import { toggleTaskCompletion } from "../services/task.service.js";
 import { findTaskWithPlanner } from "../repositories/task.repository.js";
@@ -57,7 +59,7 @@ export const handleCreateTask = async (req, res, next) => {
         const newTask = await createTask({ ...validTaskData, userId });
 
         // 성공 응답 반환
-        res.success(newTask);
+        res.success(transformTaskResponse(newTask));
 
     } catch (error) {
         next(error);
@@ -110,7 +112,7 @@ export const handleCreateTaskBulk = async (req, res, next) => {
         //여러개 생성 
         const newTasks= await createTaskBulk (validTaskData, userId);
 
-        res.success(newTasks);
+        res.success(transformTaskListResponse(newTasks));
    } catch (error) {
         next(error);
    }
@@ -185,7 +187,7 @@ export const handleUpdateTask = async (req, res, next) => {
         });
 
         // 성공 응답
-        res.success(updatedTask);
+        res.success(transformTaskResponse(updatedTask));
     } catch (error) {
         next(error);
     }
@@ -223,7 +225,7 @@ export const handleGetTask = async (req, res, next) => {
         
         const tasks = await getTask(validDate, userId);
         
-        res.success(tasks);
+        res.success(transformTaskListResponse(tasks));
     }
     catch (error) {
         console.log(error);

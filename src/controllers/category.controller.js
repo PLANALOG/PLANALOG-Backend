@@ -5,7 +5,12 @@ import {createCategoryService,
         createTaskCategory,
         createTaskCategoryBulk,
         createCategoryBulk
-} from '../services/category.service.js'
+} from '../services/category.service.js';
+import { transformCategoryListResponse,
+        transformCategoryResponse,
+        transformTaskResponse,
+        transformTaskListResponse
+ } from '../dtos/task.dto.js';
 import { createTaskBulkDto, createTaskDto } from '../dtos/task.dto.js';
 import { deleteCategoryRepository } from '../repositories/category.repository.js';
 import { DuplicateCategoryError, AuthError } from '../errors.js';
@@ -47,10 +52,12 @@ export const handleCreateCategory = async (req, res, next) => {
             throw new AuthError;
         }
 
+        // 생성된 카테고리 반환 
+        const createdCategory = await createCategoryService({ userId, name }); // 서비스 호출
 
-        const createdTaskCategory = await createCategoryService({ userId, name }); // 서비스 호출
-
-        res.success(createdTaskCategory); // 성공 응답
+        res.success(
+            transformCategoryResponse(createdCategory)
+        ); // 성공 응답
     } catch (error) {
         next(error); // 전역 오류 처리 미들웨어로 전달
     }
@@ -97,7 +104,7 @@ export const handleCreateCategoryBulk = async (req, res, next) => {
          
         const createdCategories = await createCategoryBulk({ userId, names }); // 서비스 호출
         // 성공 응답
-        res.success(createdCategories); 
+        res.success(transformCategoryListResponse(createdCategories)); 
    } catch (error) {
        next(error); 
    }
@@ -147,8 +154,8 @@ export const handleUpdateCategory = async (req, res, next) => {
             });
         }
 
-        const updatedTaskCategory = await updateCategoryService(task_category_id, name, userId); // 서비스 호출
-        res.success(updatedTaskCategory); // 성공 응답
+        const updatedCategory = await updateCategoryService(task_category_id, name, userId); // 서비스 호출
+        res.success(transformCategoryResponse(updatedCategory)); // 성공 응답
     } catch (error) {
         next(error); // 전역 오류 처리 미들웨어로 전달
     }
@@ -214,7 +221,7 @@ export const handleViewCategory = async (req, res, next) => {
 
 
         const taskCategories = await getCategoriesByUser(userId); // 서비스 호출
-        res.success(taskCategories); // 성공 응답
+        res.success(transformCategoryListResponse(taskCategories)); // 성공 응답
     } catch (error) {
         next(error); // 전역 오류 처리 미들웨어로 전달
     }
@@ -395,7 +402,7 @@ export const handleCreateTaskCategoryBulk = async (req, res, next) => {
         return res.status(200).json({
             resultType: "SUCCESS",
             error: null,
-            success: createdTaskCategory,
+            success: transformTaskResponse(createdTaskCategory),
         });
     } catch (error) {
         next(error); // 전역 오류 처리 미들웨어로 전달
