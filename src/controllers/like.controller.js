@@ -29,7 +29,7 @@ export const handleLikeMoment = async (req, res, next) => {
               type: "object",
               properties: {
                 id: { type: "integer", description: "Moment ID" },
-                     userId: { type: "integer", description: "Moment 작성자 ID" },
+                userId: { type: "integer", description: "Moment 작성자 ID" },
                 entityType: { type: "string", default: "moment", description: "엔터티 유형" }
               },
               required: ["id", "userId"]
@@ -67,7 +67,7 @@ export const handleLikeMoment = async (req, res, next) => {
 */
 
    try{ 
-    console.log("Like를 요청했습니다!");
+//   console.log("Like를 요청했습니다!");
     const like = await likeMoment(bodyToLike(req.body,req.user.id)); 
     res.status(StatusCodes.OK).success(like); 
   } catch (error) {
@@ -122,7 +122,7 @@ export const handleDeleteLikeMoment =  async (req, res, next) =>{
 */
 
   try{ 
-  console.log("Like 삭제를 요청했습니다!");
+//  console.log("Like 삭제를 요청했습니다!");
   const like = await deleteMomentLike(bodyToDeleteLike(req.body), req.user.id);
   res.status(StatusCodes.OK).success(like);
   } catch (error) {

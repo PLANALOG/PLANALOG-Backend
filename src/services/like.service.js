@@ -1,5 +1,5 @@
 import { 
-  EntityValidationError, 
+  ValidationError, 
   DuplicateLikeMomentError, 
   momentIdNotFoundError, 
   LikeIdNotExistError, 
@@ -8,6 +8,7 @@ import {
   DatabaseError, 
   handleServerError 
 } from "../errors.js";
+
 import { addMomentLike, removeMomentLike } from "../repositories/like.repository.js";
 import { prisma } from "../db.config.js";
 
@@ -19,17 +20,17 @@ const handleDatabaseError = (error, message) => {
   throw new DatabaseError(message, error);
 };
 
+
 export const likeMoment = async (data) => {
   try {
     // 입력값 검증
-    if (!data.entityId || !data.entityType ) { 
-      throw new EntityValidationError(data);
+    if (!data.entityId || !data.entityType || !data.userId) { 
+      throw new ValidationError(data);
     }
 
     // 게시글 존재 여부 확인
     const momentExists = await prisma.moment.findUnique({
       where: { id: data.entityId }, 
-      select: { userId: true } , 
     });
 
     if (!momentExists) {
@@ -55,7 +56,7 @@ export const likeMoment = async (data) => {
 
   } catch (error) {
     // 사용자의 잘못된 요청
-    if (error instanceof EntityValidationError || 
+    if (error instanceof ValidationError || 
         error instanceof momentIdNotFoundError || 
         error instanceof DuplicateLikeMomentError) {
       throw error; 
