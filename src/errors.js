@@ -141,7 +141,7 @@ export class DuplicateLikeMomentError extends Error {
   statusCode = 409; //Conflict
 
   constructor(data) {
-    const reason = '이미 존재하는 좋아요입니다다.';
+    const reason = '이미 존재하는 좋아요입니다.';
     super(reason);
     this.reason = reason;
     this.data = data;
@@ -184,13 +184,12 @@ export class LikeIdMissingError extends Error {
   }
 }
 
-//entityId, entityType 또는 userId가 누락 
-export class ValidationError extends Error{
+export class EntityValidationError extends Error{
   errorCode = "L005";
   statusCode = 400; // Bad Request
 
   constructor(data) {
-    const reason = 'entityId, entityType 또는 userId가 누락되었습니다.';
+    const reason = 'entityId 또는 entityType가 누락되었습니다.';
     super(reason);
     this.reason = reason;
     this.data = data;
@@ -207,7 +206,7 @@ export class DatabaseError extends Error{
   statusCode = 500; // Internal Server Error
   
   constructor(data) {
-    const reason = '데이터베이스 연결에 실패했습니다';
+    const reason = '데이터베이스 연결에 실패했습니다.';
     super(reason);
     this.reason = reason;
     this.data = data;
