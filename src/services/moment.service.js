@@ -4,8 +4,8 @@ import {
     deleteMomentFromDB, 
     findMyMoments, 
     findMyMomentDetail, 
-    findFriendsMoments, 
-    findFriendMomentDetail 
+    findOtherUserMoments, 
+    findOtherUserMomentDetail 
 } from "../repositories/moment.repository.js";
 
 import { 
@@ -13,8 +13,8 @@ import {
     responseFromUpdateMoment, 
     responseFromMyMoments, 
     responseFromMyMomentDetail, 
-    responseFromFriendsMoments, 
-    responseFromFriendMomentDetail 
+    responseFromOtherUserMoments, 
+    responseFromOtherUserMomentDetail 
 } from "../dtos/moment.dto.js";
 
 import {
@@ -177,33 +177,54 @@ export const getMyMomentDetail = async (userId, momentId) => {
 };
 
 
-
-export const getFriendsMoments = async (userId) => {
+export const getOtherUserMoments = async (userId) => {
     try {
-        const friendsMoments = await findFriendsMoments(userId);
-
-        if (!friendsMoments) {
-            throw new Error("친구의 Moment 목록 조회에 실패했습니다.");
+        // 인증되지 않은 사용자 처리
+        if (!userId) {
+            throw new UnauthorizedAccessError();
         }
 
-        return responseFromFriendsMoments(friendsMoments);
+        const otherUsersMoments = await findOtherUserMoments(userId);
+
+        return responseFromOtherUserMoments(otherUsersMoments);
     } catch (error) {
-        console.error("친구의 Moment 목록 조회 중 오류 발생:", error.message);
-        throw new Error("친구의 Moment 목록 조회에 실패했습니다. 다시 시도해주세요.");
+        console.error("다른사람의 Moment 목록 조회 중 오류 발생:", error);
+
+        if (error instanceof UnauthorizedAccessError) {
+            throw error;
+        }
+
+        // 기타 예상치 못한 오류는 서버 오류로 처리
+        throw new MomentServerError();
     }
 };
 
-export const getFriendMomentDetail = async (userId, momentId) => {
-    try {
-        const friendMomentDetail = await findFriendMomentDetail(userId, momentId);
 
-        if (!friendMomentDetail) {
-            throw new Error("친구의 Moment 상세 조회에 실패했습니다.");
+export const getOtherUserMomentDetail = async (userId, momentId) => {
+    try {
+        // 유효하지 않은 momentId 체크
+        if (isNaN(momentId) || !Number.isInteger(Number(momentId))) {
+            throw new InvalidMomentIdError(momentId);
         }
 
-        return responseFromFriendMomentDetail(friendMomentDetail);
+        const otherUserMomentDetail = await findOtherUserMomentDetail(userId, BigInt(momentId));
+
+        // 존재하지 않는 momentId 체크
+        if (!otherUserMomentDetail) {
+            throw new MomentNotFoundError(momentId);
+        }
+
+        return responseFromOtherUserMomentDetail(otherUserMomentDetail);
     } catch (error) {
         console.error("친구의 Moment 상세 조회 중 오류 발생:", error.message);
-        throw new Error("친구의 Moment 상세 조회에 실패했습니다. 다시 시도해주세요.");
+
+        // 존재하지 않는 moment 에러
+        if (error instanceof MomentNotFoundError || error instanceof InvalidMomentIdError) {
+            throw error;
+        }
+
+        // 기타 예상치 못한 오류는 서버 오류로 처리
+        throw new MomentServerError("다른 사용자의의 Moment 상세 조회에 실패했습니다. 다시 시도해주세요.", { error });
     }
 };
+
