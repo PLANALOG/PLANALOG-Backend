@@ -1,18 +1,19 @@
 import { prisma } from "../db.config.js";
 
+
 // 알림 생성
-export const createNotice = async (userId, { message, entityType, entityId }) => {
+export const createNotice = async (fromUserId, toUserId, { message, entityType, entityId }) => {
   return await prisma.notice.create({
     data: {
-      userId: BigInt(userId),
+      fromUserId: BigInt(fromUserId),
+      toUserId: BigInt(toUserId),
       message,
       entityType,
       entityId,
-      isRead: false, 
+      isRead: false,
     },
   });
 };
-
 
 // 알림 읽음 상태 수정
 export const updateNoticeReadStatus = async (noticeId, isRead, userId) => {
@@ -26,7 +27,7 @@ export const updateNoticeReadStatus = async (noticeId, isRead, userId) => {
     throw new Error("알림이 존재하지 않습니다.");
   }
 
-  if (notice.userId !== BigInt(userId)) {
+  if (notice.toUserId !== BigInt(userId)) {  // ✅ userId -> toUserId로 변경
     throw new Error("해당 알림에 대한 수정 권한이 없습니다.");
   }
 
@@ -40,7 +41,6 @@ export const updateNoticeReadStatus = async (noticeId, isRead, userId) => {
   });
 };
 
-
 // 알림 삭제
 export const deleteNotice = async (noticeId, userId) => {
   const notice = await prisma.notice.findUnique({
@@ -53,7 +53,7 @@ export const deleteNotice = async (noticeId, userId) => {
     throw new Error("해당 알림이 존재하지 않습니다.");
   }
 
-  if (notice.userId !== BigInt(userId)) {
+  if (notice.toUserId !== BigInt(userId)) {  // ✅ userId -> toUserId로 변경
     throw new Error("해당 알림에 대한 삭제 권한이 없습니다.");
   }
 
@@ -64,16 +64,19 @@ export const deleteNotice = async (noticeId, userId) => {
   });
 };
 
-
-
-// 특정 유저의 알림 목록 조회
+// 나에게 온 알림 조회할 때, 보낸 사람(`fromUserId`)의 `name` 포함
 export const getNoticesByUserId = async (userId) => {
   return await prisma.notice.findMany({
     where: {
-      userId: BigInt(userId),
+      toUserId: BigInt(userId), //
     },
     orderBy: {
-      createdAt: "desc", 
+      createdAt: "desc",
+    },
+    include: {
+      fromUser: {  
+        select: { id: true, name: true },
+      },
     },
   });
 };

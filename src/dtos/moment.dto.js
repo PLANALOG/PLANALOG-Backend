@@ -1,3 +1,27 @@
+// YYYY-MM-DD 형식으로 변환하는 함수 (UTC+9 적용)
+const formatDate = (date) => {
+    if (!date) return null;
+    const validDate = date instanceof Date ? date : new Date(date); // 문자열이면 Date 객체로 변환
+    if (isNaN(validDate.getTime())) {
+        console.error("Invalid date detected:", date);
+        return null;
+    }
+    const KST = new Date(validDate.getTime() + 9 * 60 * 60 * 1000); // UTC+9 적용
+    return KST.toISOString().split("T")[0]; // YYYY-MM-DD
+};
+
+// YYYY-MM-DDTHH:mm:ss.sssZ 형식으로 변환하는 함수 (UTC+9 적용)
+const formatDateTime = (date) => {
+    if (!date) return null;
+    const validDate = date instanceof Date ? date : new Date(date); // 문자열이면 Date 객체로 변환
+    if (isNaN(validDate.getTime())) {
+        console.error("Invalid date detected:", date);
+        return null;
+    }
+    const KST = new Date(validDate.getTime() + 9 * 60 * 60 * 1000); // UTC+9 적용
+    return KST.toISOString(); // ISO 형식 유지
+};
+
 export const bodyToCreateMoment = (body) => {
     if (!body) {
         throw new Error("요청 body값이 없습니다."); // body값이 없는 경우
@@ -10,8 +34,9 @@ export const bodyToCreateMoment = (body) => {
     const momentContents = body.momentContents;
 
 
-    if (!body.title) {
-        throw new Error("제목을 작성해주세요.");
+    // 🔹 title 유효성 검사 강화
+    if (!body.title || typeof body.title !== "string") {
+        throw new Error("제목을 문자열로 작성해주세요.");
     }
     if (momentContents.length === 0) {
         throw new Error("최소 하나의 페이지가 존재해야합니다.");
@@ -38,15 +63,15 @@ export const bodyToCreateMoment = (body) => {
 };
 
 
-//  moment 생성 응답 DTO
 export const responseFromCreateMoment = (moment) => {
     return {
         id: moment.id,
         userId: moment.userId,
         title: moment.title,
+        date: formatDate(moment.createdAt),  // YYYY-MM-DD 형식의 새로운 필드 추가
         plannerId: moment.plannerId ?? null,
-        createdAt: moment.createdAt,
-        updatedAt: moment.updatedAt,
+        createdAt: formatDateTime(moment.createdAt), 
+        updatedAt: formatDateTime(moment.updatedAt), 
         momentContents: moment.momentContents.map(content => ({
             sortOrder: content.sortOrder,
             content: content.content,
@@ -58,26 +83,18 @@ export const responseFromCreateMoment = (moment) => {
 
 //  moment 수정 DTO
 export const bodyToUpdateMoment = (body) => {
-    // 유효성 검증: status 필수
-    if (!body.status) {
-        throw new Error("저장할 상태를 지정해주세요.");
+
+    // 🔹 title 유효성 검사 강화
+    if (!body.title || typeof body.title !== "string") {
+        throw new Error("제목을 문자열로 작성해주세요.");
     }
 
     // momentContents 배열 확인
     const momentContents = Array.isArray(body.momentContents) ? body.momentContents : [];
     const deletedSortOrders = Array.isArray(body.deletedSortOrders) ? body.deletedSortOrders : [];
 
-    // status가 public인 경우: title + momentContents 필수
-    if (body.status === "public") {
-        if (!body.title) {
-            throw new Error("공개(public) 상태에서는 제목(title)이 필수입니다.");
-        }
-        if (momentContents.length === 0 && deletedSortOrders.length === 0) {
-            throw new Error("공개(public) 상태에서는 최소 하나 이상의 페이지가 필요합니다.");
-        }
-        if (momentContents.some(momentContent => !momentContent.content)) {
-            throw new Error("공개(public) 상태에서는 모든 페이지에 content 값이 포함되어야 합니다.");
-        }
+    if (momentContents.some(content => content.content === undefined || content.content === null || content.content.trim() === '')) {
+        throw new Error("모든 페이지에 빈 내용이 포함될 수 없습니다.");
     }
 
     // momentContents 내부의 sortOrder 중복 검사 (null 제외)
@@ -91,15 +108,15 @@ export const bodyToUpdateMoment = (body) => {
     }
 
     return {
-        title: body.title || null,
-        status: body.status,
+        title: body.title,
+        plannerId: body.plannerId ?? null,
         momentContents: momentContents.map(content => ({
             sortOrder: content.sortOrder,
-            content: content.content ?? null,
-            url: content.url || null,
-            insertAfterId: content.insertAfterId || null, // 추가된 부분
+            content: content.content,
+            url: content.url ?? null,
+            insertAfterSortOrder: content.insertAfterSortOrder || null, // 추가된 부분
         })),
-        deletedSortOrders: deletedSortOrders, // ✅ 삭제할 페이지 정보 추가
+        deletedSortOrders: deletedSortOrders, // 삭제할 페이지 정보 추가
     };
 };
 
@@ -109,10 +126,9 @@ export const responseFromUpdateMoment = (moment) => {
         id: moment.id,
         userId: moment.userId,
         title: moment.title,
-        status: moment.status,
         plannerId: moment.plannerId || null,
-        createdAt: moment.createdAt,
-        updatedAt: moment.updatedAt,
+        createdAt: formatDateTime(moment.createdAt), 
+        updatedAt: formatDateTime(moment.updatedAt), 
         momentContents: moment.momentContents.map(content => ({
             sortOrder: content.sortOrder,
             content: content.content,
@@ -120,7 +136,6 @@ export const responseFromUpdateMoment = (moment) => {
         }))
     };
 };
-
 
 
 export const responseFromMyMoments = (moments) => {
@@ -129,35 +144,35 @@ export const responseFromMyMoments = (moments) => {
         return [];
     }
 
-    return moments.map(moment => {
-        try {
-            if (!moment || !Array.isArray(moment.momentContents)) {
-                console.warn("moment 또는 momentContents가 올바르지 않음:", moment);
+    return moments
+        //  map() 실행 전에 undefined 또는 id 없는 객체 제거
+        .filter(moment => {
+            const isValid = moment && moment.id !== undefined;
+            return isValid;
+        })
+        .map(moment => {
+            try {
+                const firstContent = moment.momentContents?.length > 0 ? moment.momentContents[0].url : null;
+
+                return {
+                    momentId: typeof moment.id === 'bigint' ? BigInt(moment.id) : moment.id,
+                    title: moment.title,
+                    date: formatDate(moment.createdAt), 
+                    userName: moment.user?.name ?? "알 수 없음",
+                    likingCount: moment.likingCount ?? 0,
+                    commentCount: moment._count?.comments ?? 0,
+                    thumbnailURL: firstContent
+                };
+            } catch (error) {
+                console.error("DTO 변환 중 오류 발생:", error, moment);
                 return null;
             }
-
-            return {
-                momentId: typeof moment.id === 'bigint' ? Number(moment.id) : moment.id, // BigInt 처리
-                title: moment.title,
-                status: moment.status,
-                createdAt: moment.createdAt instanceof Date 
-                    ? moment.createdAt.toISOString() 
-                    : moment.createdAt,
-                updatedAt: moment.updatedAt instanceof Date 
-                    ? moment.updatedAt.toISOString() 
-                    : moment.updatedAt,
-                thumbnailUrl: moment.momentContents[0]?.url || null
-            };
-        } catch (error) {
-            console.error("DTO 변환 중 오류 발생:", error, moment);
-            return null;
-        }
-    }).filter(moment => moment !== null);
+        })
+        //  map() 실행 후 변환 오류로 인해 null이 된 데이터 제거
+        .filter(moment => {
+            return moment !== null;
+        });
 };
-
-
-
-
 
 
 // 나의 Moment 상세 조회 DTO
@@ -166,17 +181,18 @@ export const responseFromMyMomentDetail = (moment) => {
         userId: moment.userId,
         momentId: moment.id,
         title: moment.title,
-        status: moment.status,
-        plannerId: moment.plannerId || null,
-        createdAt: moment.createdAt,
-        updatedAt: moment.updatedAt,
+        date: formatDate(moment.createdAt),
+        plannerId: moment.plannerId ?? null,
+        createdAt: formatDateTime(moment.createdAt), 
+        updatedAt: formatDateTime(moment.updatedAt), 
         momentContents: moment.momentContents.map(content => ({
             sortOrder: content.sortOrder,
             content: content.content,
-            url: content.url,
+            url: content.url ?? null
         }))
     };
 };
+
 
 //  친구의 Moment 목록 조회 DTO
 export const responseFromFriendsMoments = (moments) => {
@@ -185,8 +201,8 @@ export const responseFromFriendsMoments = (moments) => {
         momentId: moment.id,
         title: moment.title,
         status: moment.status,
-        createdAt: moment.createdAt,
-        updatedAt: moment.updatedAt,
+        createdAt: formatDateTime(moment.createdAt), 
+        updatedAt: formatDateTime(moment.updatedAt), 
         thumbnailUrl: moment.momentContents[0]?.url || null
     }));
 };
@@ -199,8 +215,8 @@ export const responseFromFriendMomentDetail = (moment) => {
         title: moment.title,
         status: moment.status,
         plannerId: moment.plannerId || null,
-        createdAt: moment.createdAt,
-        updatedAt: moment.updatedAt,
+        createdAt: formatDateTime(moment.createdAt), 
+        updatedAt: formatDateTime(moment.updatedAt), 
         momentContents: moment.momentContents.map(content => ({
             sortOrder: content.sortOrder,
             content: content.content,

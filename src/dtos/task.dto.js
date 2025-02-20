@@ -1,16 +1,47 @@
+// YYYY-MM-DDTHH:mm:ss.sssZ 형식으로 변환하는 함수 (UTC+9 적용)
+const formatDateTime = (date) => {
+    if (!date) return null;
+    const validDate = date instanceof Date ? date : new Date(date); // 문자열이면 Date 객체로 변환
+    if (isNaN(validDate.getTime())) {
+        console.error("Invalid date detected:", date);
+        return null;
+    }
+    const KST = new Date(validDate.getTime() + 9 * 60 * 60 * 1000); // UTC+9 적용
+    return KST.toISOString(); // ISO 형식 유지
+};
+
+export const transformCategoryResponse = (category) => ({
+    ...category,
+    createdAt: formatDateTime(category.createdAt),
+    updatedAt: formatDateTime(category.updatedAt)
+});
+
+export const transformCategoryListResponse = (categories) =>
+    Array.isArray(categories) ? categories.map(transformCategoryResponse) : categories;
+
+
+export const transformTaskResponse = (task) => ({
+    ...task,
+    createdAt: formatDateTime(task.createdAt),
+    updatedAt: formatDateTime(task.updatedAt)
+});
+
+export const transformTaskListResponse = (tasks) =>
+    tasks.map(transformTaskResponse);
+
+
 export const createTaskDto = (body) => {
 
     // 1. Validate title
     if (!body.title) {
-        throw new Error("Title is required");
+        throw new Error("할 일 제목이 필요합니다");
     }
 
     // 2. Validate planner_date
     if (!body.planner_date) {
-        throw new Error("Planner date is required");
+        throw new Error("Planner 날짜가 필요합니다다");
     }
-    const planner_date = new Date(body.planner_date + "T00:00:00.000Z"); // ✅ 초 단위까지 동일하게 변환
-
+    const planner_date = new Date(body.planner_date); 
     // 3. 데이터 반환 
     return {
         title: body.title,
@@ -19,10 +50,11 @@ export const createTaskDto = (body) => {
 
 }
 export const createTaskBulkDto = (body) => {
+    
     // body 는 배열 형태의 제목들(String)과 String 형태의 날짜
     // 1. 배열 검증 (title이 배열인지 확인)
-    if (!body.title || !Array.isArray(body.title) || body.title.length === 0) {
-        throw new Error("할일(title)은 배열 형태로 전달되어야 합니다.");
+    if (!body.titles || !Array.isArray(body.titles) || body.titles.length === 0) {
+        throw new Error("할일들(titles)은 배열 형태로 전달되어야 합니다.");
     }
 
     // 2. planner_date가 문자열인지 확인
@@ -31,43 +63,48 @@ export const createTaskBulkDto = (body) => {
     }
 
     // 3. DTO 변환 (각각 개별의 할 일 객체로 변환 할일 => {할일, 날짜})
-    return body.title.map(title => ({
+    return body.titles.map(title => ({
         title: title,
-        planner_date: new Date(body.planner_date + "T00:00:00.000Z") // ✅ 초 단위까지 동일하게 변환
-        // 공통된 날짜 적용
+        planner_date: new Date(body.planner_date) 
+        
     }));
 };
 export const updateTaskDto = (task_id, body) => {
     // task_id 숫자인지 확인 
     if (isNaN(task_id)) {
-        throw new Error("Task_id is not a number");
+        throw new Error("Task_id 가 숫자가 아닙니다.");
     }
     // 데이터 이름 확인 
     if (!body.title) {
-        throw new Error("Task title is required");
+        throw new Error("할일 제목이 필요합니다.");
     }
     return {
         task_id: BigInt(task_id),
         title: body.title
     }
 }
-export const getTaskDto = (task_id) => {
-    //task_id 숫자인지 확인
-
-    if (isNaN(task_id)) {
-        throw new Error("Task_id is not a number");
+export const getTaskDto = (planner_date) => {
+    console.log("planner_date", planner_date);
+    if (typeof planner_date !== "string") {
+        throw new Error("planner_date 는 문자열이어야 합니다.");
     }
-    return {
-        task_id: BigInt(task_id)
+
+    const date = new Date(planner_date);
+
+    if (isNaN(date.getTime())) {
+        throw new Error("planner_date 값이 올바른 날짜 형식이 아닙니다. (예: YYYY-MM-DD)");
     }
-    
 
-}
+    return date;
+};
 
-export const responseFromToggledTask = ({ task, newIsCompleted }) => {
-    console.log("반환값 확인 task :", task, ", newIsCompleted :", newIsCompleted);
 
-    const response = {
+export const responseFromToggledTask = ( tasks, newIsCompleted ) => {
+    console.log("반환값 확인 task :", tasks, ", newIsCompleted :", newIsCompleted);
+
+    // 개별 task를 포맷팅하는 함수
+    const formatTask = (task) => {
+        const response = {
         id: task.id,
         plannerId: task.plannerId,
         taskCategoryId: task.taskCategoryId,
@@ -77,8 +114,17 @@ export const responseFromToggledTask = ({ task, newIsCompleted }) => {
     };
 
     if (newIsCompleted !== null) {
-        response.message = `해당 날짜의 플래너의 할 일 모두 완료 여부가 ${newIsCompleted}로 변경되었습니다`;
+      response.message = `해당 날짜의 플래너의 할 일 모두 완료 여부가 ${newIsCompleted}로 변경되었습니다`;
     }
 
     return response;
-}
+  };
+
+  // 전달된 tasks가 배열이면 map으로, 단일 객체면 바로 포맷팅하여 반환
+  if (Array.isArray(tasks)) {
+    return tasks.map(formatTask);
+  } else {
+    return formatTask(tasks);
+  }
+};
+    

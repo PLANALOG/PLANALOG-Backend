@@ -141,7 +141,7 @@ export class DuplicateLikeMomentError extends Error {
   statusCode = 409; //Conflict
 
   constructor(data) {
-    const reason = '이미 존재하는 좋아요입니다다.';
+    const reason = '이미 존재하는 좋아요입니다.';
     super(reason);
     this.reason = reason;
     this.data = data;
@@ -184,13 +184,12 @@ export class LikeIdMissingError extends Error {
   }
 }
 
-//entityId, entityType 또는 userId가 누락 
-export class ValidationError extends Error{
+export class EntityValidationError extends Error{
   errorCode = "L005";
   statusCode = 400; // Bad Request
 
   constructor(data) {
-    const reason = 'entityId, entityType 또는 userId가 누락되었습니다.';
+    const reason = 'entityId 또는 entityType가 누락되었습니다.';
     super(reason);
     this.reason = reason;
     this.data = data;
@@ -207,7 +206,7 @@ export class DatabaseError extends Error{
   statusCode = 500; // Internal Server Error
   
   constructor(data) {
-    const reason = '데이터베이스 연결에 실패했습니다';
+    const reason = '데이터베이스 연결에 실패했습니다.';
     super(reason);
     this.reason = reason;
     this.data = data;
@@ -295,6 +294,7 @@ export class UnauthorizedPlannerDeletionError extends Error {
     this.reason = reason;
   }
 }
+
 // moment생성 에러처리
 
 // 서버 오류
@@ -376,6 +376,51 @@ export class DuplicateSortOrderError extends Error {
     this.data = data;
   }
 }
+
+//moment 목록 조회 
+
+//인증되지 않은 사용자
+export class UnauthorizedAccessError extends Error {
+  errorCode = "M007";
+  statusCode = 401;
+
+  constructor() {
+    const reason = "인증되지 않은 사용자입니다. 로그인 후 다시 시도하세요.";
+    super(reason);
+    this.reason = reason;
+    this.data = {};
+  }
+}
+
+//특정 moment 조회
+
+//존재하지 않는 moment
+export class MomentNotFoundError extends Error {
+  errorCode = "M008";
+  statusCode = 404; // Not Found
+
+  constructor(momentId) {
+    const reason = `해당 Moment(${momentId})를 찾을 수 없습니다.`;
+    super(reason);
+    this.reason = reason;
+    this.data = { momentId };
+  }
+}
+
+//유효하지 않은 momentId
+export class InvalidMomentIdError extends Error {
+  errorCode = "M009";
+  statusCode = 400; // Bad Request
+
+  constructor(momentId) {
+    const reason = `momentId(${momentId})가 유효한 숫자가 아닙니다.`;
+    super(reason);
+    this.reason = reason;
+    this.data = { momentId };
+  }
+}
+
+
 // 사용자 인증 정보가 없을 때 발생
 export class UserAuthenticationError extends Error {
   errorCode = "USER001";
@@ -495,3 +540,113 @@ export class NoticeFetchError extends Error {
     this.reason = reason;
   }
 }
+
+// 카테고리 추가중 중복 오류 
+export class DuplicateCategoryError extends Error {
+  errorCode = "CA001";  // 카테고리 관련 중복 에러
+  statusCode = 400;  // Bad Request
+
+  constructor(data) {
+    const reason = "중복된 카테고리입니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data; // { name: "중복된이름" } 등 추가 데이터
+  }
+}
+
+
+export class CategoryDeletionNotAllowedError extends Error {
+  errorCode = "CA007";
+  statusCode = 400;
+
+  constructor(data) {
+    const reason = "이 카테고리는 삭제할 수 없습니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}
+
+// 존재하지 않는 카테고리 접근 
+export class NoExistsCategoryError extends Error {
+  errorCode = "CA002"; 
+  statusCode = 404;  // Not Found
+
+  constructor(data) {
+    const reason = "존재하지 않는 카테고리입니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data;  // { categoryId: "1234" } 등 추가 정보
+  }
+}
+
+
+
+
+export class UnauthorizedCategoryAccessError extends Error {
+  errorCode = "CA005";
+  statusCode = 403; // Forbidden: 권한 없음
+
+  constructor(data) {
+    const reason = "이 카테고리에 대한 접근 권한이 없습니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data;  // { categoryId: 1234, userId: 5678 }
+  }
+}
+export class InvalidCategoryIdError extends Error {
+  errorCode = "CA008";
+  statusCode = 400;
+
+  constructor() {
+    const reason = "잘못된 카테고리 ID입니다.";
+    super(reason);
+    this.reason = reason;
+
+  }
+}
+export class TaskNotFoundError extends Error {
+  errorCode = "T001";
+  statusCode = 404; // Not Found
+
+  constructor(data) {
+    const reason = "해당 Task가 존재하지 않습니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data; // { taskId: 1234 }
+  }
+}
+export class DuplicateTaskError extends Error {
+  errorCode = "T002";
+  statusCode = 400; // Bad Request
+
+  constructor(data) {
+    const reason = "이미 같은 날짜에 동일한 Task가 존재합니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data; // { title: "운동하기", plannerId: 1234 }
+  }
+}
+export class TaskDeleteNotFoundError extends Error {
+  errorCode = "T003";
+  statusCode = 404; // Not Found
+
+  constructor(data) {
+    const reason = "삭제할 Task를 찾을 수 없습니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data; // { taskIds: [123, 456] }
+  }
+}
+export class UnauthorizedTaskAccessError extends Error {
+  errorCode = "T005";
+  statusCode = 403; // Forbidden
+
+  constructor(data) {
+    const reason = "해당 Task에 대한 접근 권한이 없습니다.";
+    super(reason);
+    this.reason = reason;
+    this.data = data; // { taskId: 1234, userId: 5678 }
+  }
+}
+

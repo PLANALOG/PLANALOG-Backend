@@ -60,7 +60,8 @@ model User {
   searches       Search[]
   friendsTo      Friend[]       @relation("UserToFriends")
   friendsFrom    Friend[]       @relation("FriendsToUser")
-  notices        Notice[]
+  noticesTo      Notice[]       @relation("ToUser") // 사용자가 받은 알림
+  noticesFrom    Notice[]       @relation("FromUser") // 사용자가 보낸 알림
   likes          Like[]         @relation("LikeToUser")
   fromLikes      Like[]         @relation("LikeFromUser")
   avatars        Avatar[]
@@ -85,8 +86,8 @@ model Planner {
   //shared_planners Shared_Planner[]
   Moment Moment[]
 
-  @@index([userId], map: "userId")
   @@unique([userId, plannerDate], map: "unique_user_planner_date") // Composite Unique Constraint
+  @@index([userId], map: "userId")
   @@map("planner")
 }
 
@@ -100,7 +101,7 @@ model Task {
   updatedAt      DateTime      @updatedAt @map("updated_at")
   // Relationships
   planner        Planner       @relation(fields: [plannerId], references: [id], onDelete: Cascade)
-  taskCategory   TaskCategory? @relation(fields: [taskCategoryId], references: [id] ,onDelete: Cascade)
+  taskCategory   TaskCategory? @relation(fields: [taskCategoryId], references: [id], onDelete: Cascade)
 
   @@index([plannerId], map: "plannerId")
   @@index([taskCategoryId], map: "taskCategoryId")
@@ -176,19 +177,27 @@ model Friend {
  * }
  */
 
+enum NoticeType {
+  MOMENT
+  COMMENT
+  FRIEND
+}
+
 model Notice {
-  id         BigInt      @id @default(autoincrement())
-  userId     BigInt      @map("user_id")
-  isRead     Boolean     @map("is_read")
-  message    String      @db.VarChar(100)
-  entityType notice_type @map("entity_type") // ENUM (moment, comment, friend)
-  entityId   Int         @map("entity_id")
-  createdAt  DateTime    @default(now()) @map("created_at")
+  id         BigInt     @id @default(autoincrement())
+  toUserId   BigInt     @map("to_user_id")
+  fromUserId BigInt     @map("from_user_id")
+  isRead     Boolean    @map("is_read")
+  message    String     @db.VarChar(100)
+  entityType NoticeType @map("entity_type") // ENUM (MOMENT, COMMENT, FRIEND)
+  entityId   Int        @map("entity_id")
+  createdAt  DateTime   @default(now()) @map("created_at")
 
   // Relationships
-  user User @relation(fields: [userId], references: [id])
+  toUser   User @relation(fields: [toUserId], references: [id], name: "ToUser")
+  fromUser User @relation(fields: [fromUserId], references: [id], name: "FromUser")
 
-  @@index([userId], map: "userId")
+  @@index([toUserId], map: "to_user_id")
   @@map("notice")
 }
 
@@ -226,6 +235,7 @@ model Moment {
   id           BigInt   @id @default(autoincrement())
   userId       BigInt   @map("user_id")
   title        String   @db.VarChar(100)
+  //date         DateTime @default(now()) @map("date")
   //status       share_status @map("status") // ENUM (public, draft)
   plannerId    BigInt?  @map("planner_id")
   likingCount  BigInt   @default(0) @map("liking_count")

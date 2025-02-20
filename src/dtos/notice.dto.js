@@ -42,7 +42,9 @@ export const validateDeleteNoticeDTO = (noticeId) => {
 };
 
 
-// 알림 목록 데이터 포맷팅
+
+
+
 export const formatNoticeListDTO = (notices) => {
   return notices.map((notice) => ({
     id: notice.id,
@@ -51,5 +53,9 @@ export const formatNoticeListDTO = (notices) => {
     entityType: notice.entityType,
     entityId: notice.entityId,
     createdAt: notice.createdAt,
+    fromUserId: notice.fromUser.id,  
+    fromUserName: notice.fromUser.name, 
   }));
 };
+
+

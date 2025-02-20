@@ -1,11 +1,13 @@
 import { StatusCodes } from "http-status-codes";
 import { createTask,createTaskBulk} from "../services/task.service.js";
-import { createTaskBulkDto, createTaskDto, getTaskDto, responseFromToggledTask, updateTaskDto } from "../dtos/task.dto.js";
+import { createTaskBulkDto, createTaskDto, getTaskDto, responseFromToggledTask, updateTaskDto,
+    transformTaskListResponse, transformTaskResponse
+} from "../dtos/task.dto.js";
 import { updateTask, getTask, deleteTask } from "../services/task.service.js";
 import { toggleTaskCompletion } from "../services/task.service.js";
 import { findTaskWithPlanner } from "../repositories/task.repository.js";
 import { prisma } from "../db.config.js";
-
+import { AuthError } from "../errors.js";
 export const handleCreateTask = async (req, res, next) => {
     /*
     #swagger.tags = ['Tasks']
@@ -38,16 +40,14 @@ export const handleCreateTask = async (req, res, next) => {
             }
         }
     }
-
-
 */
-
     try {
         // 1. req.session에서 userId 가져오기
         const userId = req.user.id;
-        if (!userId) {
-            throw new Error("사용자 인증이 필요합니다."); // 세션에 userId가 없으면 에러 처리
+        if (!req.user || !userId) {
+            throw new AuthError;
         }
+
         console.log("userId from session", userId);
         // console.log("request recevied to controller: ", req.body)
         // 요청 데이터 검증 (DTO에서 수행)
@@ -59,7 +59,7 @@ export const handleCreateTask = async (req, res, next) => {
         const newTask = await createTask({ ...validTaskData, userId });
 
         // 성공 응답 반환
-        res.success(newTask);
+        res.success(transformTaskResponse(newTask));
 
     } catch (error) {
         next(error);
@@ -81,7 +81,7 @@ export const handleCreateTaskBulk = async (req, res, next) => {
                 schema: {
                     type: "object",
                     properties: {
-                        title: {
+                        titles: {
                             type: "array",
                             description: "할일 제목 리스트",
                             example: ["오늘 할일 1", "오늘 할일 2", "오늘 할일 3"]
@@ -99,18 +99,20 @@ export const handleCreateTaskBulk = async (req, res, next) => {
     }
     */
    try {
-        const user_id = req.user.id;
-        if (!user_id) {
-            throw new Error("사용자 인증이 필요합니다.");
+        const userId = req.user.id;
+        if (!req.user || !userId) {
+                throw new AuthError;
         }
+        
+        console.log("request body", req.body);
         //dto로 검증 
         const validTaskData = await createTaskBulkDto(req.body);
         
         console.log(validTaskData);
         //여러개 생성 
-        const newTasks= await createTaskBulk (validTaskData, user_id);
+        const newTasks= await createTaskBulk (validTaskData, userId);
 
-        res.success(newTasks);
+        res.success(transformTaskListResponse(newTasks));
    } catch (error) {
         next(error);
    }
@@ -146,10 +148,11 @@ export const handleUpdateTask = async (req, res, next) => {
     try {
         // userId 가져오기
         const userId = req.user.id; // 세션에서 userId 추출
-        if (!userId) {
-            throw new Error("사용자 인증이 필요합니다."); // 로그인되지 않은 사용자 처리
-        }
-
+        if (!req.user || !userId) {
+                    throw new AuthError;
+                }
+        
+        console.log("handleUpdateTask입니다");
         // task_id 추출 및 검증
         console.log("data received to controller", req.body);
         const task_id = req.params.task_id;
@@ -184,7 +187,7 @@ export const handleUpdateTask = async (req, res, next) => {
         });
 
         // 성공 응답
-        res.success(updatedTask);
+        res.success(transformTaskResponse(updatedTask));
     } catch (error) {
         next(error);
     }
@@ -195,69 +198,34 @@ export const handleGetTask = async (req, res, next) => {
     /*
         #swagger.tags = ['Tasks']
         #swagger.summary = '할일 조회 API'
-        #swagger.description = '특정 할일을 조회하는 API입니다.'
+        #swagger.description = '날짜별로 (플래너별로) 할일들을 모두 조회하는 api 입니다다.'
         #swagger.security = [{
         "bearerAuth": []
         }]
-        #swagger.responses[200] = {
-        description: "할일 조회 성공 응답",
-        content: {
-            "application/json": {
-                schema: {
-                    type: "object",
-                    properties: {
-                        resultType: { 
-                            type: "string", 
-                            example: "SUCCESS", 
-                            description: "결과 상태 (SUCCESS: 성공)"
-                        },
-                        error: { 
-                            type: "object", 
-                            nullable: true, 
-                            example: null, 
-                            description: "에러 정보 (없을 경우 null)"
-                        },
-                        success: { 
-                            type: "object", 
-                            properties: {
-                                id: { 
-                                    type: "integer", 
-                                    description: "할일 ID", 
-                                    example: 123 
-                                },
-                                title: { 
-                                    type: "string", 
-                                    description: "할일 제목", 
-                                    example: "수정된 할일 제목" 
-                                },
-                                isCompleted: { 
-                                    type: "boolean", 
-                                    description: "완료 여부", 
-                                    example: false 
-                                }
-                            }
-                        }
-                    }
-                }
+        #swagger.parameters = [
+            {
+            "name": "planner_date",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "date",
+            "description": "조회할 날짜 (YYYY-MM-DD 형식)"
             }
-        }
-    }
+        ]
     */
     //Task 조회. 
 
     
-    const task_id = req.params.task_id;
-
-
-    
-
-
+    const userId = req.user.id;
+    const planner_date = req.query.planner_date;
     try {
-        const validTaskId = getTaskDto(task_id); 
-        
-        const task = await getTask(validTaskId);
+        const validDate = getTaskDto(planner_date); 
+        console.log("validDate after dto", validDate);
 
-        res.success(task)
+        
+        const tasks = await getTask(validDate, userId);
+        
+        res.success(transformTaskListResponse(tasks));
     }
     catch (error) {
         console.log(error);
@@ -295,7 +263,12 @@ export const handleDeleteTask = async (req, res, next) => {
 */
     try {
         // 요청 데이터에서 ids 추출
+        const userId = req.user.id; 
         const { ids } = req.body;
+        if (!req.user || !userId) {
+            throw new AuthError;
+                }
+        
         console.log("전달받은 id들:", ids);
         // 유효성 검사
         if (!ids || !Array.isArray(ids) || ids.length === 0) {
@@ -327,61 +300,45 @@ export const handleToggleCompletion = async (req, res, next) => {
     /*
      #swagger.tags = ['Tasks']
      #swagger.summary = '할일 완료여부 수정 API'
-     #swagger.description = '특정 할일의 완료 여부를 수정하는 API입니다.'
+     #swagger.description = '특정 할일들의 완료여부를 수정하는 API 입니다.'
      #swagger.security = [{
          "bearerAuth": []
          }]
-     #swagger.responses[200] = {
-     description: "할일 완료 여부 토글 성공",
-     content: {
-         "application/json": {
-             schema: {
-                 type: "object",
-                 properties: {
-                     resultType: { 
-                         type: "string", 
-                         example: "SUCCESS", 
-                         description: "결과 상태 (SUCCESS: 성공)"
-                     },
-                     error: { 
-                         type: "object", 
-                         nullable: true, 
-                         example: null, 
-                         description: "에러 정보 (없을 경우 null)"
-                     },
-                     success: { 
-                         type: "object", 
-                         properties: {
-                             id: { 
-                                 type: "integer", 
-                                 description: "할일 ID", 
-                                 example: 123 
-                             },
-                             title: { 
-                                 type: "string", 
-                                 description: "할일 제목", 
-                                 example: "수정된 할일 제목" 
-                             },
-                             isCompleted: { 
-                                 type: "boolean", 
-                                 description: "완료 여부", 
-                                 example: true 
-                             }
-                         }
-                     }
-                 }
-             }
-         }
-     }
- }
+     #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: "object",
+                        properties: {
+                            ids: { 
+                                type: "array", 
+                                items: { type: "integer" }, 
+                                example: [3, 4, 5],
+                                description: "완료여부 수정할 할일 ID 리스트"
+                            }
+                        },
+                        required: ["ids"]
+                    }
+                }
+            }
+        }
      */
     // Task ID 추출
-    const task_id = req.params;
-    const validTaskId = await getTaskDto(task_id.task_id);
+    
+    const ids = req.body.ids; 
+    const userId = req.user.id;
+    if (!req.user || !userId) {
+        throw new AuthError;
+    }
+   
+    console.log(ids);
 
     try {
-        const { toggledTask, newPlannerIsCompleted } = await toggleTaskCompletion(validTaskId);
-        res.success(responseFromToggledTask({ task: toggledTask, newIsCompleted: newPlannerIsCompleted }));
+        // 배열 전달 
+        const { toggledTasks, newPlannerIsCompleted } = await toggleTaskCompletion(ids, userId);
+        console.log("newPlannerIsCompleted",newPlannerIsCompleted);
+        res.success(responseFromToggledTask(toggledTasks, newPlannerIsCompleted ));
     }
     catch (error) {
         next(error);
