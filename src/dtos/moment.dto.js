@@ -194,33 +194,56 @@ export const responseFromMyMomentDetail = (moment) => {
 };
 
 
-//  친구의 Moment 목록 조회 DTO
-export const responseFromFriendsMoments = (moments) => {
-    return moments.map(moment => ({
-        userId: moment.userId,
-        momentId: moment.id,
-        title: moment.title,
-        status: moment.status,
-        createdAt: formatDateTime(moment.createdAt), 
-        updatedAt: formatDateTime(moment.updatedAt), 
-        thumbnailUrl: moment.momentContents[0]?.url || null
-    }));
+export const responseFromOtherUserMoments = (moments) => {
+    if (!Array.isArray(moments)) {
+        console.error("❌ moments가 배열이 아님:", moments);
+        return [];
+    }
+
+    return moments.map(moment => {
+        if (!moment || typeof moment.id === "undefined") {
+            console.error("❌ moment.id가 유실됨! 원인 추적 필요:", moment);
+            return null;
+        }
+
+        const transformedMoment = {
+            userId: Number(moment.userId),  // ✅ bigint 변환
+            momentId: Number(moment.id),    // ✅ bigint 변환
+            title: moment.title,
+            date: moment.createdAt ? moment.createdAt.toISOString().split("T")[0] : "날짜 없음",
+            userName: moment.user?.name ?? "알 수 없음",
+            likingCount: Number(moment.likingCount ?? 0),
+            commentCount: Number(moment._count?.comments ?? 0),
+            thumbnailURL: moment.momentContents?.length > 0 ? moment.momentContents[0].url : null
+        };
+
+        return transformedMoment;
+    }).filter(moment => moment !== null);
 };
 
-// 친구의 moment 상세 조회 DTO
-export const responseFromFriendMomentDetail = (moment) => {
+
+
+
+
+// 친구의 Moment 상세 조회 DTO
+export const responseFromOtherUserMomentDetail = (moment) => {
+    if (!moment || !moment.id) {
+        console.error("잘못된 moment 데이터:", moment);
+        return null;
+    }
+
     return {
         userId: moment.userId,
         momentId: moment.id,
         title: moment.title,
-        status: moment.status,
-        plannerId: moment.plannerId || null,
-        createdAt: formatDateTime(moment.createdAt), 
-        updatedAt: formatDateTime(moment.updatedAt), 
+        date: formatDate(moment.createdAt),
+        plannerId: moment.plannerId ?? null,
+        createdAt: formatDateTime(moment.createdAt),
+        updatedAt: formatDateTime(moment.updatedAt),
         momentContents: moment.momentContents.map(content => ({
             sortOrder: content.sortOrder,
             content: content.content,
-            url: content.url,
+            url: content.url ?? null
         }))
     };
-}; 
+};

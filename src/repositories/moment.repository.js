@@ -203,57 +203,60 @@ export const findMyMomentDetail = async (userId, momentId) => {
 };
 
 
-// 친구들의 Moment 목록 조회 (status: public만 조회)
-export const findFriendsMoments = async (userId) => {
-  // 친구 목록 조회
-  const friendIds = await prisma.friend.findMany({
-    where: {
-        fromUserId: BigInt(userId),
-        isAccepted: true,
-    },
-    select: {
-        toUserId: true,
-    },
-  });
+export const findOtherUserMoments = async (userId) => {
+    try {
 
-  const friendUserIds = friendIds.map(friend => friend.toUserId);
+        const moments = await prisma.moment.findMany({
+            where: { userId: BigInt(userId) },
+            include: {
+                user: { select: { name: true } },
+                momentContents: { select: { url: true }, take: 1 },
+                _count: { select: { comments: true } }
+            },
+            orderBy: { createdAt: "desc" },
+        });
 
-  return await prisma.moment.findMany({
-    where: {
-      userId: { in: friendUserIds },
-      status: 'public',
-    },
-    include: {
-      momentContents: true,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+        for (const moment of moments) {
+            const likesCount = await prisma.like.count({
+                where: {
+                    entityId: Number(moment.id),
+                    entityType: "moment",
+                },
+            });
+            moment.likingCount = likesCount;
+        }
+
+        return moments;
+    } catch (error) {
+        console.error("[findOtherUserMoments] DB 조회 오류:", error);
+        throw new Error("Moment 목록 조회 실패");
+    }
 };
 
-// 친구의 특정 Moment 상세 조회 (status: public만 조회)
-export const findFriendMomentDetail = async (userId, momentId) => {
-  // 친구인지 확인
-  const isFriend = await prisma.friend.findFirst({
-    where: {
-      fromUserId: BigInt(userId),
-      isAccepted: true,
-    },
-  });
 
-  if (!isFriend) {
-    throw new Error("친구가 아닌 사용자입니다.");
-  }
 
-  return await prisma.moment.findFirst({
-    where: {
-      id: BigInt(momentId),
-      userId: isFriend.toUserId,
-      status: 'public',
-    },
-    include: {
-      momentContents: true,
-    },
-  });
+
+
+// 특정 사용자의 특정 Moment 상세 조회
+export const findOtherUserMomentDetail = async (userId, momentId) => {
+    try {
+        console.log(`[findOtherUserMomentDetail] API 호출됨! userId: ${userId}, momentId: ${momentId}`);
+
+        const moment = await prisma.moment.findUnique({
+            where: { id: BigInt(momentId) },
+            include: {
+                momentContents: true,
+                planner: true
+            }
+        });
+
+        if (!moment) {
+            throw new Error("Moment를 찾을 수 없습니다.");
+        }
+
+        return moment;
+    } catch (error) {
+        console.error("[findOtherUserMomentDetail] DB 조회 오류:", error.message);
+        throw error;
+    }
 };

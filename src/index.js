@@ -187,8 +187,8 @@ import {
   handleDeleteMoment,
   handleGetMyMoments,
   handleGetMyMomentDetail,
-  handleGetFriendsMoments,
-  handleGetFriendMomentDetail
+  handleGetOtherUserMoments,
+  handleGetOtherUserMomentDetail
 } from "./controllers/moment.controller.js";
 
 app.post("/moments", authenticateJWT, handleCreateMoment); //모먼트 생성
@@ -196,8 +196,8 @@ app.patch("/moments/:momentId", authenticateJWT, handleUpdateMoment); //모먼�
 app.delete("/moments/:momentId", authenticateJWT, handleDeleteMoment); //모먼트 삭제
 app.get("/mypage/moments", authenticateJWT, handleGetMyMoments); //마이페이지에서 나의 moment게시글 목록 조회
 app.get("/mypage/moments/:momentId", authenticateJWT, handleGetMyMomentDetail); //마이페이지에서 나의  특정 moment게시물 조회 
-app.get("/friends/:friendId/moments", authenticateJWT, handleGetFriendsMoments) //친구페이지 moment게시물 목록 조회
-app.get("/friends/:friendId/moments/momentId", authenticateJWT, handleGetFriendMomentDetail); //친구페이지 특정 moment게시물 조회
+app.get("/users/:userId/moments", authenticateJWT, handleGetOtherUserMoments) //친구페이지 moment게시물 목록 조회
+app.get("/users/:userId/moments/momentId", authenticateJWT, handleGetOtherUserMomentDetail); //친구페이지 특정 moment게시물 조회
 
 
 
