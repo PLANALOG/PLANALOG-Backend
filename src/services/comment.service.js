@@ -17,10 +17,6 @@ try {
     const momentExists = await prisma.moment.findUnique({
         where: { id: data.momentId },
     });
-
-    if (!data.userId) {
-        throw new Error("userId가 요청되지 않았습니다.");
-    }
     if (!momentExists) {
         throw new momentIdNotFoundError(data);
     }
