@@ -177,7 +177,7 @@ export class LikeIdMissingError extends Error {
   statusCode = 400;  // Bad Request
 
   constructor(data) {
-    const reason = 'likeId가 요청 데이터에 없습니다';
+    const reason = 'likeId가 요청 데이터에 없습니다.';
     super(reason);
     this.reason = reason;
     this.data = data;
@@ -217,7 +217,7 @@ export class momentIdNotFoundError extends Error {
   statusCode = 404; // Not Found
 
   constructor(data) {
-    const reason = '존재하지 않는 게시글입니다';
+    const reason = '존재하지 않는 게시글입니다.';
     super(reason);
     this.reason = reason;
     this.data = data;
