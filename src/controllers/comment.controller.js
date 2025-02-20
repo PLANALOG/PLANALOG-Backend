@@ -74,7 +74,7 @@ export const handleAddComment = async (req, res, next) => {
 */
 
     try{ 
-      console.log("댓글 추가를 요청했습니다!");  
+//      console.log("댓글 추가를 요청했습니다!");  
       const commentData = bodyToComment(req.body, req.user.id ,parseInt(req.params.momentId));         
       const newComment = await addUserComment(commentData);
       res.status(StatusCodes.OK).success(newComment); 
@@ -146,7 +146,7 @@ export const handleAddComment = async (req, res, next) => {
 
   */ 
     try{
-      console.log("댓글 수정 기능 요청했습니다!");
+//      console.log("댓글 수정 기능 요청했습니다!");
       const momentId = parseInt(req.params.momentId);
       const commentId = parseInt(req.params.commentId);
       const editData = bodyToEditComment(req.body, req.user.id, momentId, commentId); 
@@ -208,7 +208,7 @@ export const handleAddComment = async (req, res, next) => {
   */
 
       try{
-        console.log("댓글 삭제 기능 요청");   
+//        console.log("댓글 삭제 기능 요청");   
         const deleteData = bodyToDeleteComment(req.user.id, req.params.commentId);
         const deleteComment = await deleteUserComment(deleteData);
         res.status(StatusCodes.OK).success(deleteComment); 

@@ -3,16 +3,16 @@ import {
     bodyToCreateMoment, 
     bodyToUpdateMoment,
     responseFromMyMomentDetail, 
-    responseFromFriendsMoments, 
-    responseFromFriendMomentDetail  } from "../dtos/moment.dto.js";
+    responseFromOtherUserMoments, 
+    responseFromOtherUserMomentDetail  } from "../dtos/moment.dto.js";
 import { 
     momentCreate, 
     momentUpdate, 
     momentDelete,
     getMyMoments, 
     getMyMomentDetail, 
-    getFriendsMoments, 
-    getFriendMomentDetail  } from "../services/moment.service.js";
+    getOtherUserMoments, 
+    getOtherUserMomentDetail  } from "../services/moment.service.js";
 
 
 export const handleCreateMoment = async (req, res, next) => {
@@ -228,66 +228,83 @@ export const handleGetMyMomentDetail = async (req, res, next) => {
     }
 };
 
-
-
-export const handleGetFriendsMoments = async (req, res, next) => {
-    /*
-        #swagger.tags = ['Moments']
-        #swagger.summary = '친구의 Moment 목록 조회 API'
-        #swagger.description = '친구의 페이지에서 해당 친구의 Moment 게시물 목록을 조회합니다.'
-        #swagger.security = [{
-        "bearerAuth": []
-    }]
-
-    */
-
+export const handleGetOtherUserMoments = async (req, res, next) => {
     try {
-        console.log("친구의 Moment 목록 조회 요청");
-        const friendId = parseInt(req.params.friendId, 10);
-        const moments = await getFriendsMoments(friendId);
+
+        // userId 확인: 잘못된 값이 전달되는지 확인
+        const userId = Number(req.params.userId);
+        console.log("Received userId from params:", req.params.userId); // 확인용 로그 추가
+        if (isNaN(userId)) {
+            throw new Error("유효하지 않은 사용자 ID입니다.");
+        }
+
+        // getOtherUserMoments 함수에서 userId 확인
+        const responseData = await getOtherUserMoments(userId);
+
         res.status(StatusCodes.OK).json({
             resultType: "SUCCESS",
             error: null,
-            success: {
-                data: responseFromFriendsMoments(moments)
-            }
+            success: { data: responseData }
         });
+
     } catch (error) {
+        console.error("❌ 특정 사용자의 Moment 목록 조회 오류:", error);
         next(error);
     }
 };
 
 
-export const handleGetFriendMomentDetail = async (req, res, next) => {
+
+
+
+
+
+
+
+export const handleGetOtherUserMomentDetail = async (req, res, next) => {
     /*
         #swagger.tags = ['Moments']
-        #swagger.summary = '친구의 특정 Moment 상세 조회 API'
-        #swagger.description = '친구의 페이지에서 특정 Moment 게시물의 상세 정보를 조회합니다.'
-        #swagger.security = [{
-        "bearerAuth": []
-    }]
+        #swagger.summary = '특정 사용자의 특정 Moment 상세 조회 API'
+        #swagger.description = '특정 사용자의 페이지에서 특정 Moment 게시물의 상세 정보를 조회합니다.'
+        #swagger.security = [{ "bearerAuth": [] }]
+        #swagger.parameters['userId'] = {
+            in: "path",
+            required: true,
+            description: "조회할 사용자의 ID",
+            schema: { type: "integer", example: 1234 }
+        }
         #swagger.parameters['momentId'] = {
             in: "path",
             required: true,
             description: "조회할 Moment의 ID",
             schema: { type: "integer", example: 456 }
         }
-
     */
 
     try {
-        console.log("친구의 특정 Moment 상세 조회 요청");
-        const friendId = parseInt(req.params.friendId, 10);
-        const momentId = parseInt(req.params.momentId, 10);
-        const moment = await getFriendMomentDetail(friendId, momentId);
+        console.log("특정 사용자의 Moment 목록 조회 요청");
+
+        const userId = parseInt(req.params.userId, 10);
+        if (isNaN(userId)) {
+            throw new Error("유효하지 않은 사용자 ID입니다.");
+        }
+
+        const moments = await getOtherUserMoments(userId);
+
+        // 🔍 responseFromOtherUserMoments() 변환 결과 확인
+        const responseData = responseFromOtherUserMoments(moments);
+        console.log("Swagger 응답 데이터:", JSON.stringify(responseData, null, 2));
+
         res.status(StatusCodes.OK).json({
             resultType: "SUCCESS",
             error: null,
             success: {
-                data: responseFromFriendMomentDetail(moment)
+                data: responseData
             }
         });
     } catch (error) {
+        console.error("특정 사용자의 Moment 목록 조회 오류:", error);
         next(error);
     }
 };
+
