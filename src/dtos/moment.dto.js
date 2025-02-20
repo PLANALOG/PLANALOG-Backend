@@ -222,28 +222,30 @@ export const responseFromOtherUserMoments = (moments) => {
 };
 
 
-
-
-
-// 친구의 Moment 상세 조회 DTO
 export const responseFromOtherUserMomentDetail = (moment) => {
     if (!moment || !moment.id) {
         console.error("잘못된 moment 데이터:", moment);
         return null;
     }
 
-    return {
-        userId: moment.userId,
-        momentId: moment.id,
+    const transformedMoment = {
+        userId: Number(moment.userId), // BigInt를 Number로 변환
+        momentId: Number(moment.id),   // BigInt를 Number로 변환
         title: moment.title,
         date: formatDate(moment.createdAt),
         plannerId: moment.plannerId ?? null,
         createdAt: formatDateTime(moment.createdAt),
         updatedAt: formatDateTime(moment.updatedAt),
         momentContents: moment.momentContents.map(content => ({
-            sortOrder: content.sortOrder,
+            sortOrder: Number(content.sortOrder), // BigInt를 Number로 변환
             content: content.content,
             url: content.url ?? null
         }))
     };
+
+    return transformedMoment;
 };
+
+
+
+

@@ -269,12 +269,6 @@ export const handleGetOtherUserMoments = async (req, res, next) => {
 
 
 
-
-
-
-
-
-
 export const handleGetOtherUserMomentDetail = async (req, res, next) => {
     /*
         #swagger.tags = ['Moments']
@@ -296,29 +290,34 @@ export const handleGetOtherUserMomentDetail = async (req, res, next) => {
     */
 
     try {
-        console.log("특정 사용자의 Moment 목록 조회 요청");
-
         const userId = parseInt(req.params.userId, 10);
-        if (isNaN(userId)) {
-            throw new Error("유효하지 않은 사용자 ID입니다.");
+        const momentId = parseInt(req.params.momentId, 10);
+
+        // 유효성 검사: NaN 체크
+        if (isNaN(userId) || isNaN(momentId)) {
+            throw new Error("유효하지 않은 사용자 ID 또는 Moment ID입니다.");
         }
 
-        const moments = await getOtherUserMoments(userId);
+        // getOtherUserMomentDetail을 호출하여 데이터를 가져옵니다.
+        const responseData = await getOtherUserMomentDetail(userId, momentId);
 
-        // 🔍 responseFromOtherUserMoments() 변환 결과 확인
-        const responseData = responseFromOtherUserMoments(moments);
-        console.log("Swagger 응답 데이터:", JSON.stringify(responseData, null, 2));
-
+        // 응답 데이터 반환
         res.status(StatusCodes.OK).json({
             resultType: "SUCCESS",
             error: null,
-            success: {
-                data: responseData
-            }
+            success: { data: responseData }
         });
     } catch (error) {
-        console.error("특정 사용자의 Moment 목록 조회 오류:", error);
+        console.error("특정 사용자의 Moment 상세 조회 오류:", error);
         next(error);
     }
 };
+
+
+
+
+
+
+
+
 

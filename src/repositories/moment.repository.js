@@ -240,10 +240,9 @@ export const findOtherUserMoments = async (userId) => {
 // 특정 사용자의 특정 Moment 상세 조회
 export const findOtherUserMomentDetail = async (userId, momentId) => {
     try {
-        console.log(`[findOtherUserMomentDetail] API 호출됨! userId: ${userId}, momentId: ${momentId}`);
 
         const moment = await prisma.moment.findUnique({
-            where: { id: BigInt(momentId) },
+            where: { id: momentId },  // BigInt 대신 number로 직접 처리
             include: {
                 momentContents: true,
                 planner: true
@@ -253,7 +252,6 @@ export const findOtherUserMomentDetail = async (userId, momentId) => {
         if (!moment) {
             throw new Error("Moment를 찾을 수 없습니다.");
         }
-
         return moment;
     } catch (error) {
         console.error("[findOtherUserMomentDetail] DB 조회 오류:", error.message);
