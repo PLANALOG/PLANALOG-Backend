@@ -1,5 +1,6 @@
 import { prisma } from "../db.config.js";
 
+
 // 알림 생성
 export const createNotice = async (fromUserId, toUserId, { message, entityType, entityId }) => {
   return await prisma.notice.create({
@@ -26,7 +27,7 @@ export const updateNoticeReadStatus = async (noticeId, isRead, userId) => {
     throw new Error("알림이 존재하지 않습니다.");
   }
 
-  if (notice.userId !== BigInt(userId)) {
+  if (notice.toUserId !== BigInt(userId)) {  // ✅ userId -> toUserId로 변경
     throw new Error("해당 알림에 대한 수정 권한이 없습니다.");
   }
 
@@ -40,7 +41,6 @@ export const updateNoticeReadStatus = async (noticeId, isRead, userId) => {
   });
 };
 
-
 // 알림 삭제
 export const deleteNotice = async (noticeId, userId) => {
   const notice = await prisma.notice.findUnique({
@@ -53,7 +53,7 @@ export const deleteNotice = async (noticeId, userId) => {
     throw new Error("해당 알림이 존재하지 않습니다.");
   }
 
-  if (notice.userId !== BigInt(userId)) {
+  if (notice.toUserId !== BigInt(userId)) {  // ✅ userId -> toUserId로 변경
     throw new Error("해당 알림에 대한 삭제 권한이 없습니다.");
   }
 
@@ -63,9 +63,6 @@ export const deleteNotice = async (noticeId, userId) => {
     },
   });
 };
-
-
-
 
 // 나에게 온 알림 조회할 때, 보낸 사람(`fromUserId`)의 `name` 포함
 export const getNoticesByUserId = async (userId) => {
@@ -83,6 +80,3 @@ export const getNoticesByUserId = async (userId) => {
     },
   });
 };
-
-
-

@@ -18,6 +18,7 @@ export const searchUsersByNicknameAndName = async (nickname, name) => {
   return await prisma.user.findMany({
     where: {
       OR: filters,
+      isDeleted: false,
     },
     select: {
       id: true,

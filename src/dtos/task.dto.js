@@ -1,3 +1,35 @@
+// YYYY-MM-DDTHH:mm:ss.sssZ 형식으로 변환하는 함수 (UTC+9 적용)
+const formatDateTime = (date) => {
+    if (!date) return null;
+    const validDate = date instanceof Date ? date : new Date(date); // 문자열이면 Date 객체로 변환
+    if (isNaN(validDate.getTime())) {
+        console.error("Invalid date detected:", date);
+        return null;
+    }
+    const KST = new Date(validDate.getTime() + 9 * 60 * 60 * 1000); // UTC+9 적용
+    return KST.toISOString(); // ISO 형식 유지
+};
+
+export const transformCategoryResponse = (category) => ({
+    ...category,
+    createdAt: formatDateTime(category.createdAt),
+    updatedAt: formatDateTime(category.updatedAt)
+});
+
+export const transformCategoryListResponse = (categories) =>
+    Array.isArray(categories) ? categories.map(transformCategoryResponse) : categories;
+
+
+export const transformTaskResponse = (task) => ({
+    ...task,
+    createdAt: formatDateTime(task.createdAt),
+    updatedAt: formatDateTime(task.updatedAt)
+});
+
+export const transformTaskListResponse = (tasks) =>
+    tasks.map(transformTaskResponse);
+
+
 export const createTaskDto = (body) => {
 
     // 1. Validate title
