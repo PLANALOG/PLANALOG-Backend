@@ -229,6 +229,20 @@ export const handleGetMyMomentDetail = async (req, res, next) => {
 };
 
 export const handleGetOtherUserMoments = async (req, res, next) => {
+
+    /*
+    #swagger.tags = ['Moments']
+    #swagger.summary = '특정 사용자의 Moment 목록 조회 API'
+    #swagger.description = '특정 사용자의 페이지에서 해당 사용자의 Moment 게시물 목록을 조회합니다.'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['userId'] = {
+        in: "path",
+        required: true,
+        description: "조회할 사용자의 ID",
+        schema: { type: "integer", example: 2 }
+    }
+*/
+
     try {
 
         // userId 확인: 잘못된 값이 전달되는지 확인
